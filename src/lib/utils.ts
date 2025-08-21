@@ -11,15 +11,19 @@ export function generateId(): string {
   return Math.random().toString(36).substr(2, 9);
 }
 
-// 格式化日期
-export function formatDate(date: Date): string {
+// 格式化日期（容錯：支援 Date、字串、數字，避免 Invalid time value）
+export function formatDate(date: Date | string | number): string {
+  const parsed = date instanceof Date ? date : new Date(date);
+  if (isNaN(parsed.getTime())) {
+    return '';
+  }
   return new Intl.DateTimeFormat('zh-TW', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(date);
+  }).format(parsed);
 }
 
 // 驗證 Email 格式
