@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PrimaryEnglishSupport
 
-## Getting Started
+一個協助完成輔具的電子化平台，為資源不足的學校提供數位化教學工具。
 
-First, run the development server:
+## 功能特色
 
+- 🎮 遊戲方法管理系統
+- 📚 課本輔具電子化
+- 📢 站長消息發布
+- 🎨 馬卡龍色系設計風格
+- 📧 Email.js 整合
+
+## 技術架構
+
+- **框架**: Next.js 14.2
+- **語言**: TypeScript
+- **樣式**: Tailwind CSS
+- **部署**: Cloudflare Pages
+- **郵件**: Email.js
+
+## 開發指南
+
+### 安裝依賴
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 開發模式
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 建置專案
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### 部署到 Cloudflare Pages
+專案已配置為可直接部署到 Cloudflare Pages。
 
-## Learn More
+## 專案結構
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                 # Next.js App Router
+├── components/          # 可重用元件
+├── lib/                # 工具函數
+└── types/              # TypeScript 類型定義
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 設計理念
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+採用馬卡龍色系設計，色彩深但明亮，營造柔和且專業的視覺體驗。

@@ -1,0 +1,16 @@
+name = "primary-english-support"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+cwd = "."
+
+[site]
+bucket = ".next/static"
+
+[env.production]
+name = "primary-english-support"
+
+[env.staging]
+name = "primary-english-support-staging"
