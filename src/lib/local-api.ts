@@ -37,10 +37,13 @@ export const localGameAPI = {
       );
 
       console.log("📊 從 Worker 獲取到原始資料:", result);
+      console.log("📊 回應類型:", typeof result);
+      console.log("📊 回應鍵值:", Object.keys(result || {}));
 
       // 檢查回應格式
       if (!result.success) {
         console.error("❌ Worker 回應失敗:", result.error);
+        console.error("❌ 完整回應:", result);
         return [];
       }
 
