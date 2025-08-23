@@ -1,63 +1,167 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import GameMethodCard from "@/components/GameMethodCard";
 import { GameMethod } from "@/types";
+import { localGameAPI } from "@/lib/local-api";
 
 export default function GamesPage() {
   const [games, setGames] = useState<GameMethod[]>([]);
   const [filteredGames, setFilteredGames] = useState<GameMethod[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     "all",
   ]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>(["all"]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => {
-    // 直接從 D1 數據庫讀取遊戲方法數據
-    const fetchGamesFromD1 = async () => {
+  const ITEMS_PER_PAGE = 20;
+
+  // 從本地 Cloudflare Worker 撈取資料
+  const fetchGames = useCallback(
+    async (page: number = 1, append: boolean = false) => {
       try {
-        setIsLoading(true);
-        setHasError(false);
+        setLoadingMore(true);
 
-        // 使用 fetch 調用 games API 端點來獲取 D1 數據
-        const response = await fetch("/api/games");
-        const result = await response.json();
+        // 使用本地 Cloudflare API 獲取遊戲方法
+        let newGames: GameMethod[] = [];
 
-        if (result.success && result.data) {
-          setGames(result.data);
+        console.log("🔍 開始調用 localGameAPI.getAllGames()...");
+
+        if (
+          selectedCategories.includes("all") &&
+          selectedGrades.includes("all")
+        ) {
+          // 獲取所有遊戲方法
+          console.log("📚 獲取所有遊戲方法...");
+          newGames = await localGameAPI.getAllGames();
+          console.log("✅ 成功獲取遊戲資料:", newGames.length);
         } else {
-          console.warn("D1 數據庫返回空數據或錯誤:", result.message);
+          // 根據篩選條件獲取遊戲方法
+          // 這裡可以根據需要實現更複雜的篩選邏輯
+          console.log("🔍 根據篩選條件獲取遊戲方法...");
+          newGames = await localGameAPI.getAllGames();
+          console.log("✅ 成功獲取篩選後的遊戲資料:", newGames.length);
+        }
+
+        console.log("Local API response:", { count: newGames.length, page });
+
+        if (append) {
+          // 追加模式：將新資料加到現有資料後面
+          console.log("Appending mode:", {
+            currentGamesCount: games.length,
+            newGamesCount: newGames.length,
+            page,
+          });
+          setGames((prev) => {
+            const updated = [...prev, ...newGames];
+            console.log("Updated games array:", {
+              previousCount: prev.length,
+              newCount: updated.length,
+            });
+            return updated;
+          });
+        } else {
+          // 替換模式：完全替換現有資料
+          console.log("Replace mode:", {
+            newGamesCount: newGames.length,
+            page,
+          });
+          setGames(newGames);
+        }
+
+        // 簡化分頁邏輯，本地 API 一次性返回所有資料
+        setHasMore(false);
+        setCurrentPage(page);
+
+        // 調試日誌
+        console.log(
+          `Page ${page}: ${newGames.length} games loaded from local API`
+        );
+      } catch (err) {
+        console.error("Failed to fetch games from local API:", err);
+        setError(err instanceof Error ? err.message : "未知錯誤");
+
+        // 如果撈取失敗，設定空陣列避免網頁崩潰
+        if (!append) {
           setGames([]);
         }
-      } catch (error) {
-        console.error("Failed to fetch games from D1 database:", error);
-        setHasError(true);
-        setGames([]);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
+        setLoadingMore(false);
       }
-    };
+    },
+    [selectedCategories, selectedGrades, games.length]
+  );
 
-    fetchGamesFromD1();
-  }, []);
-
+  // 初始載入
   useEffect(() => {
-    // 篩選遊戲方法
+    fetchGames(1, false);
+  }, []); // 只在組件掛載時執行一次
+
+  // 篩選條件改變時重新載入
+  useEffect(() => {
+    if (games.length > 0) {
+      setCurrentPage(1);
+      fetchGames(1, false);
+    }
+  }, [selectedCategories, selectedGrades, fetchGames]); // 添加 fetchGames 依賴
+
+  // 載入更多資料
+  const loadMore = () => {
+    console.log("loadMore called:", {
+      loadingMore,
+      hasMore,
+      currentPage,
+      currentGamesCount: games.length,
+    });
+
+    if (!loadingMore && hasMore) {
+      console.log("Fetching next page:", currentPage + 1);
+      fetchGames(currentPage + 1, true);
+    } else {
+      console.log("Cannot load more:", {
+        loadingMore,
+        hasMore,
+        reason: loadingMore ? "Currently loading" : "No more data",
+      });
+    }
+  };
+
+  // 篩選遊戲方法（前端篩選，用於即時響應）
+  useEffect(() => {
+    console.log("Filtering effect triggered:", {
+      gamesLength: games.length,
+      selectedCategories,
+      selectedGrades,
+    });
+
     let filtered = games;
 
     if (!selectedCategories.includes("all")) {
       filtered = filtered.filter((game) =>
         game.categories.some((category) =>
-          selectedCategories.includes(category)
+          selectedCategories.some((selectedCategory) => {
+            const categoryMapping: { [key: string]: string } = {
+              vocabulary: "單字學習",
+              sentence: "句型練習",
+              oral: "口語訓練",
+              teaching: "教學輔具",
+              listening: "聽力練習",
+              pronunciation: "發音練習",
+              spelling: "拼寫練習",
+            };
+            return category === categoryMapping[selectedCategory];
+          })
         )
       );
     }
 
     if (!selectedGrades.includes("all")) {
       filtered = filtered.filter((game) => {
-        // 檢查選中的年級是否適用於該遊戲
         return selectedGrades.some((grade) => {
           if (grade === "grade1") return game.grades.includes("grade1");
           if (grade === "grade2") return game.grades.includes("grade2");
@@ -69,6 +173,13 @@ export default function GamesPage() {
         });
       });
     }
+
+    console.log("Filtering result:", {
+      totalGames: games.length,
+      filteredCount: filtered.length,
+      selectedCategories,
+      selectedGrades,
+    });
 
     setFilteredGames(filtered);
   }, [games, selectedCategories, selectedGrades]);
@@ -138,6 +249,55 @@ export default function GamesPage() {
     }
   };
 
+  // 載入中狀態
+  if (loading && games.length === 0) {
+    return (
+      <div className="min-h-screen py-8 bg-primary-blue">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary-pink mx-auto mb-4"></div>
+            <p className="text-black">載入中...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 錯誤狀態
+  if (error && games.length === 0) {
+    return (
+      <div className="min-h-screen py-8 bg-primary-blue">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-16">
+            <div className="text-red-500 mb-4">
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-black mb-2">載入失敗</h3>
+            <p className="text-black mb-4">{error}</p>
+            <button
+              onClick={() => fetchGames(1, false)}
+              className="px-4 py-2 bg-secondary-pink text-white rounded-lg hover:bg-pink-600 transition-colors"
+            >
+              重新載入
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-8 bg-primary-blue">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,7 +324,7 @@ export default function GamesPage() {
                       type="checkbox"
                       checked={selectedCategories.includes(category)}
                       onChange={() => handleCategoryChange(category)}
-                      className="mr-2 h-4 w-4 text-secondary-pink focus:ring-secondary-pink border-gray-300 rounded"
+                      className="mr-2 h-4 w-4 text-secondary-pink focus:ring-secondary-pink border-gray-300 rounded appearance-none checked:appearance-auto"
                     />
                     <span className="text-sm text-black">
                       {categoryLabels[category as keyof typeof categoryLabels]}
@@ -186,7 +346,7 @@ export default function GamesPage() {
                       type="checkbox"
                       checked={selectedGrades.includes(grade)}
                       onChange={() => handleGradeChange(grade)}
-                      className="mr-2 h-4 w-4 text-secondary-pink focus:ring-secondary-pink border-gray-300 rounded"
+                      className="mr-2 h-4 w-4 text-secondary-pink focus:ring-secondary-pink border-gray-300 rounded appearance-none checked:appearance-auto"
                     />
                     <span className="text-sm text-black">
                       {gradeLabels[grade as keyof typeof gradeLabels]}
@@ -199,55 +359,7 @@ export default function GamesPage() {
         </div>
 
         {/* 遊戲方法列表 */}
-        {isLoading ? (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-black mb-2">載入中...</h3>
-            <p className="text-black">請稍候，正在加載遊戲方法。</p>
-          </div>
-        ) : hasError ? (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-black mb-2">載入失敗</h3>
-            <p className="text-black">
-              無法載入遊戲方法，請稍後再試或聯繫管理員。
-            </p>
-          </div>
-        ) : filteredGames.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredGames.map((game) => (
-              <GameMethodCard key={game.id} game={game} />
-            ))}
-          </div>
-        ) : games.length === 0 ? (
+        {filteredGames.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4">
               <svg
@@ -267,88 +379,50 @@ export default function GamesPage() {
             <h3 className="text-lg font-medium text-black mb-2">
               暫無遊戲方法
             </h3>
-            <p className="text-black">
-              目前資料庫中還沒有遊戲方法，請聯繫管理員添加內容。
-            </p>
+            <p className="text-black">目前沒有符合篩選條件的遊戲方法。</p>
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredGames.map((game) => (
+                <GameMethodCard key={game.id} game={game} />
+              ))}
             </div>
-            <h3 className="text-lg font-medium text-black mb-2">
-              沒有找到符合條件的遊戲方法
-            </h3>
-            <p className="text-black">請嘗試調整篩選條件</p>
-          </div>
-        )}
 
-        {/* 統計資訊 */}
-        <div className="mt-12 bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-black mb-4">統計資訊</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-secondary-pink">
-                {games.length}
+            {/* 載入更多按鈕 */}
+            {hasMore && (
+              <div className="text-center mt-8">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-6 py-3 bg-white text-secondary-pink border border-secondary-pink rounded-lg hover:bg-secondary-pink hover:text-secondary-pink transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingMore ? (
+                    <span className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      載入中...
+                    </span>
+                  ) : (
+                    "載入更多"
+                  )}
+                </button>
+
+                {/* 調試資訊 */}
+                <div className="mt-2 text-sm text-gray-500">
+                  當前頁面: {currentPage} | 已載入: {games.length} 筆 |
+                  還有更多: {hasMore ? "是" : "否"}
+                </div>
               </div>
-              <div className="text-sm text-black">總數量</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {games.filter((g) => g.categories.includes("單字學習")).length}
+            )}
+
+            {/* 如果沒有更多資料，顯示提示 */}
+            {!hasMore && games.length > 0 && (
+              <div className="text-center mt-8 text-gray-500">
+                已載入所有資料 ({games.length} 筆)
               </div>
-              <div className="text-sm text-black">單字學習</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {games.filter((g) => g.categories.includes("句型練習")).length}
-              </div>
-              <div className="text-sm text-black">句型練習</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {games.filter((g) => g.categories.includes("口語訓練")).length}
-              </div>
-              <div className="text-sm text-black">口語訓練</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {games.filter((g) => g.categories.includes("教學輔具")).length}
-              </div>
-              <div className="text-sm text-black">教學輔具</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {games.filter((g) => g.categories.includes("聽力練習")).length}
-              </div>
-              <div className="text-sm text-black">聽力練習</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-indigo-600">
-                {games.filter((g) => g.categories.includes("發音練習")).length}
-              </div>
-              <div className="text-sm text-black">發音練習</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-pink-600">
-                {games.filter((g) => g.categories.includes("拼寫練習")).length}
-              </div>
-              <div className="text-sm text-black">拼寫練習</div>
-            </div>
-          </div>
-        </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

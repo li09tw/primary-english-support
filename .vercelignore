@@ -1,0 +1,69 @@
+# Vercel 部署忽略文件
+# 排除不必要的文件和目錄以優化部署
+
+# 開發和測試文件
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 建置和快取目錄
+.next/
+out/
+dist/
+build/
+
+# 依賴目錄
+node_modules/
+
+# 日誌文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 運行時文件
+.pnpm-debug.log*
+
+# 編輯器配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 作業系統文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git 相關
+.git/
+.gitignore
+
+# 文檔和腳本（可選，根據需要調整）
+doc/
+scripts/
+*.md
+
+# 測試文件
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# 本地配置文件
+wrangler-dev.toml
+.env.example
+vercel.env.example
+
+# 其他開發工具配置
+.eslintrc*
+.prettierrc*
+jest.config.*
+tsconfig.json

@@ -50,15 +50,6 @@ export function saveAdminMessages(messages: any[]): void {
   }
 }
 
-// 保存聯絡表單到本地儲存
-export function saveContactMessages(contacts: any[]): void {
-  try {
-    localStorage.setItem("contactMessages", JSON.stringify(contacts));
-  } catch (error) {
-    console.error("Error saving contact messages:", error);
-  }
-}
-
 // 保存教材資料到本地儲存
 export function saveTextbooks(textbooks: any[]): void {
   try {

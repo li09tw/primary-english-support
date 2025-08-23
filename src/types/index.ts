@@ -27,15 +27,6 @@ export interface AdminMessage {
   updatedAt: Date;
 }
 
-// 聯絡表單類型
-export interface ContactForm {
-  name: string;
-  email: string;
-  type: string;
-  title: string;
-  content: string;
-}
-
 // 電子教具類型定義
 export interface Textbook {
   id: string;

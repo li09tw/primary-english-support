@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { apiPost, API_ENDPOINTS, handleApiError } from "@/lib/api";
+import { sendContactEmail } from "@/lib/emailjs";
 import { isValidEmail } from "@/lib/utils";
 
 export default function ContactForm() {
@@ -60,24 +60,26 @@ export default function ContactForm() {
     setSubmitStatus("idle");
 
     try {
-      const result = await apiPost(API_ENDPOINTS.CONTACT, formData);
+      // 直接使用 EmailJS 發送郵件
+      await sendContactEmail({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        type: formData.type.trim(),
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+      });
 
-      if (result.success) {
-        setSubmitStatus("success");
-        setFormData({
-          name: "",
-          email: "",
-          type: "general",
-          title: "",
-          content: "",
-        });
-      } else {
-        setSubmitStatus("error");
-        console.error("API Error:", result.error);
-      }
+      setSubmitStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        type: "general",
+        title: "",
+        content: "",
+      });
     } catch (error) {
       setSubmitStatus("error");
-      console.error("Submit Error:", error);
+      console.error("Email sending error:", error);
     } finally {
       setIsSubmitting(false);
     }

@@ -378,7 +378,7 @@ export default function AidsPage() {
                 </h3>
                 <p className="text-gray-600 text-sm mb-4">從黑影猜出單字</p>
                 <Link
-                  href="/aids/silhouette-guess"
+                  href="/aids/shadow-guess"
                   className="block w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-center"
                 >
                   開始遊戲

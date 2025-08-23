@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getD1Database } from "@/lib/cloudflare";
-import mockGamesData from "@/mock_data/games.json";
+import {
+  createCloudflareClient,
+  isCloudflareSupported,
+} from "@/lib/cloudflare-client";
+
+// 強制動態路由，避免靜態生成問題
+export const dynamic = "force-dynamic";
 
 // D1 資料庫中的遊戲方法類型
 interface D1GameMethod {
@@ -21,26 +26,97 @@ interface D1GameMethod {
 }
 
 // 從 D1 讀取遊戲方法數據
-async function getGamesFromD1(): Promise<D1GameMethod[]> {
+async function getGamesFromD1(
+  page: number = 1,
+  limit: number = 20,
+  categories?: string[],
+  grades?: string[]
+): Promise<{ data: D1GameMethod[]; total: number }> {
   try {
-    const db = getD1Database();
+    if (!isCloudflareSupported()) {
+      throw new Error("Cloudflare services not configured");
+    }
 
-    console.log("D1 database connected, attempting to query...");
+    const client = createCloudflareClient();
+    console.log("Cloudflare client created, attempting to query...");
+    console.log("Query parameters:", { page, limit, categories, grades });
 
-    // 先檢查資料庫結構
-    const tableInfo = await db.prepare("PRAGMA table_info(game_methods)").all();
-    console.log("Table structure:", tableInfo);
+    // 構建 WHERE 子句
+    let whereConditions: string[] = [];
+    let params: any[] = [];
 
-    // 嘗試查詢數據
-    const result = await db
-      .prepare("SELECT * FROM game_methods ORDER BY created_at DESC")
-      .all();
+    // 分類篩選
+    if (categories && categories.length > 0) {
+      // 為每個分類創建一個 LIKE 條件
+      const categoryConditions = categories.map(
+        () => `categories LIKE '%' || ? || '%'`
+      );
+      whereConditions.push(`(${categoryConditions.join(" OR ")})`);
+      categories.forEach((cat) => {
+        params.push(cat);
+      });
+    }
 
-    console.log("Query result:", result);
-    return (result as any).results as D1GameMethod[];
+    // 年級篩選
+    if (grades && grades.length > 0) {
+      const gradeConditions = grades.map((grade) => {
+        // 確保正確的欄位名稱映射
+        const gradeNumber = grade.replace("grade", "");
+        return `grade${gradeNumber} = 1`;
+      });
+      whereConditions.push(`(${gradeConditions.join(" OR ")})`);
+    }
+
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(" AND ")}`
+        : "";
+
+    // 計算總數
+    const countQuery = `SELECT COUNT(*) as total FROM game_methods ${whereClause}`;
+    console.log("Count query:", countQuery, "params:", params);
+
+    const countResult = await client.query(countQuery, params);
+    const total = countResult?.results?.[0]?.total || 0;
+
+    console.log(`Total records found: ${total}`);
+
+    // 分頁查詢
+    const offset = (page - 1) * limit;
+    const query = `
+      SELECT * FROM game_methods 
+      ${whereClause}
+      ORDER BY created_at DESC 
+      LIMIT ? OFFSET ?
+    `;
+
+    const allParams = [...params, limit, offset];
+    console.log("Data query:", query, "params:", allParams);
+
+    const result = await client.query(query, allParams);
+
+    const resultCount = result?.results?.length || 0;
+    console.log(
+      `D1 query result: ${resultCount} games (page ${page}, offset ${offset})`
+    );
+    return {
+      data: (result?.results as D1GameMethod[]) || [],
+      total,
+    };
   } catch (error) {
     console.error("Error reading from D1:", error);
-    // 不拋出錯誤，讓上層處理
+
+    // 檢查是否是本地開發環境的 D1 不可用錯誤
+    if (
+      error instanceof Error &&
+      error.message === "Cloudflare services not configured"
+    ) {
+      console.log(
+        "Local development detected, Cloudflare services not configured - this is expected"
+      );
+      throw error; // 重新拋出錯誤，讓上層處理回退邏輯
+    }
+
     throw new Error(
       `D1 database error: ${
         error instanceof Error ? error.message : "Unknown error"
@@ -66,28 +142,47 @@ export async function GET(request: NextRequest) {
   console.log("=== API /api/games called ===");
   try {
     const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
     const category = searchParams.get("category");
     const grade = searchParams.get("grade");
 
-    console.log("Search params:", { category, grade });
+    console.log("Search params:", { page, limit, category, grade });
+
+    // 處理篩選參數
+    const categories = category ? [category] : undefined;
+    const grades = grade ? [grade] : undefined;
 
     let gamesData: D1GameMethod[] = [];
+    let totalCount = 0;
 
     // 嘗試從 D1 資料庫讀取數據
     console.log("Attempting to read from D1 database...");
     try {
-      gamesData = await getGamesFromD1();
-      console.log(`Successfully read ${gamesData.length} games from D1 database`);
+      const d1Result = await getGamesFromD1(page, limit, categories, grades);
+      gamesData = d1Result.data;
+      totalCount = d1Result.total;
+      console.log(
+        `Successfully read ${gamesData.length} games from D1 database (page ${page}, total: ${totalCount})`
+      );
     } catch (d1Error) {
-      console.log("D1 database access failed, falling back to mock data:", d1Error);
-      
-      // 回退到 mock 數據
-      if (mockGamesData[0] && mockGamesData[0].results) {
-        gamesData = mockGamesData[0].results as D1GameMethod[];
-      } else {
-        gamesData = mockGamesData as unknown as D1GameMethod[];
+      console.log("D1 database access failed:", d1Error);
+
+      // 在生產環境中，如果 Cloudflare 服務不可用，返回錯誤
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Cloudflare services unavailable",
+            message: "Unable to retrieve games data. Please try again later.",
+          },
+          { status: 500 }
+        );
       }
-      console.log(`Using ${gamesData.length} mock games as fallback`);
+
+      // 開發環境返回空結果
+      gamesData = [];
+      totalCount = 0;
     }
 
     // 如果沒有數據，返回空結果
@@ -95,6 +190,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: [],
+        total: 0,
+        page,
+        limit,
+        hasMore: false,
         message: "No games data available",
       });
     }
@@ -104,10 +203,10 @@ export async function GET(request: NextRequest) {
       id: game.id,
       title: game.title,
       description: game.description,
-      categories: JSON.parse(game.categories),
+      categories: JSON.parse(game.categories || "[]"),
       grades: convertGradesToArray(game), // 轉換數字為陣列
-      materials: JSON.parse(game.materials),
-      instructions: JSON.parse(game.instructions),
+      materials: JSON.parse(game.materials || "[]"),
+      instructions: JSON.parse(game.instructions || "[]"),
       createdAt: new Date(game.created_at),
       updatedAt: new Date(game.updated_at),
       // 保留數字欄位以保持向後兼容
@@ -119,29 +218,24 @@ export async function GET(request: NextRequest) {
       grade6: game.grade6,
     }));
 
-    let filteredGames = [...convertedGames];
-
-    if (category) {
-      filteredGames = filteredGames.filter((game) =>
-        game.categories.includes(category)
-      );
-    }
-    if (grade) {
-      filteredGames = filteredGames.filter((game) =>
-        game.grades.includes(grade)
-      );
-    }
+    const hasMore = page * limit < totalCount;
 
     return NextResponse.json({
       success: true,
-      data: filteredGames.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ),
+      data: convertedGames,
+      total: totalCount,
+      page,
+      limit,
+      hasMore,
     });
   } catch (error) {
+    console.error("API error:", error);
     return NextResponse.json(
-      { success: false, error: "獲取遊戲庫失敗" },
+      {
+        success: false,
+        error: "獲取遊戲庫失敗",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
@@ -168,44 +262,75 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 將 grades 陣列轉換為布林值格式
-    const gradeBooleans = {
-      grade1: grades.includes("grade1"),
-      grade2: grades.includes("grade2"),
-      grade3: grades.includes("grade3"),
-      grade4: grades.includes("grade4"),
-      grade5: grades.includes("grade5"),
-      grade6: grades.includes("grade6"),
+    // 將 grades 陣列轉換為數字格式 (0/1)
+    const gradeNumbers = {
+      grade1: grades.includes("grade1") ? 1 : 0,
+      grade2: grades.includes("grade2") ? 1 : 0,
+      grade3: grades.includes("grade3") ? 1 : 0,
+      grade4: grades.includes("grade4") ? 1 : 0,
+      grade5: grades.includes("grade5") ? 1 : 0,
+      grade6: grades.includes("grade6") ? 1 : 0,
     };
 
+    // 插入新遊戲到 D1 資料庫
+    const insertQuery = `
+      INSERT INTO game_methods (
+        title, description, materials, instructions, 
+        grade1, grade2, grade3, grade4, grade5, grade6,
+        categories, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const now = new Date().toISOString();
+    const insertParams = [
+      title,
+      description,
+      JSON.stringify(materials),
+      JSON.stringify(instructions),
+      gradeNumbers.grade1,
+      gradeNumbers.grade2,
+      gradeNumbers.grade3,
+      gradeNumbers.grade4,
+      gradeNumbers.grade5,
+      gradeNumbers.grade6,
+      JSON.stringify(categories),
+      now,
+      now,
+    ];
+
+    const client = createCloudflareClient();
+    const result = await client.execute(insertQuery, insertParams);
+
     const newGame = {
-      id: Date.now().toString(),
+      id:
+        (result as any).meta?.last_row_id?.toString() || Date.now().toString(),
       title,
       description,
       materials,
       instructions,
       grades,
       categories,
-      ...gradeBooleans, // 添加布林值年級欄位
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      ...gradeNumbers,
+      createdAt: now,
+      updatedAt: now,
     };
-
-    // 這裡會將數據插入 D1
-    // 暫時返回成功，等 D1 設置完成後再實現
-    console.log("New game to insert:", newGame);
 
     return NextResponse.json(
       {
         success: true,
         data: newGame,
-        message: "遊戲創建成功（D1 插入功能待實現）",
+        message: "遊戲創建成功",
       },
       { status: 201 }
     );
   } catch (error) {
+    console.error("Error creating game:", error);
     return NextResponse.json(
-      { success: false, error: "創建遊戲失敗" },
+      {
+        success: false,
+        error: "創建遊戲失敗",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

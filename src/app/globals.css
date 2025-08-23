@@ -71,4 +71,10 @@ body {
   .border-accent-green {
     border-color: #b5d8a1;
   }
+  /* 強制 checkbox 顯示為原生樣式 */
+  input[type="checkbox"] {
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    -moz-appearance: auto !important;
+  }
 }

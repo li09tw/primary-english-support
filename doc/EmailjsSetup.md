@@ -89,7 +89,7 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
 ```
 
 #### 5.2 生產環境
-在 Cloudflare Pages 中設定環境變數：
+在 Vercel 中設定環境變數：
 1. 前往 Cloudflare Dashboard
 2. 選擇您的 Pages 專案
 3. 點擊 "Settings" > "Environment variables"
@@ -107,7 +107,7 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
 4. 檢查是否收到郵件
 
 #### 6.2 生產環境測試
-1. 部署到 Cloudflare Pages
+1. 部署到 Vercel
 2. 在生產網站上測試聯絡表單
 3. 確認郵件發送功能正常
 

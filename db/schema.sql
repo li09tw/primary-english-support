@@ -25,19 +25,6 @@ CREATE TABLE game_methods (
   updated_at TEXT NOT NULL
 );
 
--- 聯絡記錄表
-CREATE TABLE contact_messages (
-  id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  type TEXT NOT NULL,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  status TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-
 -- 教材表
 CREATE TABLE textbooks (
   id TEXT PRIMARY KEY,

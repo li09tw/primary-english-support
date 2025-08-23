@@ -81,7 +81,6 @@ export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
 // 特定 API 端點
 export const API_ENDPOINTS = {
   GAMES: "/api/games",
-  CONTACT: "/api/contact",
   ADMIN: "/api/admin",
 } as const;
 
