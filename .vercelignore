@@ -66,4 +66,3 @@ vercel.env.example
 .eslintrc*
 .prettierrc*
 jest.config.*
-tsconfig.json

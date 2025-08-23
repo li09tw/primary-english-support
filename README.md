@@ -39,8 +39,12 @@ Vercel (Next.js) → Cloudflare Worker API Gateway → Cloudflare D1/R2
 
 3. **設定環境變數**
    ```bash
-   cp env.example .env.local
-   # 編輯 .env.local 文件，設定必要的環境變數
+   # 創建 .env.local 文件
+   cat > .env.local << EOF
+   CLOUDFLARE_WORKER_URL=http://localhost:8787
+   CLOUDFLARE_API_SECRET=local-dev-secret
+   NODE_ENV=development
+   EOF
    ```
 
 4. **啟動 Cloudflare Worker 本地開發**
