@@ -9,6 +9,7 @@ export function transformGameMethodFromDB(dbGame: any): GameMethod {
     id: dbGame.id,
     title: dbGame.title,
     description: dbGame.description,
+    category: dbGame.category || parseJSONArray(dbGame.categories)[0] || "",
     categories: parseJSONArray(dbGame.categories),
     grades: convertGradesToArray(dbGame),
     grade1: Boolean(dbGame.grade1),
@@ -19,6 +20,9 @@ export function transformGameMethodFromDB(dbGame: any): GameMethod {
     grade6: Boolean(dbGame.grade6),
     materials: parseJSONArray(dbGame.materials),
     instructions: parseJSONArray(dbGame.instructions),
+    steps: dbGame.steps || parseJSONArray(dbGame.instructions).join("\n") || "",
+    tips: dbGame.tips || "",
+    is_published: dbGame.is_published !== undefined ? Boolean(dbGame.is_published) : true,
     createdAt: new Date(dbGame.created_at),
     updatedAt: new Date(dbGame.updated_at),
   };

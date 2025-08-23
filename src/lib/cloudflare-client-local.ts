@@ -117,13 +117,15 @@ export class LocalCloudflareClient {
 // 創建本地 Cloudflare 客戶端實例
 export function createLocalCloudflareClient(): LocalCloudflareClient {
   // 本地開發環境配置
-  const workerUrl = process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:8787' 
-    : process.env.CLOUDFLARE_WORKER_URL;
-  
-  const apiSecret = process.env.NODE_ENV === 'development'
-    ? 'local-dev-secret'
-    : process.env.CLOUDFLARE_API_SECRET;
+  const workerUrl =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8787"
+      : process.env.CLOUDFLARE_WORKER_URL;
+
+  const apiSecret =
+    process.env.NODE_ENV === "development"
+      ? "local-dev-secret"
+      : process.env.CLOUDFLARE_API_SECRET;
 
   if (!workerUrl || !apiSecret) {
     throw new Error(
@@ -139,7 +141,7 @@ export function createLocalCloudflareClient(): LocalCloudflareClient {
 
 // 檢查是否在本地開發環境
 export function isLocalDevelopment(): boolean {
-  return process.env.NODE_ENV === 'development';
+  return process.env.NODE_ENV === "development";
 }
 
 // 檢查本地 Cloudflare 客戶端是否可用

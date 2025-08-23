@@ -3,7 +3,8 @@ export interface GameMethod {
   id: string;
   title: string;
   description: string;
-  categories: string[];
+  category: string; // 單一分類，與 D1 表格結構一致
+  categories: string[]; // 保持向後兼容
   grades: string[]; // 保持向後兼容
   // 新增布林值年級欄位，與 D1 表格結構一致
   grade1?: boolean;
@@ -14,6 +15,9 @@ export interface GameMethod {
   grade6?: boolean;
   materials: string[];
   instructions: string[];
+  steps: string; // 與 D1 表格結構一致
+  tips: string; // 與 D1 表格結構一致
+  is_published: boolean; // 發布狀態
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +27,7 @@ export interface AdminMessage {
   id: string;
   title: string;
   content: string;
+  is_published: boolean; // 發布狀態
   createdAt: Date;
   updatedAt: Date;
 }

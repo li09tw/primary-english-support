@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import GameMethodCard from "@/components/GameMethodCard";
 import { GameMethod } from "@/types";
-import { localGameAPI } from "@/lib/local-api";
+import { gameAPI } from "@/lib/game-api";
 
 export default function GamesPage() {
   const [games, setGames] = useState<GameMethod[]>([]);
@@ -29,7 +29,7 @@ export default function GamesPage() {
         // 使用本地 Cloudflare API 獲取遊戲方法
         let newGames: GameMethod[] = [];
 
-        console.log("🔍 開始調用 localGameAPI.getAllGames()...");
+        console.log("🔍 開始調用 gameAPI.getAllGames()...");
 
         if (
           selectedCategories.includes("all") &&
@@ -37,13 +37,13 @@ export default function GamesPage() {
         ) {
           // 獲取所有遊戲方法
           console.log("📚 獲取所有遊戲方法...");
-          newGames = await localGameAPI.getAllGames();
+          newGames = await gameAPI.getAllGames();
           console.log("✅ 成功獲取遊戲資料:", newGames.length);
         } else {
           // 根據篩選條件獲取遊戲方法
           // 這裡可以根據需要實現更複雜的篩選邏輯
           console.log("🔍 根據篩選條件獲取遊戲方法...");
-          newGames = await localGameAPI.getAllGames();
+          newGames = await gameAPI.getAllGames();
           console.log("✅ 成功獲取篩選後的遊戲資料:", newGames.length);
         }
 
