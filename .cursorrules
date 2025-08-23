@@ -98,3 +98,10 @@
 - 保持專案結構的整潔和一致性
 - 所有文檔都應該集中在 `doc/` 資料夾中管理
 
+## 11. Deployment Instructions
+- **當用戶說「部署」時，必須執行以下兩行程式碼：**
+  1. `npm run build` - 建置專案
+  2. `wrangler pages deploy` - 使用 wrangler 部署到 Cloudflare Pages
+- 這是標準的部署流程，確保專案能正確建置並部署到生產環境
+- 部署前必須先建置，部署後才能看到最新的網頁內容
+

@@ -41,51 +41,68 @@ async function getGamesFromD1(): Promise<D1GameMethod[]> {
       return result.results as D1GameMethod[];
     }
 
-    // 開發環境下，嘗試使用本地 D1 資料庫
-    console.log("Attempting to use local D1 database...");
-    
-    try {
-      // 使用 wrangler 命令查詢本地 D1
-      const { execSync } = require('child_process');
-      const result = execSync('wrangler d1 execute primary-english-db --command="SELECT * FROM game_methods ORDER BY created_at DESC"', { 
-        encoding: 'utf8',
-        cwd: process.cwd()
-      });
-      
-      // 解析 wrangler 輸出
-      const lines = result.trim().split('\n');
-              const dataStartIndex = lines.findIndex((line: string) => line.includes('│ id │'));
-      if (dataStartIndex !== -1) {
-        const dataLines = lines.slice(dataStartIndex + 2).filter((line: string) => line.trim() && line.includes('│'));
-        const games: D1GameMethod[] = [];
-        
-        for (const line of dataLines) {
-          const columns = line.split('│').map((col: string) => col.trim()).filter((col: string) => col);
-          if (columns.length >= 13) {
-            games.push({
-              id: columns[0],
-              title: columns[1],
-              description: columns[2],
-              categories: columns[3],
-              grade1: columns[4] === '1',
-              grade2: columns[5] === '1',
-              grade3: columns[6] === '1',
-              grade4: columns[7] === '1',
-              grade5: columns[8] === '1',
-              grade6: columns[9] === '1',
-              materials: columns[10],
-              instructions: columns[11],
-              created_at: columns[12],
-              updated_at: columns[13] || columns[12],
-            });
+    // 開發環境下，檢查是否啟用本地 D1
+    if (process.env.ENABLE_LOCAL_D1 === "true") {
+      console.log("Attempting to use local D1 database...");
+
+      try {
+        // 使用 wrangler 命令查詢本地 D1
+        const { execSync } = require("child_process");
+        const result = execSync(
+          'wrangler d1 execute primary-english-db --command="SELECT * FROM game_methods ORDER BY created_at DESC"',
+          {
+            encoding: "utf8",
+            cwd: process.cwd(),
           }
+        );
+
+        // 解析 wrangler 輸出
+        const lines = result.trim().split("\n");
+        const dataStartIndex = lines.findIndex((line: string) =>
+          line.includes("│ id │")
+        );
+        if (dataStartIndex !== -1) {
+          const dataLines = lines
+            .slice(dataStartIndex + 2)
+            .filter((line: string) => line.trim() && line.includes("│"));
+          const games: D1GameMethod[] = [];
+
+          for (const line of dataLines) {
+            const columns = line
+              .split("│")
+              .map((col: string) => col.trim())
+              .filter((col: string) => col);
+            if (columns.length >= 13) {
+              games.push({
+                id: columns[0],
+                title: columns[1],
+                description: columns[2],
+                categories: columns[3],
+                grade1: columns[4] === "1",
+                grade2: columns[5] === "1",
+                grade3: columns[6] === "1",
+                grade4: columns[7] === "1",
+                grade5: columns[8] === "1",
+                grade6: columns[9] === "1",
+                materials: columns[10],
+                instructions: columns[11],
+                created_at: columns[12],
+                updated_at: columns[13] || columns[12],
+              });
+            }
+          }
+
+          console.log(
+            `Successfully loaded ${games.length} games from local D1`
+          );
+          return games;
         }
-        
-        console.log(`Successfully loaded ${games.length} games from local D1`);
-        return games;
+      } catch (localError: any) {
+        console.log(
+          "Local D1 query failed, falling back to mock data:",
+          localError.message
+        );
       }
-    } catch (localError: any) {
-      console.log("Local D1 query failed, falling back to mock data:", localError.message);
     }
 
     // 如果本地 D1 也失敗，返回模擬數據
@@ -94,7 +111,8 @@ async function getGamesFromD1(): Promise<D1GameMethod[]> {
       {
         id: "1",
         title: "單字記憶遊戲 [本機開發數據]",
-        description: "透過配對遊戲幫助學生記憶英文單字 - 本機開發環境數據，僅供測試使用",
+        description:
+          "透過配對遊戲幫助學生記憶英文單字 - 本機開發環境數據，僅供測試使用",
         categories: '["單字學習", "記憶訓練"]',
         grade1: true,
         grade2: true,
@@ -110,7 +128,8 @@ async function getGamesFromD1(): Promise<D1GameMethod[]> {
       {
         id: "2",
         title: "句型練習活動 [本機開發數據]",
-        description: "讓學生練習基本英文句型結構 - 本機開發環境數據，僅供測試使用",
+        description:
+          "讓學生練習基本英文句型結構 - 本機開發環境數據，僅供測試使用",
         categories: '["句型練習", "口語訓練"]',
         grade1: false,
         grade2: false,
@@ -126,7 +145,8 @@ async function getGamesFromD1(): Promise<D1GameMethod[]> {
       {
         id: "3",
         title: "口語對話練習 [本機開發數據]",
-        description: "透過角色扮演提升學生口語表達能力 - 本機開發環境數據，僅供測試使用",
+        description:
+          "透過角色扮演提升學生口語表達能力 - 本機開發環境數據，僅供測試使用",
         categories: '["口語訓練", "情境對話"]',
         grade1: false,
         grade2: false,
@@ -138,7 +158,7 @@ async function getGamesFromD1(): Promise<D1GameMethod[]> {
         instructions: '["分配角色", "設定情境", "進行對話練習", "輪換角色"]',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }
+      },
     ];
   } catch (error) {
     console.error("Error reading from D1:", error);
