@@ -5,7 +5,24 @@ import { createLocalCloudflareClient } from "./cloudflare-client-local";
 import type { GameMethod, AdminMessage } from "@/types";
 import { transformGameMethodsFromDB } from "./data-transform";
 
-const client = createLocalCloudflareClient();
+// 延遲創建客戶端，避免在模組載入時就檢查環境變數
+let client: any = null;
+
+function getClient() {
+  if (!client) {
+    try {
+      client = createLocalCloudflareClient();
+    } catch (error) {
+      console.warn("Failed to create local Cloudflare client:", error);
+      // 返回一個模擬客戶端，避免錯誤
+      client = {
+        query: async () => ({ success: false, results: [] }),
+        execute: async () => ({ success: false }),
+      };
+    }
+  }
+  return client;
+}
 
 // 遊戲方法相關 API
 export const localGameAPI = {
@@ -15,7 +32,7 @@ export const localGameAPI = {
       console.log("🔍 localGameAPI.getAllGames() 開始執行...");
       console.log("🔗 連接到 Cloudflare Worker...");
 
-      const result = await client.query(
+      const result = await getClient().query(
         "SELECT * FROM game_methods ORDER BY created_at DESC"
       );
 
@@ -47,7 +64,7 @@ export const localGameAPI = {
   // 獲取所有已發布的遊戲方法（本地資料庫中所有遊戲都是已發布的）
   async getPublishedGames(): Promise<GameMethod[]> {
     try {
-      const result = await client.query(
+      const result = await getClient().query(
         "SELECT * FROM game_methods ORDER BY created_at DESC"
       );
       return transformGameMethodsFromDB(result.results || []);
@@ -61,7 +78,7 @@ export const localGameAPI = {
   async getGamesByGrade(grade: string): Promise<GameMethod[]> {
     try {
       const gradeColumn = `grade${grade.replace("grade", "")}`;
-      const result = await client.query(
+      const result = await getClient().query(
         `SELECT * FROM game_methods WHERE ${gradeColumn} = 1 ORDER BY created_at DESC`
       );
       return transformGameMethodsFromDB(result.results || []);
@@ -75,7 +92,7 @@ export const localGameAPI = {
   async searchGames(query: string): Promise<GameMethod[]> {
     try {
       const searchTerm = `%${query}%`;
-      const result = await client.query(
+      const result = await getClient().query(
         "SELECT * FROM game_methods WHERE title LIKE ? OR description LIKE ? ORDER BY created_at DESC",
         [searchTerm, searchTerm]
       );
@@ -91,7 +108,7 @@ export const localGameAPI = {
     game: Omit<GameMethod, "id" | "createdAt" | "updatedAt">
   ): Promise<boolean> {
     try {
-      const result = await client.execute(
+      const result = await getClient().execute(
         "INSERT INTO game_methods (title, description, categories, grade1, grade2, grade3, grade4, grade5, grade6, materials, instructions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           game.title,
@@ -125,7 +142,7 @@ export const localGameAPI = {
       if (fields.length === 0) return false;
 
       const setClause = fields.map((field) => `${field} = ?`).join(", ");
-      const result = await client.execute(
+      const result = await getClient().execute(
         `UPDATE game_methods SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [...values, id]
       );
@@ -139,7 +156,7 @@ export const localGameAPI = {
   // 刪除遊戲方法
   async deleteGame(id: string): Promise<boolean> {
     try {
-      const result = await client.execute(
+      const result = await getClient().execute(
         "DELETE FROM game_methods WHERE id = ?",
         [id]
       );
@@ -156,7 +173,7 @@ export const localMessageAPI = {
   // 獲取所有站長消息
   async getAllMessages(): Promise<AdminMessage[]> {
     try {
-      const result = await client.query(
+      const result = await getClient().query(
         "SELECT * FROM admin_messages ORDER BY created_at DESC"
       );
       return result.results || [];
@@ -169,7 +186,7 @@ export const localMessageAPI = {
   // 獲取已發布的站長消息
   async getPublishedMessages(): Promise<AdminMessage[]> {
     try {
-      const result = await client.query(
+      const result = await getClient().query(
         "SELECT * FROM admin_messages WHERE status = ? ORDER BY created_at DESC",
         ["published"]
       );
@@ -190,7 +207,7 @@ export const localStatsAPI = {
     draft: number;
   }> {
     try {
-      const result = await client.query(
+      const result = await getClient().query(
         "SELECT status, COUNT(*) as count FROM game_methods GROUP BY status"
       );
 

@@ -3,6 +3,10 @@ import {
   createCloudflareClient,
   isCloudflareSupported,
 } from "@/lib/cloudflare-client";
+import {
+  createLocalCloudflareClient,
+  isLocalDevelopment,
+} from "@/lib/cloudflare-client-local";
 
 // 強制動態路由，避免靜態生成問題
 export const dynamic = "force-dynamic";
@@ -33,11 +37,17 @@ async function getGamesFromD1(
   grades?: string[]
 ): Promise<{ data: D1GameMethod[]; total: number }> {
   try {
-    if (!isCloudflareSupported()) {
+    let client;
+
+    if (isLocalDevelopment()) {
+      // 本地開發環境使用本地客戶端
+      client = createLocalCloudflareClient();
+    } else if (isCloudflareSupported()) {
+      // 生產環境使用 Cloudflare 客戶端
+      client = createCloudflareClient();
+    } else {
       throw new Error("Cloudflare services not configured");
     }
-
-    const client = createCloudflareClient();
     console.log("Cloudflare client created, attempting to query...");
     console.log("Query parameters:", { page, limit, categories, grades });
 
@@ -298,7 +308,17 @@ export async function POST(request: NextRequest) {
       now,
     ];
 
-    const client = createCloudflareClient();
+    let client;
+
+    if (isLocalDevelopment()) {
+      // 本地開發環境使用本地客戶端
+      client = createLocalCloudflareClient();
+    } else if (isCloudflareSupported()) {
+      // 生產環境使用 Cloudflare 客戶端
+      client = createCloudflareClient();
+    } else {
+      throw new Error("Cloudflare services not configured");
+    }
     const result = await client.execute(insertQuery, insertParams);
 
     const newGame = {
