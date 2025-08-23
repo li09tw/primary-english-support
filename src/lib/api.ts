@@ -1,7 +1,8 @@
 // API 基礎配置
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-domain.com/api' 
-  : '/api';
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://your-domain.com/api"
+    : "/api";
 
 // API 響應類型
 export interface ApiResponse<T = any> {
@@ -20,7 +21,7 @@ export async function apiCall<T>(
     const url = `${API_BASE_URL}${endpoint}`;
     const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -37,17 +38,17 @@ export async function apiCall<T>(
 
     return data;
   } catch (error) {
-    console.error('API call failed:', error);
+    console.error("API call failed:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : '未知錯誤',
+      error: error instanceof Error ? error.message : "未知錯誤",
     };
   }
 }
 
 // GET 請求
 export async function apiGet<T>(endpoint: string): Promise<ApiResponse<T>> {
-  return apiCall<T>(endpoint, { method: 'GET' });
+  return apiCall<T>(endpoint, { method: "GET" });
 }
 
 // POST 請求
@@ -56,7 +57,7 @@ export async function apiPost<T>(
   data: any
 ): Promise<ApiResponse<T>> {
   return apiCall<T>(endpoint, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(data),
   });
 }
@@ -67,30 +68,29 @@ export async function apiPut<T>(
   data: any
 ): Promise<ApiResponse<T>> {
   return apiCall<T>(endpoint, {
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify(data),
   });
 }
 
 // DELETE 請求
 export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
-  return apiCall<T>(endpoint, { method: 'DELETE' });
+  return apiCall<T>(endpoint, { method: "DELETE" });
 }
 
 // 特定 API 端點
 export const API_ENDPOINTS = {
-  ADMIN: '/admin',
-  GAMES: '/games',
-  AIDS: '/aids',
-  CONTACT: '/contact',
+  GAMES: "/api/games",
+  CONTACT: "/api/contact",
+  ADMIN: "/api/admin",
 } as const;
 
 // 錯誤處理工具
 export function handleApiError(error: any): string {
-  if (typeof error === 'string') return error;
+  if (typeof error === "string") return error;
   if (error?.message) return error.message;
   if (error?.error) return error.error;
-  return '發生未知錯誤';
+  return "發生未知錯誤";
 }
 
 // 成功消息處理

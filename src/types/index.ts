@@ -3,8 +3,15 @@ export interface GameMethod {
   id: string;
   title: string;
   description: string;
-  category: string;
-  grade: "grade1" | "grade2" | "grade3" | "grade4" | "grade5" | "grade6";
+  categories: string[];
+  grades: string[]; // 保持向後兼容
+  // 新增布林值年級欄位，與 D1 表格結構一致
+  grade1?: boolean;
+  grade2?: boolean;
+  grade3?: boolean;
+  grade4?: boolean;
+  grade5?: boolean;
+  grade6?: boolean;
   materials: string[];
   instructions: string[];
   createdAt: Date;
@@ -20,20 +27,6 @@ export interface AdminMessage {
   updatedAt: Date;
 }
 
-// 輔具類型
-export interface TeachingAid {
-  id: string;
-  name: string;
-  description: string;
-  subject: string;
-  grade: "grade1" | "grade2" | "grade3" | "grade4" | "grade5" | "grade6";
-  textbookReference?: string;
-  materials: string[];
-  instructions: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 // 聯絡表單類型
 export interface ContactForm {
   name: string;
@@ -41,4 +34,28 @@ export interface ContactForm {
   type: string;
   title: string;
   content: string;
+}
+
+// 電子教具類型定義
+export interface Textbook {
+  id: string;
+  name: string;
+  publisher: string;
+  grade: string;
+  units: Unit[];
+}
+
+export interface Unit {
+  id: string;
+  name: string;
+  vocabulary: Vocabulary[];
+}
+
+export interface Vocabulary {
+  id: string;
+  english: string;
+  chinese: string;
+  phonetic: string;
+  example: string;
+  image?: string;
 }

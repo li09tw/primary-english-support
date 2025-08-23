@@ -5,19 +5,19 @@ export default function Footer() {
         <div className="flex justify-center space-x-8">
           <a
             href="/contact"
-            className="text-gray-800 hover:text-primary-blue transition-colors duration-200 font-medium"
+            className="text-black hover:text-primary-blue transition-colors duration-200 font-medium"
           >
             聯絡我們
           </a>
           <a
             href="/privacy"
-            className="text-gray-800 hover:text-primary-blue transition-colors duration-200 font-medium"
+            className="text-black hover:text-primary-blue transition-colors duration-200 font-medium"
           >
             隱私權條款
           </a>
           <a
             href="/terms"
-            className="text-gray-800 hover:text-primary-blue transition-colors duration-200 font-medium"
+            className="text-black hover:text-primary-blue transition-colors duration-200 font-medium"
           >
             服務條款
           </a>

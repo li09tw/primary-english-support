@@ -90,31 +90,15 @@ CREATE TABLE admin_messages (
   updated_at TEXT NOT NULL
 );
 
--- 遊戲方法表
+-- 遊戲方法與教學輔具表
 CREATE TABLE game_methods (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
+  categories TEXT NOT NULL, -- JSON 格式，包含分類如：單字學習、句型練習、口語訓練、教學輔具
+  grades TEXT NOT NULL, -- JSON 格式，包含年級如：grade1, grade2, grade3, grade4, grade5, grade6
   materials TEXT NOT NULL, -- JSON 格式
-  steps TEXT NOT NULL, -- JSON 格式
-  grade TEXT NOT NULL,
-  age_group TEXT NOT NULL,
-  category TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-
--- 教學輔具表
-CREATE TABLE teaching_aids (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  type TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  grade TEXT NOT NULL,
-  tags TEXT NOT NULL, -- JSON 格式
-  file_url TEXT,
-  preview_url TEXT,
+  instructions TEXT NOT NULL, -- JSON 格式
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -124,70 +108,11 @@ CREATE TABLE contact_messages (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  message TEXT NOT NULL,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
   status TEXT NOT NULL,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
 ```
-
-### 初始化資料庫
-
-```bash
-# 創建資料庫結構
-wrangler d1 execute primary-english-db --file=./db/schema.sql
-
-# 插入初始資料
-wrangler d1 execute primary-english-db --file=./db/seed.sql
-```
-
-## 開發 vs 生產
-
-### 開發環境
-- 使用 Next.js API Routes
-- 資料存儲在記憶體中
-- 本地開發伺服器
-
-### 生產環境
-- 使用 Cloudflare Workers
-- 資料存儲在 Cloudflare 服務中
-- 全球 CDN 分發
-
-## 監控和日誌
-
-### 查看 Workers 日誌
-```bash
-wrangler tail
-```
-
-### 查看 KV 資料
-```bash
-wrangler kv:key list --binding=PRIMARY_ENGLISH_KV
-```
-
-### 查看 D1 資料
-```bash
-wrangler d1 execute primary-english-db --command="SELECT * FROM admin_messages;"
-```
-
-## 故障排除
-
-### 常見問題
-
-1. **CORS 錯誤**: 確保在 Cloudflare Workers 中設置正確的 CORS 標頭
-2. **環境變數未定義**: 檢查 `wrangler.toml` 和 Cloudflare Pages 設置
-3. **資料庫連接失敗**: 確認 D1 資料庫 ID 和權限設置
-
-### 調試技巧
-
-- 使用 `wrangler dev` 進行本地測試
-- 檢查 Cloudflare 儀表板中的錯誤日誌
-- 使用 `console.log` 在 Workers 中輸出調試信息
-
-## 下一步
-
-- 實現用戶認證和授權
-- 添加文件上傳功能到 R2
-- 實現實時通知功能
-- 添加資料備份和恢復機制

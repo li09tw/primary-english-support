@@ -32,30 +32,49 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-// 本地儲存遊戲方法
-export function saveGameMethods(methods: any[]): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("gameMethods", JSON.stringify(methods));
+// 保存遊戲方法到本地儲存
+export function saveGameMethods(games: any[]): void {
+  try {
+    localStorage.setItem("gameMethods", JSON.stringify(games));
+  } catch (error) {
+    console.error("Error saving game methods:", error);
   }
 }
 
-// 本地儲存站長消息
+// 保存站長消息到本地儲存
 export function saveAdminMessages(messages: any[]): void {
-  if (typeof window !== "undefined") {
+  try {
     localStorage.setItem("adminMessages", JSON.stringify(messages));
+  } catch (error) {
+    console.error("Error saving admin messages:", error);
   }
 }
 
-// 本地儲存輔具
-export function saveTeachingAids(aids: any[]): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("teachingAids", JSON.stringify(aids));
-  }
-}
-
-// 本地儲存聯絡表單
+// 保存聯絡表單到本地儲存
 export function saveContactMessages(contacts: any[]): void {
-  if (typeof window !== "undefined") {
+  try {
     localStorage.setItem("contactMessages", JSON.stringify(contacts));
+  } catch (error) {
+    console.error("Error saving contact messages:", error);
+  }
+}
+
+// 保存教材資料到本地儲存
+export function saveTextbooks(textbooks: any[]): void {
+  try {
+    localStorage.setItem("textbooks", JSON.stringify(textbooks));
+  } catch (error) {
+    console.error("Error saving textbooks:", error);
+  }
+}
+
+// 從本地儲存讀取教材資料
+export function loadTextbooks(): any[] {
+  try {
+    const saved = localStorage.getItem("textbooks");
+    return saved ? JSON.parse(saved) : [];
+  } catch (error) {
+    console.error("Error loading textbooks:", error);
+    return [];
   }
 }

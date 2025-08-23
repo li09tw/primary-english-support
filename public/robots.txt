@@ -1,14 +1,12 @@
 User-agent: *
 Allow: /
-
-# Sitemap
-Sitemap: https://zsprimaryenglishsupport.com/sitemap.xml
-
-# Disallow admin pages
-Disallow: /admin/
-Disallow: /api/
-
-# Allow important pages
 Allow: /games/
-Allow: /aids/
 Allow: /contact/
+Allow: /privacy/
+Allow: /terms/
+Allow: /garden/
+
+Disallow: /api/
+Disallow: /api-test/
+
+Sitemap: https://primary-english-support.vercel.app/sitemap.xml

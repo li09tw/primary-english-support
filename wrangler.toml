@@ -1,17 +1,9 @@
 name = "zs-primary-english-support"
 compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "out"
 
-[build]
-command = "npm run build"
-cwd = "."
-
-# Cloudflare Pages 配置
-pages_build_output_dir = ".next"
-
-[site]
-bucket = ".next/static"
-
+# 全域配置（開發環境使用）
 # Cloudflare KV 命名空間
 [[kv_namespaces]]
 binding = "PRIMARY_ENGLISH_KV"
@@ -34,10 +26,25 @@ bucket_name = "primary-english-storage"
 ENVIRONMENT = "production"
 JWT_SECRET = "ZEpUQI/fzdq0To593bAMsEILPoluQJXOKS5BNH3qLRY="
 
+# 生產環境配置
 [env.production]
-name = "zs-primary-english-support"
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", JWT_SECRET = "ZEpUQI/fzdq0To593bAMsEILPoluQJXOKS5BNH3qLRY=" }
 
-[env.staging]
-name = "zs-primary-english-support-staging"
-vars = { ENVIRONMENT = "staging" }
+# 生產環境的 Cloudflare 服務配置
+[[env.production.kv_namespaces]]
+binding = "PRIMARY_ENGLISH_KV"
+id = "81b8ce87ae7a4122a7021512d13a81f5"
+
+[[env.production.d1_databases]]
+binding = "PRIMARY_ENGLISH_DB"
+database_name = "primary-english-db"
+database_id = "203cdead-8e8a-4c1d-a77b-9c5445e4f5f8"
+
+[[env.production.r2_buckets]]
+binding = "primary_english_storage"
+bucket_name = "primary-english-storage"
+
+# 預覽環境配置
+[env.preview]
+name = "zs-primary-english-support-preview"
+vars = { ENVIRONMENT = "preview" }

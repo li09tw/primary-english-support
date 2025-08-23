@@ -12,6 +12,35 @@
 - **一個頁面中至少要有1個H1，其餘最多是 H2 或 p、span**
 - **所有 hover 狀態統一使用白底 (`bg-white`) 和 `#2b6b7a` 字體顏色**
 - hover 樣式應保持一致的視覺效果，提升用戶體驗
+- **絕對禁止擅自更改用戶已設定好的顏色，除非用戶明確同意或要求**
+- 用戶的顏色設計選擇必須得到尊重和保護
+
+### 2.1 Font Size Requirements
+- **最小字體大小為 14px**
+- 使用 Tailwind CSS 的 `text-xs` 類別（14px）作為最小字體
+- 字體大小對照表：
+  - `text-xs`: 14px
+  - `text-sm`: 15px (最小字體)
+  - `text-base`: 16px (預設)
+  - `text-lg`: 18px
+  - `text-xl`: 20px
+  - `text-2xl`: 24px
+  - 等等...
+
+### 2.2 Text Color Requirements
+- **敘述性文字、列點文字必須使用黑色 (`text-black`)**
+- **禁止在以下元素使用任何 gray 顏色**：
+  - 頁面標題 (H1, H2, H3)
+  - 敘述性文字段落
+  - 列點文字 (ul, li)
+  - 標籤文字
+  - 統計資訊文字
+- **允許使用 gray 顏色的情況**：
+  - 按鈕和互動元素的 hover 效果
+  - 特殊設計的顏色 (如 `text-gray-400` 用於提示)
+  - 品牌色彩和強調色
+  - 邊框和背景色
+
 - 使用 TypeScript 進行類型安全開發
 - 遵循 Next.js 13+ App Router 的最佳實踐
 - 使用 Tailwind CSS 進行樣式設計
@@ -38,10 +67,34 @@
 - **當我說「導覽文件」時，就是指 `doc/Guide.md`**
 - 這個文件包含項目的導覽和指引資訊
 
-## 7. Garden Management Interface
+## 7. Rules File Reference
+- **當我說「規則」時，就是指 `.cursorignore` 文件**
+- 這個文件用於新增、修改和管理項目的規則設定
+
+## 8. Garden Management Interface
 - **管理介面路徑為 `/garden`，不是 `/admin`**
 - 此路徑提供遊戲方法、教學輔具和站長消息的管理功能
 - 檔案位置：`src/app/garden/`
 - 功能包括：新增、編輯、刪除各類內容，發布狀態管理
 - 此路徑替代了原本的 `/admin` 路徑，使用更友善的名稱
+
+## 8. Code Selection Scope Guidelines
+- **當用戶圈選程式碼時，只更動與圈選程式碼直接相關的部分**
+- **禁止擅自更改設計、顏色、優化其他不相關的 component、更改排版等**
+- 保持修改範圍的精確性，避免影響未圈選的程式碼
+- 確保所有更改都與用戶明確圈選的程式碼有直接關聯
+
+## 9. File Naming Convention
+- **所有 `.md` 文件名必須使用字首大寫的命名方式（PascalCase）**
+- 例如：`GamePagesGuide.md`、`CloudflareIntegration.md`、`SeoOptimization.md`
+- 禁止使用全大寫（如 `GAME_PAGES_GUIDE.md`）或蛇形命名（如 `game_pages_guide.md`）
+- 此規則適用於所有新創建和重命名的 `.md` 文件
+- 保持項目 `.md` 文件命名的一致性和可讀性
+
+## 10. Documentation File Location
+- **所有 `.md` 文件必須放在 `doc/` 資料夾中**
+- **絕對禁止在專案根目錄或其他位置創建 `.md` 文件**
+- 如果發現根目錄有 `.md` 文件，必須立即移動到 `doc/` 資料夾
+- 保持專案結構的整潔和一致性
+- 所有文檔都應該集中在 `doc/` 資料夾中管理
 

@@ -26,32 +26,51 @@ export default function GameMethodCard({ game }: GameMethodCardProps) {
     grade6: "6年級",
   };
 
+  // 從布林值年級欄位生成 grades 陣列
+  const getGradesArray = () => {
+    const grades: string[] = [];
+    if (game.grade1) grades.push("grade1");
+    if (game.grade2) grades.push("grade2");
+    if (game.grade3) grades.push("grade3");
+    if (game.grade4) grades.push("grade4");
+    if (game.grade5) grades.push("grade5");
+    if (game.grade6) grades.push("grade6");
+    return grades;
+  };
+
+  const grades = getGradesArray();
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border border-pink-100">
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xl font-semibold text-gray-800">{game.title}</h3>
-        <span
-          className={`px-3 py-1 text-xs font-medium rounded-full border ${
-            gradeColors[game.grade]
-          }`}
-        >
-          {gradeText[game.grade]}
-        </span>
+        <h3 className="text-xl font-semibold text-black">{game.title}</h3>
+        <div className="flex flex-wrap gap-1">
+          {grades.map((grade) => (
+            <span
+              key={grade}
+              className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                gradeColors[grade as keyof typeof gradeColors]
+              }`}
+            >
+              {gradeText[grade as keyof typeof gradeText]}
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="mb-4">
-        <p className="text-gray-600 mb-3">{game.description}</p>
+        <p className="text-black mb-3">{game.description}</p>
 
         <div className="mb-3">
-          <span className="text-sm font-medium text-gray-700">分類：</span>
-          <span className="text-sm text-gray-600">{game.category}</span>
+          <span className="text-sm font-medium text-black">分類：</span>
+          <span className="text-sm text-black">
+            {game.categories.join(", ")}
+          </span>
         </div>
 
         {game.materials.length > 0 && (
           <div className="mb-3">
-            <span className="text-sm font-medium text-gray-700">
-              所需材料：
-            </span>
+            <span className="text-sm font-medium text-black">所需材料：</span>
             <div className="flex flex-wrap gap-2 mt-1">
               {game.materials.map((material, index) => (
                 <span
@@ -68,10 +87,10 @@ export default function GameMethodCard({ game }: GameMethodCardProps) {
 
       {game.instructions.length > 0 && (
         <div className="mb-4">
-          <span className="text-sm font-medium text-gray-700">遊戲步驟：</span>
+          <span className="text-sm font-medium text-black">遊戲步驟：</span>
           <ol className="list-decimal list-inside mt-2 space-y-1">
             {game.instructions.map((instruction, index) => (
-              <li key={index} className="text-sm text-gray-600">
+              <li key={index} className="text-sm text-black">
                 {instruction}
               </li>
             ))}
@@ -79,7 +98,7 @@ export default function GameMethodCard({ game }: GameMethodCardProps) {
         </div>
       )}
 
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-black">
         建立時間：{formatDate(game.createdAt)}
       </div>
     </div>

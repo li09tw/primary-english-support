@@ -10,8 +10,8 @@ export default function ContactPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 頁面標題 */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">聯絡我們</h1>
-          <p className="text-xl text-gray-600">
+          <h1 className="text-4xl font-bold text-black mb-4">聯絡我們</h1>
+          <p className="text-xl text-black">
             如果您有任何問題、建議或需要協助，歡迎與我們聯繫
           </p>
         </div>

@@ -16,13 +16,15 @@ export default function TermsPage() {
           </h1>
 
           <div className="text-center mb-8">
-            <p className="text-lg text-[#2b6b7a]">生效日期：{currentDate}</p>
+            <p className="text-lg text-primary-blue-dark">
+              生效日期：{currentDate}
+            </p>
           </div>
 
-          <div className="space-y-6 text-gray-800">
+          <div className="space-y-6 text-black">
             <p>
-              歡迎您使用Zs Primary English Support /
-              Z的國小英語支援網站（以下簡稱「本網站」）。在您開始使用本網站提供的服務前，請詳細閱讀以下服務條款（以下簡稱「本條款」）。您對本網站的存取和使用，即表示您已閱讀、理解並同意接受本條款的所有內容。如果您不同意本條款的任何部分，請立即停止使用本網站。
+              歡迎您使用
+              Z的國小英語支援（ZPES）（以下簡稱「本網站」）。本服務條款（以下簡稱「本條款」）規範您使用本網站服務的權利和義務。當您使用本網站時，即表示您同意本條款的內容。
             </p>
 
             <section>
@@ -64,7 +66,7 @@ export default function TermsPage() {
                 三、智慧財產權與內容來源
               </h2>
               <p>
-                本網站上所有內容，包括但不限於文字、圖片、圖表、標誌、軟體等，其智慧財產權均歸英語教學輔具平台或其合法權利人所有。未經我們或權利人事先書面同意，您不得以任何方式使用這些內容。
+                本網站上所有內容，包括但不限於文字、圖片、圖表、標誌、軟體等，其智慧財產權均歸英語數位化教具或其合法權利人所有。未經我們或權利人事先書面同意，您不得以任何方式使用這些內容。
               </p>
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
                 <p className="text-yellow-800 font-medium">
@@ -140,7 +142,10 @@ export default function TermsPage() {
               </h2>
               <p className="text-gray-700 mb-4">
                 如果您對本服務條款有任何疑問，請透過{" "}
-                <a href="/contact" className="text-[#2b6b7a] hover:underline">
+                <a
+                  href="/contact"
+                  className="text-primary-blue-dark hover:underline"
+                >
                   聯絡表單
                 </a>{" "}
                 聯繫。
@@ -148,8 +153,8 @@ export default function TermsPage() {
             </section>
 
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 text-center">
-                最後更新時間：{currentDate}
+              <p className="text-sm text-black text-center">
+                最後更新時間：2024年12月20日
               </p>
             </div>
           </div>

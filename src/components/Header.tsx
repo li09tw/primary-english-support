@@ -9,8 +9,8 @@ export default function Header() {
 
   const navigation = [
     { name: "首頁", href: "/" },
-    { name: "遊戲方法", href: "/games" },
-    { name: "教學輔具", href: "/aids" },
+    { name: "遊戲庫", href: "/games" },
+    { name: "電子教具", href: "/aids" },
   ];
 
   return (
@@ -20,7 +20,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-gray-800">
+              <span className="text-xl font-bold text-black">
                 Z的國小英語支援
               </span>
             </Link>
@@ -32,7 +32,7 @@ export default function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-800 hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                className="text-black hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
               >
                 {item.name}
               </Link>
@@ -43,7 +43,7 @@ export default function Header() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-800 hover:text-primary-blue focus:outline-none focus:text-primary-blue"
+              className="text-black hover:text-primary-blue focus:outline-none focus:text-primary-blue"
             >
               <svg
                 className="h-6 w-6"
@@ -74,12 +74,12 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-primary-yellow/90 backdrop-blur-sm rounded-lg mt-2">
+            <div className="px-2 pt-2 pb-3  space-y-1 sm:px-3 bg-primary-blue/90 backdrop-blur-sm rounded-lg mt-2 mb-3">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-800 hover:text-primary-blue block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  className="text-center text-white hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}

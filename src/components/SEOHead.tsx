@@ -15,8 +15,8 @@ interface SEOHeadProps {
 }
 
 export default function SEOHead({
-  title = "Z的國小英語支援(ZPES) - 英語教學輔具平台",
-  description = "為資源不足的學校提供數位化教學工具，讓每個孩子都能享受優質的英語學習體驗。",
+  title = "Z的國小英語支援(ZPES) - 英語數位化教具",
+  description = "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
   keywords = [
     "英語教學",
     "教學輔具",

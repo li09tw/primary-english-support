@@ -24,7 +24,17 @@ export default function ContactForm() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // 如果選擇的是「遊戲、輔具提議」類型，自動填入預設內容
+    if (name === "type" && value === "game_aid_suggestion") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        content: "教材、年級、句型/單字、希望增加或投放的電子教具",
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,6 +157,7 @@ export default function ContactForm() {
             <option value="technical">技術支援</option>
             <option value="feedback">意見回饋</option>
             <option value="cooperation">合作提案</option>
+            <option value="game_aid_suggestion">遊戲、輔具提議</option>
             <option value="other">其他</option>
           </select>
         </div>
@@ -192,7 +203,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-secondary-pink hover:bg-accent-green text-black font-medium py-3 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          className="w-full bg-secondary-pink hover:bg-white hover:text-primary-blue-dark text-black font-medium py-3 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 border-2 border-transparent hover:border-primary-blue-dark"
         >
           {isSubmitting ? "發送中..." : "發送訊息"}
         </button>

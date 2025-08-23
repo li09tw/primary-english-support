@@ -7,10 +7,13 @@
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
 
-  /* Custom color palette */
+  /* Custom color palette - 與 Tailwind 配置保持一致 */
   --primary-blue: #bde6f4;
+  --primary-blue-dark: #2b6b7a;
   --secondary-pink: #fee1e8;
+  --secondary-pink-dark: #b76b7a;
   --accent-green: #b5d8a1;
+  --accent-green-dark: #4a6b3a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +27,13 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: #ffffff;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Ensure minimum font size for all text elements */
+* {
+  font-size: clamp(14px, 1rem, 100%);
 }
 
 @layer utilities {

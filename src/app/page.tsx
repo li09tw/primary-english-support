@@ -12,7 +12,7 @@ const sampleMessages: AdminMessage[] = [
     id: generateId(),
     title: "歡迎使用國小英語支援！",
     content:
-      "我們很高興為您提供這個英語教學輔具平台。這裡有豐富的遊戲方法和教學輔具，希望能幫助您創造更好的英語學習環境。\n\n如果您有任何建議或需要特定的輔具，歡迎透過聯絡表單與我們聯繫。",
+      "我們很高興為您提供這個英語數位化教具。這裡有豐富的遊戲方法和教學輔具，希望能幫助您創造更好的英語學習環境。\n\n如果您有任何建議或需要特定的輔具，歡迎透過聯絡表單與我們聯繫。",
     createdAt: new Date("2024-01-15T10:00:00"),
     updatedAt: new Date("2024-01-15T10:00:00"),
   },
@@ -46,7 +46,7 @@ export default function Home() {
     "@type": "EducationalOrganization",
     name: "Z的國小英語支援(ZPES)",
     description:
-      "為資源不足的學校提供數位化教學工具，讓每個孩子都能享受優質的英語學習體驗。",
+      "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
     url: "https://zsprimaryenglishsupport.com",
     logo: "https://zsprimaryenglishsupport.com/logo.png",
     sameAs: ["https://zsprimaryenglishsupport.com"],
@@ -95,11 +95,37 @@ export default function Home() {
       <section className="bg-primary-blue text-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            英語教學輔具平台
+            英語數位化教具
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-[#2b6b7a]">
-            為資源不足的學校提供數位化教學工具
+          <p className="text-xl md:text-2xl mb-8 text-primary-blue-dark">
+            支援沒有拿到紙本教具的國小老師
           </p>
+        </div>
+      </section>
+
+      {/* 重要聲明 Section */}
+      <section className="py-8 bg-yellow-50 border-b-2 border-yellow-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg">
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-sm font-medium">
+                重要聲明：本網站僅供非營利、教育目的使用。
+                <br />
+                每個單元並非完全按照課本內編排的單字、句型。
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -132,7 +158,7 @@ export default function Home() {
             <p className="text-lg text-black">我們提供多樣化的教學工具和資源</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* 遊戲方法 */}
             <div className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
               <div className="w-16 h-16 bg-secondary-pink rounded-full flex items-center justify-center mx-auto mb-4">
@@ -150,21 +176,13 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-black mb-3">
-                遊戲方法
-              </h3>
+              <h3 className="text-xl font-semibold text-black mb-3">遊戲庫</h3>
               <p className="text-black mb-4">
-                豐富的英語學習遊戲，讓課堂更加生動有趣，提升學生的學習興趣和參與度。
+                豐富的英語學習遊戲，適合全教材，讓課堂更加生動有趣，提升學生的學習興趣和參與度。
               </p>
-              <Link
-                href="/games"
-                className="inline-block bg-secondary-pink hover:bg-white hover:text-[#2b6b7a] text-black px-6 py-2 rounded-lg font-medium transition-colors duration-200 border-2 border-transparent hover:border-[#2b6b7a]"
-              >
-                探索遊戲
-              </Link>
             </div>
 
-            {/* 教學輔具 */}
+            {/* 課本單字 */}
             <div className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
               <div className="w-16 h-16 bg-accent-green rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
@@ -182,17 +200,61 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-black mb-3">
-                教學輔具
+                課本單字
               </h3>
               <p className="text-black mb-4">
-                多樣化的教學輔具，配合課本內容，幫助教師更好地傳授知識，學生更容易理解。
+                配合課本內容的單字學習資源，幫助學生掌握核心詞彙，建立紮實的英語基礎。
               </p>
-              <Link
-                href="/aids"
-                className="inline-block bg-accent-green hover:bg-white hover:text-[#2b6b7a] text-black px-6 py-2 rounded-lg font-medium transition-colors duration-200 border-2 border-transparent hover:border-[#2b6b7a]"
-              >
-                查看輔具
-              </Link>
+            </div>
+
+            {/* 補充單字 */}
+            <div className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
+              <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-3">
+                補充單字
+              </h3>
+              <p className="text-black mb-4">
+                擴展學生的詞彙量，提供課本以外的實用單字，豐富學生的英語表達能力。
+              </p>
+            </div>
+
+            {/* 課本句型 */}
+            <div className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
+              <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-3">
+                課本句型
+              </h3>
+              <p className="text-black mb-4">
+                系統化的句型練習，幫助學生理解語法結構，提升英語寫作和口語表達能力。
+              </p>
             </div>
           </div>
         </div>
