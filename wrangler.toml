@@ -1,10 +1,8 @@
 name = "zs-primary-english-support"
 compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
-# 移除靜態導出設置，因為我們需要支援 API 路由
-# pages_build_output_dir = "out"
-
 # 全域配置（開發環境使用）
+pages_build_output_dir = ".next"
 # Cloudflare KV 命名空間
 [[kv_namespaces]]
 binding = "PRIMARY_ENGLISH_KV"
@@ -64,9 +62,4 @@ database_id = "203cdead-8e8a-4c1d-a77b-9c5445e4f5f8"
 binding = "primary_english_storage"
 bucket_name = "primary-english-storage"
 
-# Pages Functions 配置
-[pages]
-pages_build_output_dir = ".next"
 
-[[pages.functions]]
-directory = "functions"
