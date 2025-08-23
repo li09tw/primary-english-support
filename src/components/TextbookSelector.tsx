@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Textbook, Unit, Vocabulary } from "@/types";
 
 interface TextbookSelectorProps {
@@ -19,22 +19,32 @@ export default function TextbookSelector({
   const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
 
-  // 載入教材資料
-  useEffect(() => {
-    const loadTextbooks = () => {
-      try {
-        const saved = localStorage.getItem("textbooks");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setTextbooks(parsed);
-        }
-      } catch (error) {
-        console.error("Error loading textbooks:", error);
-      }
-    };
+  // 使用 useRef 來避免函數依賴導致的無限循環
+  const onVocabularySelectedRef = useRef(onVocabularySelected);
+  const onSelectionChangeRef = useRef(onSelectionChange);
 
-    loadTextbooks();
+  // 更新 ref 值
+  useEffect(() => {
+    onVocabularySelectedRef.current = onVocabularySelected;
+    onSelectionChangeRef.current = onSelectionChange;
+  }, [onVocabularySelected, onSelectionChange]);
+
+  // 載入教材資料
+  const loadTextbooks = useCallback(() => {
+    try {
+      const saved = localStorage.getItem("textbooks");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setTextbooks(parsed);
+      }
+    } catch (error) {
+      console.error("Error loading textbooks:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    loadTextbooks();
+  }, [loadTextbooks]);
 
   // 當選擇的教材或單元改變時，更新單字列表
   useEffect(() => {
@@ -53,66 +63,68 @@ export default function TextbookSelector({
         }
       });
 
-      onVocabularySelected(allVocabulary);
+      onVocabularySelectedRef.current(allVocabulary);
 
-      if (onSelectionChange) {
-        onSelectionChange(
+      if (onSelectionChangeRef.current) {
+        onSelectionChangeRef.current(
           Array.from(selectedTextbooks)[0],
           Array.from(selectedUnits)
         );
       }
     } else {
-      onVocabularySelected([]);
+      onVocabularySelectedRef.current([]);
     }
-  }, [
-    selectedTextbooks,
-    selectedUnits,
-    textbooks,
-    onVocabularySelected,
-    onSelectionChange,
-  ]);
+  }, [selectedTextbooks, selectedUnits, textbooks]);
 
   // 切換教材選擇
-  const toggleTextbook = (textbookId: string) => {
-    const newSelected = new Set(selectedTextbooks);
-    if (newSelected.has(textbookId)) {
-      newSelected.delete(textbookId);
-      // 如果取消選擇教材，也要清除相關的單元選擇
-      const textbook = textbooks.find((t) => t.id === textbookId);
-      if (textbook) {
-        const newSelectedUnits = new Set(selectedUnits);
-        textbook.units.forEach((unit) => {
-          newSelectedUnits.delete(unit.id);
-        });
-        setSelectedUnits(newSelectedUnits);
+  const toggleTextbook = useCallback(
+    (textbookId: string) => {
+      const newSelected = new Set(selectedTextbooks);
+      if (newSelected.has(textbookId)) {
+        newSelected.delete(textbookId);
+        // 如果取消選擇教材，也要清除相關的單元選擇
+        const textbook = textbooks.find((t) => t.id === textbookId);
+        if (textbook) {
+          const newSelectedUnits = new Set(selectedUnits);
+          textbook.units.forEach((unit) => {
+            newSelectedUnits.delete(unit.id);
+          });
+          setSelectedUnits(newSelectedUnits);
+        }
+      } else {
+        newSelected.add(textbookId);
       }
-    } else {
-      newSelected.add(textbookId);
-    }
-    setSelectedTextbooks(newSelected);
-  };
+      setSelectedTextbooks(newSelected);
+    },
+    [selectedTextbooks, selectedUnits, textbooks]
+  );
 
   // 切換單元選擇
-  const toggleUnit = (unitId: string) => {
-    const newSelected = new Set(selectedUnits);
-    if (newSelected.has(unitId)) {
-      newSelected.delete(unitId);
-    } else {
-      newSelected.add(unitId);
-    }
-    setSelectedUnits(newSelected);
-  };
+  const toggleUnit = useCallback(
+    (unitId: string) => {
+      const newSelected = new Set(selectedUnits);
+      if (newSelected.has(unitId)) {
+        newSelected.delete(unitId);
+      } else {
+        newSelected.add(unitId);
+      }
+      setSelectedUnits(newSelected);
+    },
+    [selectedUnits]
+  );
 
   // 檢查單元是否可選（只有選中的教材的單元才可選）
-  const isUnitSelectable = (unitId: string) => {
-    return Array.from(selectedTextbooks).some((textbookId) => {
-      const textbook = textbooks.find((t) => t.id === textbookId);
-      return textbook?.units.some((u) => u.id === unitId);
-    });
-  };
+  const isUnitSelectable = useMemo(() => {
+    return (unitId: string) => {
+      return Array.from(selectedTextbooks).some((textbookId) => {
+        const textbook = textbooks.find((t) => t.id === textbookId);
+        return textbook?.units.some((u) => u.id === unitId);
+      });
+    };
+  }, [selectedTextbooks, textbooks]);
 
   // 獲取所有可選的單元
-  const getAllUnits = () => {
+  const getAllUnits = useMemo(() => {
     const allUnits: Unit[] = [];
     selectedTextbooks.forEach((textbookId) => {
       const textbook = textbooks.find((t) => t.id === textbookId);
@@ -121,7 +133,7 @@ export default function TextbookSelector({
       }
     });
     return allUnits;
-  };
+  }, [selectedTextbooks, textbooks]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -159,7 +171,7 @@ export default function TextbookSelector({
             選擇單元
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {getAllUnits().map((unit) => (
+            {getAllUnits.map((unit) => (
               <label
                 key={unit.id}
                 className={`flex items-center space-x-3 cursor-pointer ${

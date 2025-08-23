@@ -14,7 +14,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-lg">
+    <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -32,7 +32,7 @@ export default function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-black hover:text-primary-blue px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                className="text-black hover:text-primary-blue hover:bg-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative z-10"
               >
                 {item.name}
               </Link>
@@ -43,7 +43,7 @@ export default function Header() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-black hover:text-primary-blue focus:outline-none focus:text-primary-blue"
+              className="text-black hover:text-primary-blue focus:outline-none focus:text-primary-blue relative z-10"
             >
               <svg
                 className="h-6 w-6"

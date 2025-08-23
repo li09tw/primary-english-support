@@ -111,19 +111,10 @@ export default function WordPuzzlePage() {
     setPuzzleWords(updatedPuzzleWords);
   };
 
-  // 下一題
-  const nextWord = () => {
-    if (currentWordIndex < puzzleWords.length - 1) {
-      setCurrentWordIndex((prev) => prev + 1);
-      setShowHint(false);
-    } else {
-      // 遊戲結束
-      setIsGameStarted(false);
-    }
-  };
-
   // 重置當前單字
   const resetCurrentWord = () => {
+    if (puzzleWords[currentWordIndex].isCompleted) return;
+
     const updatedPuzzleWords = puzzleWords.map((puzzle, index) =>
       index === currentWordIndex
         ? { ...puzzle, userLetters: [], isCompleted: false }
@@ -131,7 +122,13 @@ export default function WordPuzzlePage() {
     );
 
     setPuzzleWords(updatedPuzzleWords);
-    setShowHint(false);
+  };
+
+  // 下一題
+  const nextWord = () => {
+    if (currentWordIndex < puzzleWords.length - 1) {
+      setCurrentWordIndex(currentWordIndex + 1);
+    }
   };
 
   // 重置遊戲
@@ -147,135 +144,140 @@ export default function WordPuzzlePage() {
   // 獲取字母樣式
   const getLetterStyle = (letter: string, letterIndex: number) => {
     const currentPuzzle = puzzleWords[currentWordIndex];
-    if (!currentPuzzle) return "";
+    if (!currentPuzzle) return "bg-gray-100 text-gray-400";
 
-    const isUsed =
-      currentPuzzle.userLetters.filter((l, i) => l === letter).length >
-      currentPuzzle.scrambledLetters.filter(
-        (l, i) => l === letter && i <= letterIndex
-      ).length;
+    const isUsed = currentPuzzle.userLetters.includes(letter);
+    const isCorrect = currentPuzzle.word.includes(letter);
 
-    return isUsed
-      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-      : "bg-red-100 border-red-300 text-red-700 hover:bg-red-200 cursor-pointer";
+    if (isUsed) {
+      return "bg-green-100 border-green-300 text-green-700 hover:bg-green-200 cursor-pointer";
+    } else if (isCorrect) {
+      return "bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200 cursor-pointer";
+    } else {
+      return "bg-red-100 border-red-300 text-red-700 hover:bg-red-200 cursor-pointer";
+    }
   };
 
   const currentPuzzle = puzzleWords[currentWordIndex];
 
   return (
-    <div className="min-h-screen py-8 bg-primary-blue">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 頁面標題 */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">單字拼圖</h1>
-          <p className="text-xl text-gray-600">拼湊字母，完成單字</p>
-        </div>
+    <div className="min-h-screen bg-primary-blue">
+      <div className="pt-8 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* 頁面標題 */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-black mb-4">單字拼圖</h1>
+            <p className="text-xl text-black">拼湊字母，完成單字</p>
+          </div>
 
-        {/* 句型與單字主題選擇 */}
-        {!isGameStarted && (
-          <>
-            <TextbookSelector onVocabularySelected={handleVocabularySelected} />
+          {/* 句型與單字主題選擇 */}
+          {!isGameStarted && (
+            <>
+              <TextbookSelector
+                onVocabularySelected={handleVocabularySelected}
+              />
 
-            {/* 單字預覽 */}
-            {vocabulary.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  單字列表 ({vocabulary.length} 個)
-                </h3>
-                <div className="bg-gray-50 p-4 rounded-md max-h-40 overflow-y-auto">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {vocabulary.map((word) => (
-                      <div key={word.id} className="text-sm text-gray-700">
-                        {word.english} - {word.chinese}
-                      </div>
-                    ))}
+              {/* 單字預覽 */}
+              {vocabulary.length > 0 && (
+                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                  <h3 className="text-lg font-semibold text-black mb-4">
+                    單字列表 ({vocabulary.length} 個)
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded-md max-h-40 overflow-y-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {vocabulary.map((word) => (
+                        <div key={word.id} className="text-sm text-black">
+                          {word.english} - {word.chinese}
+                        </div>
+                      ))}
+                    </div>
                   </div>
+
+                  {/* 開始遊戲按鈕 */}
+                  {vocabulary.length >= 5 && (
+                    <button
+                      onClick={startWordPuzzleGame}
+                      className="w-full mt-4 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                    >
+                      開始單字拼圖遊戲
+                    </button>
+                  )}
+
+                  {vocabulary.length < 5 && vocabulary.length > 0 && (
+                    <div className="text-center text-red-600 text-sm mt-4">
+                      需要至少5個單字才能開始單字拼圖遊戲，目前只有{" "}
+                      {vocabulary.length} 個單字
+                    </div>
+                  )}
                 </div>
+              )}
+            </>
+          )}
 
-                {/* 開始遊戲按鈕 */}
-                {vocabulary.length >= 5 && (
-                  <button
-                    onClick={startWordPuzzleGame}
-                    className="w-full mt-4 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
-                  >
-                    開始單字拼圖遊戲
-                  </button>
-                )}
-
-                {vocabulary.length < 5 && vocabulary.length > 0 && (
-                  <div className="text-center text-red-600 text-sm mt-4">
-                    需要至少5個單字才能開始單字拼圖遊戲，目前只有{" "}
-                    {vocabulary.length} 個單字
-                  </div>
-                )}
+          {/* 單字拼圖遊戲區域 */}
+          {isGameStarted && currentPuzzle && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-black">
+                  單字拼圖遊戲進行中
+                </h2>
+                <button
+                  onClick={resetGame}
+                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  重新開始
+                </button>
               </div>
-            )}
-          </>
-        )}
 
-        {/* 單字拼圖遊戲區域 */}
-        {isGameStarted && currentPuzzle && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
-                單字拼圖遊戲進行中
-              </h2>
-              <button
-                onClick={resetGame}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                重新開始
-              </button>
-            </div>
-
-            {/* 遊戲進度 */}
-            <div className="mb-6 text-center">
-              <div className="inline-flex items-center space-x-6">
-                <span className="text-gray-600">
-                  單字: {currentWordIndex + 1} / {totalWords}
-                </span>
-                <span className="text-gray-600">
-                  得分: {score} / {totalWords}
-                </span>
+              {/* 遊戲進度 */}
+              <div className="mb-6 text-center">
+                <div className="inline-flex items-center space-x-6">
+                  <span className="text-black">
+                    單字: {currentWordIndex + 1} / {totalWords}
+                  </span>
+                  <span className="text-black">
+                    得分: {score} / {totalWords}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* 當前拼圖 */}
-            <div className="mb-8 text-center">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-8">
-                <h3 className="text-2xl font-bold text-red-800 mb-6">
-                  第 {currentWordIndex + 1} 個單字
-                </h3>
+              {/* 當前拼圖 */}
+              <div className="mb-8 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-8">
+                  <h3 className="text-2xl font-bold text-red-800 mb-6">
+                    第 {currentWordIndex + 1} 個單字
+                  </h3>
 
-                {/* 中文提示 */}
-                <p className="text-xl text-gray-700 mb-6">
-                  中文意思：{currentPuzzle.chinese}
-                </p>
+                  {/* 中文提示 */}
+                  <p className="text-xl text-black mb-6">
+                    中文意思：{currentPuzzle.chinese}
+                  </p>
 
-                {/* 用戶拼出的單字 */}
-                <div className="mb-8">
-                  <div className="flex justify-center space-x-2">
-                    {currentPuzzle.word.split("").map((_, index) => (
-                      <div
-                        key={index}
-                        className={`
-                          w-16 h-16 border-2 border-gray-300 rounded-lg flex items-center justify-center text-2xl font-bold
-                          ${
-                            currentPuzzle.userLetters[index]
-                              ? "bg-green-100 border-green-500 text-green-800"
-                              : "bg-gray-100 text-gray-400"
-                          }
-                        `}
-                      >
-                        {currentPuzzle.userLetters[index] || "_"}
-                      </div>
-                    ))}
+                  {/* 用戶拼出的單字 */}
+                  <div className="mb-8">
+                    <div className="flex justify-center space-x-2">
+                      {currentPuzzle.word.split("").map((_, index) => (
+                        <div
+                          key={index}
+                          className={`
+                            w-16 h-16 border-2 border-gray-300 rounded-lg flex items-center justify-center text-2xl font-bold
+                            ${
+                              currentPuzzle.userLetters[index]
+                                ? "bg-green-100 border-green-500 text-green-800"
+                                : "bg-gray-100 text-gray-400"
+                            }
+                          `}
+                        >
+                          {currentPuzzle.userLetters[index] || "_"}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* 字母選擇區域 */}
                 <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h4 className="text-lg font-semibold text-black mb-4">
                     選擇字母：
                   </h4>
                   <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
@@ -316,41 +318,41 @@ export default function WordPuzzlePage() {
                   </button>
                 </div>
               </div>
-            </div>
 
-            {/* 完成提示 */}
-            {currentPuzzle.isCompleted && (
-              <div className="mb-6 text-center">
-                <div className="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg">
-                  🎉 正確！{currentPuzzle.word} = {currentPuzzle.chinese} 🎉
+              {/* 完成提示 */}
+              {currentPuzzle.isCompleted && (
+                <div className="mb-6 text-center">
+                  <div className="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg">
+                    🎉 正確！{currentPuzzle.word} = {currentPuzzle.chinese} 🎉
+                  </div>
                 </div>
+              )}
+
+              {/* 遊戲提示 */}
+              <div className="text-center text-black text-sm">
+                <p>將打亂的字母按正確順序排列，拼出完整的單字！</p>
               </div>
-            )}
-
-            {/* 遊戲提示 */}
-            <div className="text-center text-gray-600 text-sm">
-              <p>將打亂的字母按正確順序排列，拼出完整的單字！</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 遊戲完成提示 */}
-        {!isGameStarted && puzzleWords.length > 0 && (
+          {/* 遊戲完成提示 */}
+          {!isGameStarted && puzzleWords.length > 0 && (
+            <div className="text-center mt-8">
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-6 py-4 rounded-lg">
+                🎉 遊戲完成！你的得分是 {score} / {totalWords} 🎉
+              </div>
+            </div>
+          )}
+
+          {/* 返回按鈕 */}
           <div className="text-center mt-8">
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-6 py-4 rounded-lg">
-              🎉 遊戲完成！你的得分是 {score} / {totalWords} 🎉
-            </div>
+            <Link
+              href="/aids"
+              className="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              ← 返回電子教具
+            </Link>
           </div>
-        )}
-
-        {/* 返回按鈕 */}
-        <div className="text-center mt-8">
-          <Link
-            href="/aids"
-            className="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-          >
-            ← 返回電子教具
-          </Link>
         </div>
       </div>
     </div>

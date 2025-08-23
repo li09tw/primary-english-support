@@ -27,7 +27,7 @@ CREATE TABLE game_methods (
 
 -- 聯絡記錄表
 CREATE TABLE contact_messages (
-  id TEXT PRIMARY KEY,
+  id TEXT NOT NULL,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   type TEXT NOT NULL,
@@ -36,4 +36,38 @@ CREATE TABLE contact_messages (
   status TEXT NOT NULL,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
+);
+
+-- 教材表
+CREATE TABLE textbooks (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  publisher TEXT NOT NULL,
+  grade TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+-- 單元表
+CREATE TABLE units (
+  id TEXT PRIMARY KEY,
+  textbook_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (textbook_id) REFERENCES textbooks(id) ON DELETE CASCADE
+);
+
+-- 單字表
+CREATE TABLE vocabulary (
+  id TEXT PRIMARY KEY,
+  unit_id TEXT NOT NULL,
+  english TEXT NOT NULL,
+  chinese TEXT NOT NULL,
+  phonetic TEXT NOT NULL,
+  example TEXT NOT NULL,
+  image TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE CASCADE
 );

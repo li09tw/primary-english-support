@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import GameMethodCard from "@/components/GameMethodCard";
 import { GameMethod } from "@/types";
-import { generateId } from "@/lib/utils";
 
 export default function GamesPage() {
   const [games, setGames] = useState<GameMethod[]>([]);
@@ -12,29 +11,36 @@ export default function GamesPage() {
     "all",
   ]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>(["all"]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // 從 API 讀取遊戲方法數據
-    const fetchGames = async () => {
+    // 直接從 D1 數據庫讀取遊戲方法數據
+    const fetchGamesFromD1 = async () => {
       try {
+        setIsLoading(true);
+        setHasError(false);
+
+        // 使用 fetch 調用 games API 端點來獲取 D1 數據
         const response = await fetch("/api/games");
         const result = await response.json();
 
         if (result.success && result.data) {
           setGames(result.data);
         } else {
-          console.warn("API 返回空數據或錯誤:", result.message);
-          // 如果 API 無數據，顯示空狀態
+          console.warn("D1 數據庫返回空數據或錯誤:", result.message);
           setGames([]);
         }
       } catch (error) {
-        console.error("Failed to fetch games from API:", error);
-        // 網絡錯誤時顯示空狀態
+        console.error("Failed to fetch games from D1 database:", error);
+        setHasError(true);
         setGames([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchGames();
+    fetchGamesFromD1();
   }, []);
 
   useEffect(() => {
@@ -67,20 +73,6 @@ export default function GamesPage() {
     setFilteredGames(filtered);
   }, [games, selectedCategories, selectedGrades]);
 
-  const categories = [
-    "all",
-    ...Array.from(new Set(games.flatMap((game) => game.categories))),
-  ];
-  const grades = [
-    "all",
-    "grade1",
-    "grade2",
-    "grade3",
-    "grade4",
-    "grade5",
-    "grade6",
-  ];
-
   const categoryLabels = {
     all: "全部",
     單字學習: "單字學習",
@@ -92,6 +84,11 @@ export default function GamesPage() {
     拼寫練習: "拼寫練習",
   };
 
+  const categories = [
+    "all",
+    ...Object.keys(categoryLabels).filter((key) => key !== "all"),
+  ];
+
   const gradeLabels = {
     all: "全部",
     grade1: "1年級",
@@ -101,6 +98,11 @@ export default function GamesPage() {
     grade5: "5年級",
     grade6: "6年級",
   };
+
+  const grades = [
+    "all",
+    ...Object.keys(gradeLabels).filter((key) => key !== "all"),
+  ];
 
   const handleCategoryChange = (category: string) => {
     if (category === "all") {
@@ -197,11 +199,77 @@ export default function GamesPage() {
         </div>
 
         {/* 遊戲方法列表 */}
-        {filteredGames.length > 0 ? (
+        {isLoading ? (
+          <div className="text-center py-16">
+            <div className="text-gray-400 mb-4">
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-black mb-2">載入中...</h3>
+            <p className="text-black">請稍候，正在加載遊戲方法。</p>
+          </div>
+        ) : hasError ? (
+          <div className="text-center py-16">
+            <div className="text-gray-400 mb-4">
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-black mb-2">載入失敗</h3>
+            <p className="text-black">
+              無法載入遊戲方法，請稍後再試或聯繫管理員。
+            </p>
+          </div>
+        ) : filteredGames.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredGames.map((game) => (
               <GameMethodCard key={game.id} game={game} />
             ))}
+          </div>
+        ) : games.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-gray-400 mb-4">
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-black mb-2">
+              暫無遊戲方法
+            </h3>
+            <p className="text-black">
+              目前資料庫中還沒有遊戲方法，請聯繫管理員添加內容。
+            </p>
           </div>
         ) : (
           <div className="text-center py-16">

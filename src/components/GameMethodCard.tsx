@@ -26,19 +26,20 @@ export default function GameMethodCard({ game }: GameMethodCardProps) {
     grade6: "6年級",
   };
 
-  // 從布林值年級欄位生成 grades 陣列
-  const getGradesArray = () => {
-    const grades: string[] = [];
-    if (game.grade1) grades.push("grade1");
-    if (game.grade2) grades.push("grade2");
-    if (game.grade3) grades.push("grade3");
-    if (game.grade4) grades.push("grade4");
-    if (game.grade5) grades.push("grade5");
-    if (game.grade6) grades.push("grade6");
-    return grades;
-  };
-
-  const grades = getGradesArray();
+  // 使用 grades 陣列，如果不存在則從布林值欄位生成
+  const grades =
+    game.grades && game.grades.length > 0
+      ? game.grades
+      : (() => {
+          const gradesArray: string[] = [];
+          if (game.grade1) gradesArray.push("grade1");
+          if (game.grade2) gradesArray.push("grade2");
+          if (game.grade3) gradesArray.push("grade3");
+          if (game.grade4) gradesArray.push("grade4");
+          if (game.grade5) gradesArray.push("grade5");
+          if (game.grade6) gradesArray.push("grade6");
+          return gradesArray;
+        })();
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 border border-pink-100">
