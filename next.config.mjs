@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Cloudflare Pages 支援 - 移除靜態導出以支援 API 路由
-  // output: "export", // 註解掉這行以支援 API 路由
+  // Cloudflare Pages 支援 - 啟用靜態導出
+  output: "export", // 啟用靜態導出
   trailingSlash: true,
   images: {
     unoptimized: true,

@@ -73,40 +73,21 @@ export async function GET(request: NextRequest) {
 
     let gamesData: D1GameMethod[] = [];
 
-    // 智能環境檢測：建置時使用 mock，運行時嘗試 D1
-    const isBuildTime =
-      typeof window === "undefined" && process.env.NODE_ENV === "production";
-
-    if (isBuildTime) {
-      console.log("Build time detected, using mock data for static generation");
-      // 建置時使用 mock 數據
+    // 嘗試從 D1 資料庫讀取數據
+    console.log("Attempting to read from D1 database...");
+    try {
+      gamesData = await getGamesFromD1();
+      console.log(`Successfully read ${gamesData.length} games from D1 database`);
+    } catch (d1Error) {
+      console.log("D1 database access failed, falling back to mock data:", d1Error);
+      
+      // 回退到 mock 數據
       if (mockGamesData[0] && mockGamesData[0].results) {
         gamesData = mockGamesData[0].results as D1GameMethod[];
       } else {
         gamesData = mockGamesData as unknown as D1GameMethod[];
       }
-    } else {
-      console.log("Runtime detected, attempting to read from D1 database...");
-      try {
-        gamesData = await getGamesFromD1();
-        console.log(
-          `Successfully read ${gamesData.length} games from D1 database`
-        );
-      } catch (d1Error) {
-        console.log(
-          "D1 database access failed, falling back to mock data:",
-          d1Error
-        );
-
-        // 回退到 mock 數據
-        if (mockGamesData[0] && mockGamesData[0].results) {
-          gamesData = mockGamesData[0].results as D1GameMethod[];
-        } else {
-          gamesData = mockGamesData as unknown as D1GameMethod[];
-        }
-
-        console.log(`Using ${gamesData.length} mock games as fallback`);
-      }
+      console.log(`Using ${gamesData.length} mock games as fallback`);
     }
 
     // 如果沒有數據，返回空結果

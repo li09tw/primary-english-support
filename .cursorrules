@@ -68,8 +68,9 @@
 - 這個文件包含項目的導覽和指引資訊
 
 ## 7. Rules File Reference
-- **當我說「規則」時，就是指 `.cursorignore` 文件**
+- **當我說「規則」時，就是指 `.cursorrules ` 文件**
 - 這個文件用於新增、修改和管理項目的規則設定
+
 
 ## 8. Garden Management Interface
 - **管理介面路徑為 `/garden`，不是 `/admin`**
@@ -78,37 +79,49 @@
 - 功能包括：新增、編輯、刪除各類內容，發布狀態管理
 - 此路徑替代了原本的 `/admin` 路徑，使用更友善的名稱
 
-## 8. Code Selection Scope Guidelines
+## 9. Code Selection Scope Guidelines
 - **當用戶圈選程式碼時，只更動與圈選程式碼直接相關的部分**
 - **禁止擅自更改設計、顏色、優化其他不相關的 component、更改排版等**
 - 保持修改範圍的精確性，避免影響未圈選的程式碼
 - 確保所有更改都與用戶明確圈選的程式碼有直接關聯
 
-## 9. File Naming Convention
+## 10. File Naming Convention
 - **所有 `.md` 文件名必須使用字首大寫的命名方式（PascalCase）**
 - 例如：`GamePagesGuide.md`、`CloudflareIntegration.md`、`SeoOptimization.md`
 - 禁止使用全大寫（如 `GAME_PAGES_GUIDE.md`）或蛇形命名（如 `game_pages_guide.md`）
 - 此規則適用於所有新創建和重命名的 `.md` 文件
 - 保持項目 `.md` 文件命名的一致性和可讀性
 
-## 10. Documentation File Location
+## 11. Documentation File Location
 - **所有 `.md` 文件必須放在 `doc/` 資料夾中**
 - **絕對禁止在專案根目錄或其他位置創建 `.md` 文件**
 - 如果發現根目錄有 `.md` 文件，必須立即移動到 `doc/` 資料夾
 - 保持專案結構的整潔和一致性
 - 所有文檔都應該集中在 `doc/` 資料夾中管理
 
-## 11. Deployment Instructions
+## 12. Deployment Instructions
 - **當用戶說「部署」時，必須執行以下兩行程式碼：**
   1. `npm run build` - 建置專案
   2. `wrangler pages deploy` - 使用 wrangler 部署到 Cloudflare Pages
 - 這是標準的部署流程，確保專案能正確建置並部署到生產環境
 - 部署前必須先建置，部署後才能看到最新的網頁內容
 
-## 12. Decision Making Guidelines
+## 13. Decision Making Guidelines
 - **當面對多個解決方案時，必須提供所有選項並詢問用戶選擇**
 - **禁止擅自決定執行哪個方案**
 - 必須清楚列出所有可能的解決方案
 - 讓用戶明確選擇要執行的方案
 - 避免過於急躁地做決定和執行動作
 - 確保用戶對每個步驟都有控制權
+
+## 14. Reinstallation Procedure
+- **當用戶說「重新安裝」時，必須執行以下程序：**
+  1. `rm -rf .next node_modules package-lock.json` - 清理損壞的建置快取和依賴
+  2. `npm install` - 重新安裝所有依賴套件
+  3. `npm run build` - 重新建置專案
+- 這個程序專門用來解決：
+  - webpack 模組解析錯誤（如 `Cannot find module './948.js'`）
+  - 依賴衝突或安裝不完整
+  - 建置快取損壞
+  - 其他與依賴或建置相關的問題
+- 執行此程序前應先停止開發伺服器，完成後可重新啟動

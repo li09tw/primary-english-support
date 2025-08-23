@@ -85,14 +85,21 @@ export interface CloudflareEnv {
 
 // 檢查是否在 Cloudflare 環境中運行
 export function isCloudflareEnvironment(): boolean {
-  return typeof globalThis !== "undefined" && "Cloudflare" in globalThis;
+  // 檢查多種可能的 Cloudflare 環境標識
+  return (
+    typeof globalThis !== "undefined" && (
+      "Cloudflare" in globalThis ||
+      (globalThis as any).env?.PRIMARY_ENGLISH_DB ||
+      (globalThis as any).cloudflare?.env?.PRIMARY_ENGLISH_DB
+    )
+  );
 }
 
 // 獲取 Cloudflare 環境變數
 export function getCloudflareEnv(): Partial<CloudflareEnv> {
   if (isCloudflareEnvironment()) {
     // 在 Cloudflare Workers 環境中
-    return (globalThis as any).env || {};
+    return (globalThis as any).env || (globalThis as any).cloudflare?.env || {};
   }
 
   // 在 Node.js 環境中
@@ -104,25 +111,32 @@ export function getCloudflareEnv(): Partial<CloudflareEnv> {
 
 // 獲取 D1 資料庫實例
 export function getD1Database(): D1Database {
-  // 嘗試訪問 Cloudflare 環境
-  const cloudflareEnv = (globalThis as any).cloudflare?.env;
-  const directEnv = (globalThis as any).env;
-  const d1Database =
-    cloudflareEnv?.PRIMARY_ENGLISH_DB || directEnv?.PRIMARY_ENGLISH_DB;
-
+  console.log("Attempting to get D1 database...");
+  
+  // 嘗試多種方式獲取 D1 資料庫
+  const possibleSources = [
+    (globalThis as any).env?.PRIMARY_ENGLISH_DB,
+    (globalThis as any).cloudflare?.env?.PRIMARY_ENGLISH_DB,
+    (globalThis as any).PRIMARY_ENGLISH_DB,
+  ];
+  
+  console.log("Possible D1 sources:", possibleSources.map(src => !!src));
+  
+  const d1Database = possibleSources.find(src => src);
+  
   if (!d1Database) {
+    console.log("D1 database not found in any source");
+    
     // 在本地開發環境中，嘗試使用 wrangler 的本地 D1 連接
-    console.log("Attempting to connect to local D1 database...");
-
-    // 檢查是否在本地開發環境
     if (process.env.NODE_ENV === "development") {
-      // 在本地開發環境中，我們需要手動連接到 D1
+      console.log("Development environment detected, attempting local D1 connection...");
       // 這裡可以嘗試使用 wrangler 的本地 D1 功能
       throw new Error("D1_DATABASE_NOT_AVAILABLE_LOCAL");
     }
 
-    throw new Error("D1 database not available");
+    throw new Error("D1 database not available in production environment");
   }
 
+  console.log("D1 database found successfully");
   return d1Database;
 }

@@ -1,0 +1,21 @@
+{
+  "routes": [
+    {
+      "routePath": "/games",
+      "mountPath": "/",
+      "method": "",
+      "module": [
+        "games.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/:path*",
+      "mountPath": "/",
+      "method": "",
+      "module": [
+        "[[path]].js:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}

@@ -75,13 +75,13 @@ export default function GamesPage() {
 
   const categoryLabels = {
     all: "全部",
-    單字學習: "單字學習",
-    句型練習: "句型練習",
-    口語訓練: "口語訓練",
-    教學輔具: "教學輔具",
-    聽力練習: "聽力練習",
-    發音練習: "發音練習",
-    拼寫練習: "拼寫練習",
+    vocabulary: "單字學習",
+    sentence: "句型練習",
+    oral: "口語訓練",
+    teaching: "教學輔具",
+    listening: "聽力練習",
+    pronunciation: "發音練習",
+    spelling: "拼寫練習",
   };
 
   const categories = [

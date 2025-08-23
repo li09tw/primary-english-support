@@ -7,7 +7,13 @@ export async function onRequest(context) {
 
   // 處理 API 路由
   if (url.pathname.startsWith("/api/")) {
-    // 轉發到 Next.js API 路由
+    // 對於 /api/games 路由，使用專門的處理器
+    if (url.pathname === "/api/games") {
+      // 轉發到專門的 games 處理器
+      return next();
+    }
+    
+    // 其他 API 路由轉發到 Next.js
     return next();
   }
 
