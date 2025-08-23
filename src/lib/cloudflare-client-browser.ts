@@ -53,7 +53,7 @@ export class CloudflareClientBrowser {
 export function createCloudflareClientBrowser(): CloudflareClientBrowser {
   // 在瀏覽器中，我們使用相對路徑
   const apiBaseUrl = "";
-  
+
   return new CloudflareClientBrowser({
     apiBaseUrl,
   });

@@ -12,6 +12,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 檢查環境變數
+    console.log("Environment check:", {
+      NODE_ENV: process.env.NODE_ENV,
+      CLOUDFLARE_WORKER_URL: process.env.CLOUDFLARE_WORKER_URL
+        ? "SET"
+        : "NOT SET",
+      CLOUDFLARE_API_SECRET: process.env.CLOUDFLARE_API_SECRET
+        ? "SET"
+        : "NOT SET",
+    });
+
     const client = createCloudflareClient();
 
     let result;
@@ -30,9 +41,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Cloudflare API error:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Unknown error" 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
