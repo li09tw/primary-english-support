@@ -63,3 +63,10 @@ database_id = "203cdead-8e8a-4c1d-a77b-9c5445e4f5f8"
 [[env.preview.r2_buckets]]
 binding = "primary_english_storage"
 bucket_name = "primary-english-storage"
+
+# Pages Functions 配置
+[pages]
+pages_build_output_dir = ".next"
+
+[[pages.functions]]
+directory = "functions"
