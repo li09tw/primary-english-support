@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import { generateMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = generateMetadata("contact");
 
 export default function ContactPage() {
   return (
@@ -20,46 +24,6 @@ export default function ContactPage() {
 
           {/* 聯絡資訊 */}
           <div className="space-y-8">
-            {/* 關於我們 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                關於我們
-              </h3>
-              <p className="text-gray-600 mb-4">
-                PrimaryEnglishSupport
-                致力於為資源不足的學校提供高品質的英語教學工具。
-                我們相信每個孩子都應該有機會享受優質的英語學習體驗。
-              </p>
-              <p className="text-gray-600">
-                透過數位化技術，我們將傳統的紙本和塑膠教具轉化為互動式的電子工具，
-                讓教學更加生動有趣，學習效果更加顯著。
-              </p>
-            </div>
-
-            {/* 服務時間 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                服務時間
-              </h3>
-              <div className="space-y-2 text-gray-600">
-                <div className="flex justify-between">
-                  <span>週一至週五</span>
-                  <span>09:00 - 18:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>週六</span>
-                  <span>10:00 - 16:00</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>週日</span>
-                  <span>休息</span>
-                </div>
-              </div>
-              <p className="text-sm text-gray-500 mt-4">
-                * 國定假日服務時間可能有所調整
-              </p>
-            </div>
-
             {/* 常見問題 */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">

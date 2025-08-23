@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 // 合併 Tailwind CSS 類別
 export function cn(...inputs: ClassValue[]) {
@@ -15,14 +15,14 @@ export function generateId(): string {
 export function formatDate(date: Date | string | number): string {
   const parsed = date instanceof Date ? date : new Date(date);
   if (isNaN(parsed.getTime())) {
-    return '';
+    return "";
   }
-  return new Intl.DateTimeFormat('zh-TW', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Intl.DateTimeFormat("zh-TW", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(parsed);
 }
 
@@ -34,21 +34,28 @@ export function isValidEmail(email: string): boolean {
 
 // 本地儲存遊戲方法
 export function saveGameMethods(methods: any[]): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('gameMethods', JSON.stringify(methods));
+  if (typeof window !== "undefined") {
+    localStorage.setItem("gameMethods", JSON.stringify(methods));
   }
 }
 
 // 本地儲存站長消息
 export function saveAdminMessages(messages: any[]): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('adminMessages', JSON.stringify(messages));
+  if (typeof window !== "undefined") {
+    localStorage.setItem("adminMessages", JSON.stringify(messages));
   }
 }
 
 // 本地儲存輔具
 export function saveTeachingAids(aids: any[]): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('teachingAids', JSON.stringify(aids));
+  if (typeof window !== "undefined") {
+    localStorage.setItem("teachingAids", JSON.stringify(aids));
+  }
+}
+
+// 本地儲存聯絡表單
+export function saveContactMessages(contacts: any[]): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("contactMessages", JSON.stringify(contacts));
   }
 }

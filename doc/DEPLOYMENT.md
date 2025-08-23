@@ -58,7 +58,7 @@ git push origin main
 
 #### 4.1 使用 Wrangler 部署
 ```bash
-wrangler pages deploy .next --project-name=primary-english-support
+wrangler pages deploy .next --project-name=zs-primary-english-support
 ```
 
 #### 4.2 使用 Cloudflare Dashboard
@@ -83,7 +83,7 @@ wrangler pages deploy .next --project-name=primary-english-support
 
 #### 5.2 使用 Wrangler
 ```bash
-wrangler pages domain add primary-english-support yourdomain.com
+wrangler pages domain add zs-primary-english-support yourdomain.com
 ```
 
 ### 6. 環境變數管理
@@ -95,7 +95,7 @@ wrangler pages domain add primary-english-support yourdomain.com
 
 #### 6.2 使用 Wrangler
 ```bash
-wrangler pages secret put EMAILJS_SERVICE_ID --project-name=primary-english-support
+wrangler pages secret put EMAILJS_SERVICE_ID --project-name=zs-primary-english-support
 ```
 
 ### 7. 故障排除
@@ -119,17 +119,17 @@ wrangler pages secret put EMAILJS_SERVICE_ID --project-name=primary-english-supp
 
 #### 8.1 查看部署狀態
 ```bash
-wrangler pages deployment list --project-name=primary-english-support
+wrangler pages deployment list --project-name=zs-primary-english-support
 ```
 
 #### 8.2 查看日誌
 ```bash
-wrangler pages deployment tail --project-name=primary-english-support
+wrangler pages deployment tail --project-name=zs-primary-english-support
 ```
 
 #### 8.3 回滾部署
 ```bash
-wrangler pages deployment rollback --project-name=primary-english-support
+wrangler pages deployment rollback --project-name=zs-primary-english-support
 ```
 
 ### 9. 更新部署

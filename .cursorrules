@@ -1,0 +1,47 @@
+# Cursor Rules for Primary English Support Project
+
+## 1. Hero Section Guidelines
+- **永遠不要在 hero section 放按鈕**
+- Hero section 應該專注於展示主要訊息和視覺效果
+- 避免在 hero section 中使用任何形式的按鈕元素
+
+## 2. Typography and Color Guidelines
+- **使用 `#2b6b7a` 作為副標或 H3 的文字顏色**
+- 當一個 section 已經有黑色文字的 H1 或 H2 時，使用此顏色作為副標
+- 此顏色適用於 H3 標題和副標題文字
+- **一個頁面中至少要有1個H1，其餘最多是 H2 或 p、span**
+- **所有 hover 狀態統一使用白底 (`bg-white`) 和 `#2b6b7a` 字體顏色**
+- hover 樣式應保持一致的視覺效果，提升用戶體驗
+- 使用 TypeScript 進行類型安全開發
+- 遵循 Next.js 13+ App Router 的最佳實踐
+- 使用 Tailwind CSS 進行樣式設計
+- 保持組件結構清晰和可重用性
+
+## 3. Component Structure
+- 每個組件應該有明確的職責
+- 使用適當的 TypeScript 類型定義
+- 保持組件的可測試性和可維護性
+
+## 4. File Organization
+- 遵循 Next.js 的檔案結構慣例
+- 將共用組件放在 `src/components` 目錄
+- 將工具函數放在 `src/lib` 目錄
+- 將類型定義放在 `src/types` 目錄
+
+## 5. Client Component Guidelines
+- **每次更動檔案時，如果發現沒有 `"use client"`，請思考是否需要**
+- 使用 `"use client"` 來標記需要客戶端互動的組件
+- 只有當組件需要 useState、useEffect、事件處理器等客戶端功能時才添加
+- 保持伺服器組件的優勢，避免不必要的客戶端渲染
+
+## 6. Navigation Document Reference
+- **當我說「導覽文件」時，就是指 `doc/Guide.md`**
+- 這個文件包含項目的導覽和指引資訊
+
+## 7. Garden Management Interface
+- **管理介面路徑為 `/garden`，不是 `/admin`**
+- 此路徑提供遊戲方法、教學輔具和站長消息的管理功能
+- 檔案位置：`src/app/garden/`
+- 功能包括：新增、編輯、刪除各類內容，發布狀態管理
+- 此路徑替代了原本的 `/admin` 路徑，使用更友善的名稱
+

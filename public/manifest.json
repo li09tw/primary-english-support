@@ -1,0 +1,27 @@
+{
+  "name": "Z的國小英語支援(ZPES) - 英語教學輔具平台",
+  "short_name": "Z的國小英語支援(ZPES)",
+  "description": "為資源不足的學校提供數位化教學工具，讓每個孩子都能享受優質的英語學習體驗。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2b6b7a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "zh-TW",
+  "dir": "ltr"
+}

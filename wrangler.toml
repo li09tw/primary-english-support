@@ -1,4 +1,4 @@
-name = "primary-english-support"
+name = "zs-primary-english-support"
 compatibility_date = "2024-01-15"
 compatibility_flags = ["nodejs_compat"]
 
@@ -6,11 +6,38 @@ compatibility_flags = ["nodejs_compat"]
 command = "npm run build"
 cwd = "."
 
+# Cloudflare Pages 配置
+pages_build_output_dir = ".next"
+
 [site]
 bucket = ".next/static"
 
+# Cloudflare KV 命名空間
+[[kv_namespaces]]
+binding = "PRIMARY_ENGLISH_KV"
+id = "81b8ce87ae7a4122a7021512d13a81f5"
+preview_id = "385b9e475cee4fcbabccbc56853e1b53"
+
+# Cloudflare D1 資料庫
+[[d1_databases]]
+binding = "PRIMARY_ENGLISH_DB"
+database_name = "primary-english-db"
+database_id = "203cdead-8e8a-4c1d-a77b-9c5445e4f5f8"
+
+# Cloudflare R2 存儲
+[[r2_buckets]]
+binding = "primary_english_storage"
+bucket_name = "primary-english-storage"
+
+# 環境變數
+[vars]
+ENVIRONMENT = "production"
+JWT_SECRET = "ZEpUQI/fzdq0To593bAMsEILPoluQJXOKS5BNH3qLRY="
+
 [env.production]
-name = "primary-english-support"
+name = "zs-primary-english-support"
+vars = { ENVIRONMENT = "production" }
 
 [env.staging]
-name = "primary-english-support-staging"
+name = "zs-primary-english-support-staging"
+vars = { ENVIRONMENT = "staging" }

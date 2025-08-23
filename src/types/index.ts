@@ -4,7 +4,7 @@ export interface GameMethod {
   title: string;
   description: string;
   category: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  grade: "grade1" | "grade2" | "grade3" | "grade4" | "grade5" | "grade6";
   materials: string[];
   instructions: string[];
   createdAt: Date;
@@ -16,8 +16,6 @@ export interface AdminMessage {
   id: string;
   title: string;
   content: string;
-  priority: 'low' | 'medium' | 'high';
-  isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,7 +26,7 @@ export interface TeachingAid {
   name: string;
   description: string;
   subject: string;
-  grade: string;
+  grade: "grade1" | "grade2" | "grade3" | "grade4" | "grade5" | "grade6";
   textbookReference?: string;
   materials: string[];
   instructions: string[];
@@ -40,6 +38,7 @@ export interface TeachingAid {
 export interface ContactForm {
   name: string;
   email: string;
-  subject: string;
-  message: string;
+  type: string;
+  title: string;
+  content: string;
 }

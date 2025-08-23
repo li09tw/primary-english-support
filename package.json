@@ -1,5 +1,5 @@
 {
-  "name": "primary-english-support",
+  "name": "zs-primary-english-support",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "critters-webpack-plugin": "^3.0.2",
     "eslint": "^8",
     "eslint-config-next": "14.2.0",
     "postcss": "^8",

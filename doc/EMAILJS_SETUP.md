@@ -63,7 +63,7 @@ Email.js 支援多種郵件服務提供商：
     <p>{{message}}</p>
     
     <hr>
-    <p><small>此訊息由 PrimaryEnglishSupport 網站自動發送</small></p>
+    <p><small>此訊息由 Z的國小英語支援(ZPES) 網站自動發送</small></p>
 </body>
 </html>
 ```
@@ -136,7 +136,7 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
 <body>
     <div class="container">
         <div class="header">
-            <h1>PrimaryEnglishSupport</h1>
+            <h1>Z的國小英語支援(ZPES)</h1>
             <p>收到新的聯絡表單訊息</p>
         </div>
         
@@ -165,8 +165,8 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
         </div>
         
         <div class="footer">
-            <p>此訊息由 PrimaryEnglishSupport 網站自動發送</p>
-            <p>© 2024 PrimaryEnglishSupport. 保留所有權利。</p>
+            <p>此訊息由 Z的國小英語支援(ZPES) 網站自動發送</p>
+            <p>© 2024 Z的國小英語支援(ZPES). 保留所有權利。</p>
         </div>
     </div>
 </body>

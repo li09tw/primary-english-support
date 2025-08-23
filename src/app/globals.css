@@ -6,6 +6,11 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+
+  /* Custom color palette */
+  --primary-blue: #bde6f4;
+  --secondary-pink: #fee1e8;
+  --accent-green: #b5d8a1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,16 +23,42 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: #ffffff;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Custom color utilities */
+  .bg-primary-blue {
+    background-color: #bde6f4;
+  }
+  .bg-secondary-pink {
+    background-color: #fee1e8;
+  }
+  .bg-accent-green {
+    background-color: #b5d8a1;
+  }
+
+  .text-primary-blue {
+    color: #2b6b7a;
+  }
+  .text-secondary-pink {
+    color: #b76b7a;
+  }
+  .text-accent-green {
+    color: #4a6b3a;
+  }
+
+  .border-primary-blue {
+    border-color: #bde6f4;
+  }
+  .border-secondary-pink {
+    border-color: #fee1e8;
+  }
+  .border-accent-green {
+    border-color: #b5d8a1;
   }
 }
