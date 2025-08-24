@@ -120,16 +120,16 @@ export function createLocalCloudflareClient(): LocalCloudflareClient {
   const workerUrl =
     process.env.NODE_ENV === "development"
       ? "http://localhost:8787"
-      : process.env.CLOUDFLARE_WORKER_URL;
+      : process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
 
   const apiSecret =
     process.env.NODE_ENV === "development"
       ? "local-dev-secret"
-      : process.env.CLOUDFLARE_API_SECRET;
+      : process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET;
 
   if (!workerUrl || !apiSecret) {
     throw new Error(
-      "Missing Cloudflare environment variables: CLOUDFLARE_WORKER_URL or CLOUDFLARE_API_SECRET"
+      "Missing Cloudflare environment variables: NEXT_PUBLIC_CLOUDFLARE_WORKER_URL or NEXT_PUBLIC_CLOUDFLARE_API_SECRET"
     );
   }
 
@@ -146,5 +146,5 @@ export function isLocalDevelopment(): boolean {
 
 // 檢查本地 Cloudflare 客戶端是否可用
 export function isLocalCloudflareAvailable(): boolean {
-  return isLocalDevelopment() && !!process.env.CLOUDFLARE_WORKER_URL;
+  return isLocalDevelopment() && !!process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
 }
