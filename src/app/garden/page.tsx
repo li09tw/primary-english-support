@@ -66,15 +66,6 @@ export default function GardenPage() {
 
   // 管理員消息數據驗證函數
   const validateMessageData = (message: any): AdminMessage => {
-    console.log("🔍 驗證消息數據:", {
-      originalId: message.id,
-      originalTitle: message.title,
-      originalContent: message.content,
-      originalIsPinned: message.is_pinned,
-      idType: typeof message.id,
-      titleType: typeof message.title,
-    });
-
     const validatedMessage = {
       id: message.id?.toString() || generateId(), // 確保 id 是 string 類型
       title: message.title || "",
@@ -88,7 +79,6 @@ export default function GardenPage() {
       createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
     };
 
-    console.log("🔍 驗證後的消息數據:", validatedMessage);
     return validatedMessage;
   };
 
@@ -184,16 +174,11 @@ export default function GardenPage() {
   // 載入管理員消息數據
   const loadMessages = async () => {
     try {
-      console.log("🔍 開始載入管理員消息數據...");
-
       // 使用 Cloudflare Worker API 獲取管理員消息
       const fetchedMessages = await adminMessageAPI.getAllMessages();
-      console.log("✅ 成功獲取管理員消息:", fetchedMessages.length);
-      console.log("🔍 原始消息數據:", fetchedMessages);
 
       // 驗證數據
       const validatedMessages = fetchedMessages.map(validateMessageData);
-      console.log("🔍 驗證後的消息數據:", validatedMessages);
       setMessages(validatedMessages);
 
       // 同時保存到 localStorage 作為備份
@@ -206,13 +191,8 @@ export default function GardenPage() {
       if (savedMessages) {
         try {
           const parsedMessages = JSON.parse(savedMessages);
-          console.log("🔍 localStorage 中的消息數據:", parsedMessages);
           const validatedMessages = parsedMessages.map(validateMessageData);
           setMessages(validatedMessages);
-          console.log(
-            "📦 從 localStorage 載入備份數據:",
-            validatedMessages.length
-          );
         } catch (localError) {
           console.error("❌ localStorage 數據解析失敗:", localError);
           setMessages([]);
@@ -838,17 +818,6 @@ export default function GardenPage() {
                     <p className="text-gray-500">暫無管理員消息</p>
                   ) : (
                     messages.map((message) => {
-                      console.log("🔍 渲染消息:", {
-                        id: message.id,
-                        title: message.title,
-                        isPinned: message.is_pinned,
-                        titleType: typeof message.title,
-                        titleLength: message.title?.length,
-                        rawTitle: JSON.stringify(message.title),
-                        isPinnedValue: message.is_pinned,
-                        isPinnedType: typeof message.is_pinned,
-                      });
-
                       return (
                         <div
                           key={message.id}
