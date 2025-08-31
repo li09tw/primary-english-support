@@ -11,7 +11,7 @@
 
 -- 管理員消息表
 CREATE TABLE IF NOT EXISTS admin_messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   is_published BOOLEAN NOT NULL DEFAULT TRUE,

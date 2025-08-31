@@ -35,7 +35,7 @@ export interface GameMethod {
 
 // 站長消息類型
 export interface AdminMessage {
-  id: number;
+  id: string;
   title: string;
   content: string;
   is_published: boolean; // 發布狀態

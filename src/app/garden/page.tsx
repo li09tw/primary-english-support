@@ -38,16 +38,39 @@ export default function GardenPage() {
 
   // 數據驗證函數
   const validateGameData = (game: any): GameMethod => {
+    // 調試：檢查原始數據結構
+    console.log("🔍 驗證遊戲數據:", {
+      id: game.id,
+      title: game.title,
+      categories: game.categories,
+      grades: game.grades,
+      materials: game.materials,
+      instructions: game.instructions,
+      steps: game.steps,
+    });
+
+    // 安全地處理數組字段
+    const safeCategories = Array.isArray(game.categories)
+      ? game.categories
+      : [];
+    const safeGrades = Array.isArray(game.grades) ? game.grades : [];
+    const safeMaterials = Array.isArray(game.materials) ? game.materials : [];
+    const safeInstructions = Array.isArray(game.instructions)
+      ? game.instructions
+      : [];
+
     return {
       id: game.id || generateId(),
       title: game.title || "",
       description: game.description || "",
-      category: game.category || game.categories?.[0] || "",
-      categories: Array.isArray(game.categories) ? game.categories : [],
-      grades: Array.isArray(game.grades) ? game.grades : [],
-      materials: Array.isArray(game.materials) ? game.materials : [],
-      instructions: Array.isArray(game.instructions) ? game.instructions : [],
-      steps: game.steps || game.instructions?.join("\n") || "",
+      category: game.category || safeCategories[0] || "",
+      categories: safeCategories,
+      grades: safeGrades,
+      materials: safeMaterials,
+      instructions: safeInstructions,
+      steps:
+        game.steps ||
+        (safeInstructions.length > 0 ? safeInstructions.join("\n") : ""),
       tips: game.tips || "",
       is_published: game.is_published !== undefined ? game.is_published : true,
       createdAt: game.createdAt ? new Date(game.createdAt) : new Date(),
@@ -375,7 +398,7 @@ export default function GardenPage() {
     }
   };
 
-  const deleteMessage = async (id: number) => {
+  const deleteMessage = async (id: string) => {
     if (confirm("確定要刪除這個管理員消息嗎？")) {
       try {
         // 調用 API 從遠端資料庫刪除
