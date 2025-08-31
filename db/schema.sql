@@ -11,9 +11,10 @@
 
 -- 管理員消息表
 CREATE TABLE IF NOT EXISTS admin_messages (
-  id TEXT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -32,6 +33,19 @@ CREATE TABLE IF NOT EXISTS game_methods (
   grade6 BOOLEAN NOT NULL DEFAULT FALSE, -- 6年級
   materials TEXT NOT NULL, -- JSON 格式
   instructions TEXT NOT NULL, -- JSON 格式
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+-- 教學輔具表
+CREATE TABLE IF NOT EXISTS teaching_aids (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  file_url TEXT,
+  is_published BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );

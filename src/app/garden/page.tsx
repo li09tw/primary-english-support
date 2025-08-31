@@ -58,7 +58,7 @@ export default function GardenPage() {
   // 管理員消息數據驗證函數
   const validateMessageData = (message: any): AdminMessage => {
     return {
-      id: message.id || generateId(),
+      id: message.id || 0, // 使用資料庫的 ID，如果沒有則使用 0
       title: message.title || "",
       content: message.content || "",
       is_published:
@@ -98,7 +98,18 @@ export default function GardenPage() {
         CLOUDFLARE_WORKER_URL: process.env.CLOUDFLARE_WORKER_URL
           ? "SET"
           : "NOT SET",
+        CLOUDFLARE_API_SECRET: process.env.CLOUDFLARE_API_SECRET
+          ? "SET"
+          : "NOT SET",
+        NEXT_PUBLIC_CLOUDFLARE_API_SECRET: process.env
+          .NEXT_PUBLIC_CLOUDFLARE_API_SECRET
+          ? "SET"
+          : "NOT SET",
       });
+
+      // 調試：檢查當前域名
+      console.log("🌐 當前域名:", window.location.origin);
+      console.log("🔗 當前 URL:", window.location.href);
 
       let fetchedGames: GameMethod[] = [];
 
@@ -106,6 +117,15 @@ export default function GardenPage() {
       if (process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL) {
         try {
           console.log("🚀 嘗試直接從 Cloudflare Worker 獲取數據...");
+          console.log(
+            "🔗 Worker URL:",
+            process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL
+          );
+          console.log(
+            "🔑 API Secret:",
+            process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET ? "SET" : "NOT SET"
+          );
+
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL}/query`,
             {
@@ -121,23 +141,42 @@ export default function GardenPage() {
               }),
             }
           );
+
+          console.log("📡 直接調用回應狀態:", response.status);
+          console.log(
+            "📡 直接調用回應 headers:",
+            Object.fromEntries(response.headers.entries())
+          );
+
           if (response.ok) {
             const data = await response.json();
+            console.log("📊 直接調用回應數據:", data);
             if (data.success && data.results) {
               fetchedGames = data.results;
               console.log("✅ 直接從 Worker 獲取成功:", fetchedGames.length);
             }
+          } else {
+            const errorText = await response.text();
+            console.error("❌ 直接調用失敗:", response.status, errorText);
           }
         } catch (directError) {
           console.log("⚠️ 直接調用失敗，使用 API 路由:", directError);
         }
+      } else {
+        console.log(
+          "⚠️ NEXT_PUBLIC_CLOUDFLARE_WORKER_URL 未設置，跳過直接調用"
+        );
       }
 
       // 方法2：如果直接調用失敗，使用 gameAPI
       if (fetchedGames.length === 0) {
         console.log("🔗 使用 gameAPI 獲取數據...");
-        fetchedGames = await gameAPI.getAllGames();
-        console.log("✅ 通過 gameAPI 獲取遊戲方法:", fetchedGames.length);
+        try {
+          fetchedGames = await gameAPI.getAllGames();
+          console.log("✅ 通過 gameAPI 獲取遊戲方法:", fetchedGames.length);
+        } catch (apiError) {
+          console.error("❌ gameAPI 調用失敗:", apiError);
+        }
       }
 
       // 驗證和轉換數據
@@ -299,8 +338,7 @@ export default function GardenPage() {
     }
 
     try {
-      const newMessage: AdminMessage = {
-        id: generateId(),
+      const newMessage: Omit<AdminMessage, "id"> = {
         title: messageForm.title.trim(),
         content: messageForm.content.trim(),
         is_published: true,
@@ -313,8 +351,10 @@ export default function GardenPage() {
       console.log("📊 createMessage 結果:", success);
 
       if (success) {
-        // 成功推送到遠端後，添加到本地狀態
-        setMessages((prev) => [newMessage, ...prev]);
+        // 成功推送到遠端後，重新載入消息列表
+        // 注意：由於 ID 是自動生成的，我們需要從資料庫重新獲取
+        const updatedMessages = await adminMessageAPI.getAllMessages();
+        setMessages(updatedMessages);
         alert("管理員消息新增成功！已推送到遠端資料庫");
       } else {
         console.error("❌ 新增管理員消息失敗");
@@ -335,7 +375,7 @@ export default function GardenPage() {
     }
   };
 
-  const deleteMessage = async (id: string) => {
+  const deleteMessage = async (id: number) => {
     if (confirm("確定要刪除這個管理員消息嗎？")) {
       try {
         // 調用 API 從遠端資料庫刪除

@@ -435,7 +435,7 @@ export const adminMessageAPI = {
 
   // 更新站長消息
   async updateMessage(
-    id: string,
+    id: number,
     messageData: Partial<AdminMessage>
   ): Promise<boolean> {
     try {
@@ -458,7 +458,7 @@ export const adminMessageAPI = {
   },
 
   // 刪除站長消息
-  async deleteMessage(id: string): Promise<boolean> {
+  async deleteMessage(id: number): Promise<boolean> {
     try {
       const result = await getClient().execute(
         "DELETE FROM admin_messages WHERE id = ?",
@@ -472,7 +472,7 @@ export const adminMessageAPI = {
   },
 
   // 切換站長消息的發布狀態
-  async toggleMessagePublishStatus(id: string): Promise<boolean> {
+  async toggleMessagePublishStatus(id: number): Promise<boolean> {
     try {
       const result = await getClient().execute(
         "UPDATE admin_messages SET is_published = NOT is_published, updated_at = NOW() WHERE id = ?",
