@@ -66,8 +66,17 @@ export default function GardenPage() {
 
   // 管理員消息數據驗證函數
   const validateMessageData = (message: any): AdminMessage => {
-    return {
-      id: message.id || 0, // 使用資料庫的 ID，如果沒有則使用 0
+    console.log("🔍 驗證消息數據:", {
+      originalId: message.id,
+      originalTitle: message.title,
+      originalContent: message.content,
+      originalIsPinned: message.is_pinned,
+      idType: typeof message.id,
+      titleType: typeof message.title,
+    });
+
+    const validatedMessage = {
+      id: message.id?.toString() || generateId(), // 確保 id 是 string 類型
       title: message.title || "",
       content: message.content || "",
       is_published:
@@ -75,6 +84,9 @@ export default function GardenPage() {
       is_pinned: message.is_pinned !== undefined ? message.is_pinned : false,
       createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
     };
+
+    console.log("🔍 驗證後的消息數據:", validatedMessage);
+    return validatedMessage;
   };
 
   // 表單狀態
@@ -174,9 +186,11 @@ export default function GardenPage() {
       // 使用 Cloudflare Worker API 獲取管理員消息
       const fetchedMessages = await adminMessageAPI.getAllMessages();
       console.log("✅ 成功獲取管理員消息:", fetchedMessages.length);
+      console.log("🔍 原始消息數據:", fetchedMessages);
 
       // 驗證數據
       const validatedMessages = fetchedMessages.map(validateMessageData);
+      console.log("🔍 驗證後的消息數據:", validatedMessages);
       setMessages(validatedMessages);
 
       // 同時保存到 localStorage 作為備份
@@ -189,6 +203,7 @@ export default function GardenPage() {
       if (savedMessages) {
         try {
           const parsedMessages = JSON.parse(savedMessages);
+          console.log("🔍 localStorage 中的消息數據:", parsedMessages);
           const validatedMessages = parsedMessages.map(validateMessageData);
           setMessages(validatedMessages);
           console.log(
@@ -819,51 +834,61 @@ export default function GardenPage() {
                   {messages.length === 0 ? (
                     <p className="text-gray-500">暫無管理員消息</p>
                   ) : (
-                    messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`border rounded-lg p-4 space-y-2 ${
-                          message.is_pinned
-                            ? "border-yellow-400 bg-yellow-50"
-                            : "border-gray-200"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-2">
-                            {message.is_pinned && (
-                              <span className="text-yellow-600 text-sm font-medium">
-                                📌 釘選
-                              </span>
-                            )}
-                            <h4 className="text-lg font-medium text-black">
-                              {message.title}
-                            </h4>
+                    messages.map((message) => {
+                      console.log("🔍 渲染消息:", {
+                        id: message.id,
+                        title: message.title,
+                        isPinned: message.is_pinned,
+                        titleType: typeof message.title,
+                        titleLength: message.title?.length,
+                      });
+
+                      return (
+                        <div
+                          key={message.id}
+                          className={`border rounded-lg p-4 space-y-2 ${
+                            message.is_pinned
+                              ? "border-yellow-400 bg-yellow-50"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              {message.is_pinned && (
+                                <span className="text-yellow-600 text-sm font-medium">
+                                  📌 釘選
+                                </span>
+                              )}
+                              <h4 className="text-lg font-medium text-black">
+                                {message.title}
+                              </h4>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => toggleMessagePin(message.id)}
+                                className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                                  message.is_pinned
+                                    ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                                    : "bg-gray-500 text-white hover:bg-gray-600"
+                                }`}
+                              >
+                                {message.is_pinned ? "取消釘選" : "釘選"}
+                              </button>
+                              <button
+                                onClick={() => deleteMessage(message.id)}
+                                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                              >
+                                刪除
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => toggleMessagePin(message.id)}
-                              className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                                message.is_pinned
-                                  ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                                  : "bg-gray-500 text-white hover:bg-gray-600"
-                              }`}
-                            >
-                              {message.is_pinned ? "取消釘選" : "釘選"}
-                            </button>
-                            <button
-                              onClick={() => deleteMessage(message.id)}
-                              className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                            >
-                              刪除
-                            </button>
+                          <p className="text-gray-600">{message.content}</p>
+                          <div className="text-sm text-gray-500">
+                            創建時間: {message.createdAt.toLocaleDateString()}
                           </div>
                         </div>
-                        <p className="text-gray-600">{message.content}</p>
-                        <div className="text-sm text-gray-500">
-                          創建時間: {message.createdAt.toLocaleDateString()}
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>
