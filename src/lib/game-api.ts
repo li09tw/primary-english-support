@@ -192,7 +192,7 @@ export const gameAPI = {
         `INSERT INTO game_methods (
           title, description, category, grade1, grade2, grade3, grade4, grade5, grade6,
           materials, steps, tips, is_published, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
         [
           gameData.title || "",
           gameData.description || "",
@@ -226,7 +226,7 @@ export const gameAPI = {
         `UPDATE game_methods SET
           title = ?, description = ?, category = ?, grade1 = ?, grade2 = ?, grade3 = ?, 
           grade4 = ?, grade5 = ?, grade6 = ?, materials = ?, steps = ?, tips = ?, 
-          is_published = ?, updated_at = NOW()
+          is_published = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?`,
         [
           gameData.title || "",
@@ -270,7 +270,7 @@ export const gameAPI = {
   async toggleGamePublishStatus(id: string): Promise<boolean> {
     try {
       const result = await getClient().execute(
-        "UPDATE game_methods SET is_published = NOT is_published, updated_at = NOW() WHERE id = ?",
+        "UPDATE game_methods SET is_published = NOT is_published, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
         [id]
       );
       return result.success;
@@ -315,7 +315,7 @@ export const teachingAidAPI = {
       const result = await getClient().execute(
         `INSERT INTO teaching_aids (
           title, description, category, file_url, is_published, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+        ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
         [
           aidData.title || "",
           aidData.description || "",
@@ -337,7 +337,7 @@ export const teachingAidAPI = {
       const result = await getClient().execute(
         `UPDATE teaching_aids SET
           title = ?, description = ?, category = ?, file_url = ?, 
-          is_published = ?, updated_at = NOW()
+          is_published = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?`,
         [
           aidData.title || "",
@@ -410,7 +410,7 @@ export const adminMessageAPI = {
       const result = await client.execute(
         `INSERT INTO admin_messages (
           title, content, is_published, created_at, updated_at
-        ) VALUES (?, ?, ?, NOW(), NOW())`,
+        ) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
         [
           messageData.title || "",
           messageData.content || "",
@@ -441,7 +441,7 @@ export const adminMessageAPI = {
     try {
       const result = await getClient().execute(
         `UPDATE admin_messages SET
-          title = ?, content = ?, is_published = ?, updated_at = NOW()
+          title = ?, content = ?, is_published = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?`,
         [
           messageData.title || "",
@@ -475,7 +475,7 @@ export const adminMessageAPI = {
   async toggleMessagePublishStatus(id: number): Promise<boolean> {
     try {
       const result = await getClient().execute(
-        "UPDATE admin_messages SET is_published = NOT is_published, updated_at = NOW() WHERE id = ?",
+        "UPDATE admin_messages SET is_published = NOT is_published, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
         [id]
       );
       return result.success;
