@@ -82,3 +82,95 @@
 - [聯絡我們](/contact) - 聯絡表單
 - [遊戲方法](/games) - 瀏覽遊戲方法
 - [教學輔具](/aids) - 瀏覽教學輔具
+
+---
+
+## 🚀 部署流程
+
+### 部署腳本說明
+
+專案提供了多個部署腳本，位於 `scripts/` 目錄中，支援不同的部署需求：
+
+#### 1. **單獨部署主題關聯**: 使用 `deploy-word-themes.sh`
+**用途**: 只更新單字與主題的關聯關係
+**適用場景**: 
+- 新增單字後需要建立主題關聯
+- 修正主題分類錯誤
+- 快速更新特定主題的單字
+
+**使用方法**:
+```bash
+./scripts/deploy-word-themes.sh
+```
+
+#### 2. **完整重建資料庫**: 使用 `deploy-d1-schema.sh`
+**用途**: 重建整個資料庫結構和所有資料
+**適用場景**:
+- 首次部署資料庫
+- 資料庫結構重大變更
+- 需要重新建立所有單字和句型資料
+
+**使用方法**:
+```bash
+./scripts/deploy-d1-schema.sh
+```
+
+#### 3. **一鍵完整部署**: 使用 `deploy.sh`
+**用途**: 執行完整的專案部署流程
+**包含步驟**:
+1. 檢查部署需求
+2. 建置 Next.js 應用
+3. 部署 Cloudflare Worker
+4. 部署 D1 資料庫結構
+5. 部署單字主題關聯
+6. 觸發 Vercel 自動部署
+
+**使用方法**:
+```bash
+./scripts/deploy.sh
+```
+
+### 部署建議
+
+#### 首次部署
+```bash
+# 1. 部署資料庫結構
+./scripts/deploy-d1-schema.sh
+
+# 2. 部署單字主題關聯
+./scripts/deploy-word-themes.sh
+
+# 3. 執行完整部署
+./scripts/deploy.sh
+```
+
+#### 日常更新
+```bash
+# 只更新主題關聯
+./scripts/deploy-word-themes.sh
+```
+
+#### 重大更新
+```bash
+# 重建整個資料庫
+./scripts/deploy-d1-schema.sh
+./scripts/deploy-word-themes.sh
+```
+
+### 資料庫內容
+
+系統包含 24 個豐富的單字主題，涵蓋日常生活、學校、運動、食物等各個領域：
+
+| 主題 | 單字數量 | 內容描述 |
+|------|----------|----------|
+| Sports | 35個 | 運動和體育活動 |
+| Stationery | 40個 | 學校和辦公用品 |
+| Fruits | 45個 | 各種水果 |
+| Drinks | 50個 | 飲品和飲料 |
+| Main Dishes | 50個 | 主菜和料理 |
+| Furniture | 60個 | 家具和家居用品 |
+| Countries | 80個 | 世界各國 |
+| Ailments | 100個 | 疾病和症狀 |
+| School Subjects | 100個 | 學校科目和活動 |
+
+**總計**: 500+ 個單字，為學生提供豐富的詞彙學習資源。

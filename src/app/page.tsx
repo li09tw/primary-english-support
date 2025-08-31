@@ -6,39 +6,16 @@ import AdminMessageCard from "@/components/AdminMessageCard";
 import { AdminMessage } from "@/types";
 import { generateId } from "@/lib/utils";
 
-// 範例站長消息
-const sampleMessages: AdminMessage[] = [
-  {
-    id: generateId(),
-    title: "歡迎使用國小英語支援！",
-    content:
-      "我們很高興為您提供這個英語數位化教具。這裡有豐富的遊戲方法和教學輔具，希望能幫助您創造更好的英語學習環境。\n\n如果您有任何建議或需要特定的輔具，歡迎透過聯絡表單與我們聯繫。",
-    is_published: true,
-    createdAt: new Date("2024-01-15T10:00:00"),
-    updatedAt: new Date("2024-01-15T10:00:00"),
-  },
-  {
-    id: generateId(),
-    title: "新增多個互動遊戲方法",
-    content:
-      "我們已經新增了 10 個新的互動遊戲方法，涵蓋單字學習、句型練習和口語訓練等不同面向。這些遊戲都經過精心設計，適合小學各年級的學生使用。\n\n您可以在遊戲方法頁面中找到這些新內容。",
-    is_published: true,
-    createdAt: new Date("2024-01-10T14:30:00"),
-    updatedAt: new Date("2024-01-10T14:30:00"),
-  },
-];
-
 export default function Home() {
   const [messages, setMessages] = useState<AdminMessage[]>([]);
 
   useEffect(() => {
-    // 從本地儲存讀取消息，如果沒有則使用範例數據
+    // 從本地儲存讀取消息
     const savedMessages = localStorage.getItem("adminMessages");
     if (savedMessages) {
       setMessages(JSON.parse(savedMessages));
     } else {
-      setMessages(sampleMessages);
-      localStorage.setItem("adminMessages", JSON.stringify(sampleMessages));
+      setMessages([]);
     }
   }, []);
 

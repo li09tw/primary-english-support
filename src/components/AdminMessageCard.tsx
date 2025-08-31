@@ -20,9 +20,6 @@ export default function AdminMessageCard({ message }: AdminMessageCardProps) {
 
       <div className="flex items-center justify-between text-sm text-black">
         <span>發布時間：{formatDate(message.createdAt)}</span>
-        {message.updatedAt !== message.createdAt && (
-          <span>更新時間：{formatDate(message.updatedAt)}</span>
-        )}
       </div>
     </div>
   );

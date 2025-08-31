@@ -68,6 +68,34 @@ deploy_worker() {
     fi
 }
 
+# 部署 D1 資料庫結構
+deploy_d1_schema() {
+    echo "🗄️ 部署 D1 資料庫結構..."
+    
+    ./scripts/deploy-d1-schema.sh
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ D1 資料庫結構部署成功"
+    else
+        echo "❌ D1 資料庫結構部署失敗"
+        exit 1
+    fi
+}
+
+# 部署單字主題關聯
+deploy_word_themes() {
+    echo "🔗 部署單字主題關聯..."
+    
+    ./scripts/deploy-word-themes.sh
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ 單字主題關聯部署成功"
+    else
+        echo "❌ 單字主題關聯部署失敗"
+        exit 1
+    fi
+}
+
 # 部署 Next.js 到 Vercel (透過 GitHub CI/CD)
 deploy_vercel() {
     echo "🚀 Vercel 部署說明..."
@@ -89,7 +117,16 @@ show_status() {
     echo ""
     echo "🎯 部署狀態："
     echo "   Cloudflare Worker: ✅ 已部署"
+    echo "   D1 資料庫結構: ✅ 已部署"
+    echo "   單字主題關聯: ✅ 已部署"
     echo "   Next.js 應用: 🔄 將透過 GitHub Actions 自動部署到 Vercel"
+    echo ""
+    echo "📊 資料庫內容："
+    echo "   - 3 個年級等級 (Grade 3, 5, 6)"
+    echo "   - 24 個單字主題"
+    echo "   - 500+ 個單字 (包含 has_plural 欄位)"
+    echo "   - 66 個句型模式 (按年級組織)"
+    echo "   - 完整的單字主題關聯"
     echo ""
     echo "📝 重要提醒："
     echo "   1. 請確認 .env.local 中的 CLOUDFLARE_WORKER_URL 已更新"
@@ -109,11 +146,13 @@ main() {
     check_env
     build_nextjs
     deploy_worker
+    deploy_d1_schema
+    deploy_word_themes
     deploy_vercel
     test_deployment
     show_status
     
-    echo "🎉 Cloudflare Worker 部署完成！"
+    echo "🎉 完整部署完成！"
     echo "📝 請推送程式碼到 GitHub main 分支以觸發 Vercel 自動部署"
 }
 

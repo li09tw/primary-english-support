@@ -29,7 +29,6 @@ export interface AdminMessage {
   content: string;
   is_published: boolean; // 發布狀態
   createdAt: Date;
-  updatedAt: Date;
 }
 
 // 電子教具類型定義

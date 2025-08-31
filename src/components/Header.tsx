@@ -74,12 +74,12 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3  space-y-1 sm:px-3 bg-primary-blue/90 backdrop-blur-sm rounded-lg mt-2 mb-3">
+            <div className="px-2 pt-2 pb-3  space-y-1 sm:px-3 bg-white border border-gray-200 rounded-lg mt-2 mb-3 shadow-lg">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-center text-white hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  className="text-center text-black hover:text-black hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}

@@ -15,9 +15,16 @@ function getClient() {
     try {
       // 根據環境選擇客戶端
       if (typeof window !== "undefined") {
-        // 在瀏覽器中，使用瀏覽器端客戶端
-        console.log("🌐 使用瀏覽器端 Cloudflare 客戶端");
-        client = createCloudflareClientBrowser();
+        // 在瀏覽器中，檢查是否有本地開發環境變數
+        if (process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL === "http://localhost:8787") {
+          // 本地開發環境，使用本地客戶端
+          console.log("🔧 瀏覽器中使用本地開發環境客戶端");
+          client = createLocalCloudflareClient();
+        } else {
+          // 生產環境，使用瀏覽器端客戶端
+          console.log("🌐 使用瀏覽器端 Cloudflare 客戶端");
+          client = createCloudflareClientBrowser();
+        }
       } else if (process.env.NODE_ENV === "development") {
         // 在伺服器端開發環境中，使用本地客戶端
         console.log("🔧 使用本地開發環境客戶端");

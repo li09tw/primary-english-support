@@ -2,15 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // 需要修復的頁面列表
-const pagesToFix = [
-  "bingo",
-  "sentence-chain",
-  "sentence-slot",
-  "projection-qa",
-  "vocabulary-sort",
-  "find-different",
-  "word-puzzle",
-];
+const pagesToFix = ["sentence-slot", "vocabulary-sort", "find-different"];
 
 // 修復每個頁面
 pagesToFix.forEach((pageName) => {

@@ -117,21 +117,35 @@ export class LocalCloudflareClient {
 // 創建本地 Cloudflare 客戶端實例
 export function createLocalCloudflareClient(): LocalCloudflareClient {
   // 本地開發環境配置
-  const workerUrl =
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:8787"
-      : process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
+  let workerUrl: string;
+  let apiSecret: string;
 
-  const apiSecret =
-    process.env.NODE_ENV === "development"
-      ? "local-dev-secret"
-      : process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET;
+  if (typeof window !== "undefined") {
+    // 瀏覽器環境
+    workerUrl =
+      process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL || "http://localhost:8787";
+    apiSecret =
+      process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET || "local-dev-secret";
+  } else {
+    // 伺服器環境
+    workerUrl =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:8787"
+        : process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL || "";
+
+    apiSecret =
+      process.env.NODE_ENV === "development"
+        ? "local-dev-secret"
+        : process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET || "";
+  }
 
   if (!workerUrl || !apiSecret) {
     throw new Error(
       "Missing Cloudflare environment variables: NEXT_PUBLIC_CLOUDFLARE_WORKER_URL or NEXT_PUBLIC_CLOUDFLARE_API_SECRET"
     );
   }
+
+  console.log("🔧 創建本地 Cloudflare 客戶端:", { workerUrl, apiSecret });
 
   return new LocalCloudflareClient({
     workerUrl,
@@ -146,5 +160,7 @@ export function isLocalDevelopment(): boolean {
 
 // 檢查本地 Cloudflare 客戶端是否可用
 export function isLocalCloudflareAvailable(): boolean {
-  return isLocalDevelopment() && !!process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
+  return (
+    isLocalDevelopment() && !!process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL
+  );
 }

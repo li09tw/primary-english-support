@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Vocabulary } from "@/types";
+import { Word, WordTheme } from "@/types/learning-content";
 import TextbookSelector from "@/components/TextbookSelector";
 import Link from "next/link";
 
@@ -23,8 +24,17 @@ export default function VocabularySortPage() {
   const [isGameComplete, setIsGameComplete] = useState(false);
 
   // 處理單字選擇
-  const handleVocabularySelected = (selectedVocabulary: Vocabulary[]) => {
-    setVocabulary(selectedVocabulary);
+  const handleVocabularySelected = (words: Word[], theme: WordTheme) => {
+    // 將 Word[] 轉換為 Vocabulary[] 格式
+    const convertedVocabulary: Vocabulary[] = words.map(word => ({
+      id: word.id.toString(),
+      english: word.english_singular,
+      chinese: word.chinese_meaning,
+      phonetic: '', // Word 類型沒有 phonetic 欄位，設為空字串
+      example: '', // Word 類型沒有 example 欄位，設為空字串
+      image: word.image_url
+    }));
+    setVocabulary(convertedVocabulary);
   };
 
   // 開始詞彙分類遊戲

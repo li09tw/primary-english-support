@@ -1,214 +1,232 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  localGameAPI,
-  localMessageAPI,
-  localStatsAPI,
-} from "@/lib/local-api";
-import { GameMethod, AdminMessage } from "@/types";
+import { useState } from "react";
+import { gameAPI } from "@/lib/game-api";
 
 export default function TestLocalAPIPage() {
-  const [games, setGames] = useState<GameMethod[]>([]);
-  const [messages, setMessages] = useState<AdminMessage[]>([]);
-  const [gameStats, setGameStats] = useState<{
-    total: number;
-    published: number;
-    draft: number;
-  } | null>(null);
+  const [testResult, setTestResult] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const testLocalAPI = async () => {
+  const testEnvironment = () => {
+    setTestResult("🔍 環境檢查:\n");
+    setTestResult((prev) => prev + `   typeof window: ${typeof window}\n`);
+    setTestResult((prev) => prev + `   NODE_ENV: ${process.env.NODE_ENV}\n`);
+    setTestResult(
+      (prev) =>
+        prev +
+        `   NEXT_PUBLIC_CLOUDFLARE_WORKER_URL: ${process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL}\n`
+    );
+    setTestResult(
+      (prev) =>
+        prev +
+        `   NEXT_PUBLIC_CLOUDFLARE_API_SECRET: ${
+          process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET ? "已設定" : "未設定"
+        }\n`
+    );
+    setTestResult(
+      (prev) =>
+        prev +
+        `   當前環境: ${typeof window !== "undefined" ? "瀏覽器" : "伺服器"}\n`
+    );
+  };
+
+  const testGameAPI = async () => {
     setLoading(true);
-    setError(null);
+    setTestResult("開始測試...\n");
 
     try {
-      console.log("🧪 開始測試本地 Cloudflare API...");
+      // 測試 1: 直接調用 API
+      setTestResult(
+        (prev) => prev + "🔍 測試 1: 調用 gameAPI.getAllGames()...\n"
+      );
 
-      // 測試遊戲方法 API
-      console.log("📚 測試遊戲方法 API...");
-      const gamesData = await localGameAPI.getAllGames();
-      setGames(gamesData);
-      console.log(`✅ 獲取到 ${gamesData.length} 個遊戲方法`);
+      const games = await gameAPI.getAllGames();
 
+      setTestResult(
+        (prev) => prev + `✅ 成功獲取 ${games.length} 個遊戲方法\n`
+      );
 
+      if (games.length > 0) {
+        const firstGame = games[0];
+        setTestResult((prev) => prev + `📊 第一個遊戲方法詳情:\n`);
+        setTestResult((prev) => prev + `   ID: ${firstGame.id}\n`);
+        setTestResult((prev) => prev + `   標題: ${firstGame.title}\n`);
+        setTestResult(
+          (prev) => prev + `   分類: ${JSON.stringify(firstGame.categories)}\n`
+        );
+        setTestResult(
+          (prev) => prev + `   年級: ${JSON.stringify(firstGame.grades)}\n`
+        );
+        setTestResult(
+          (prev) =>
+            prev + `   描述: ${firstGame.description.substring(0, 100)}...\n`
+        );
+      }
 
-      // 測試站長消息 API
-      console.log("📢 測試站長消息 API...");
-      const messagesData = await localMessageAPI.getAllMessages();
-      setMessages(messagesData);
-      console.log(`✅ 獲取到 ${messagesData.length} 個站長消息`);
+      // 測試 2: 檢查數據轉換
+      setTestResult((prev) => prev + "\n🔍 測試 2: 檢查數據轉換...\n");
 
-      // 測試統計 API
-      console.log("📊 測試統計 API...");
-      const statsData = await localStatsAPI.getGameStats();
-      setGameStats(statsData);
-      console.log(`✅ 獲取到遊戲統計: ${JSON.stringify(statsData)}`);
+      if (games.length > 0) {
+        const sampleGame = games[0];
+        setTestResult((prev) => prev + `📋 數據轉換檢查:\n`);
+        setTestResult(
+          (prev) =>
+            prev + `   categories 類型: ${typeof sampleGame.categories}\n`
+        );
+        setTestResult(
+          (prev) =>
+            prev +
+            `   categories 內容: ${JSON.stringify(sampleGame.categories)}\n`
+        );
+        setTestResult(
+          (prev) => prev + `   grades 類型: ${typeof sampleGame.grades}\n`
+        );
+        setTestResult(
+          (prev) =>
+            prev + `   grades 內容: ${JSON.stringify(sampleGame.grades)}\n`
+        );
+      }
 
-      console.log("🎉 所有 API 測試完成！");
-    } catch (err) {
-      console.error("❌ API 測試失敗:", err);
-      setError(err instanceof Error ? err.message : "未知錯誤");
+      // 測試 3: 檢查篩選邏輯
+      setTestResult((prev) => prev + "\n🔍 測試 3: 檢查篩選邏輯...\n");
+
+      const vocabularyGames = games.filter((game) =>
+        game.categories.some((cat) => cat === "單字學習")
+      );
+
+      const grade1Games = games.filter((game) =>
+        game.grades.includes("grade1")
+      );
+
+      setTestResult((prev) => prev + `📊 篩選結果:\n`);
+      setTestResult(
+        (prev) => prev + `   單字學習遊戲: ${vocabularyGames.length} 個\n`
+      );
+      setTestResult(
+        (prev) => prev + `   一年級遊戲: ${grade1Games.length} 個\n`
+      );
+    } catch (error) {
+      setTestResult((prev) => prev + `❌ 測試失敗: ${error}\n`);
+      console.error("測試失敗:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    testLocalAPI();
-  }, []);
+  const testDirectAPI = async () => {
+    setLoading(true);
+    setTestResult("開始直接 API 測試...\n");
+
+    try {
+      const response = await fetch("http://localhost:8787/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": "local-dev-secret",
+        },
+        body: JSON.stringify({
+          query: "SELECT * FROM game_methods LIMIT 3",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setTestResult((prev) => prev + `✅ 直接 API 調用成功\n`);
+      setTestResult(
+        (prev) => prev + `📊 回應數據: ${JSON.stringify(data, null, 2)}\n`
+      );
+    } catch (error) {
+      setTestResult((prev) => prev + `❌ 直接 API 測試失敗: ${error}\n`);
+      console.error("直接 API 測試失敗:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testClientSelection = () => {
+    setTestResult("🔍 客戶端選擇邏輯測試:\n");
+
+    // 模擬客戶端選擇邏輯
+    const isBrowser = typeof window !== "undefined";
+    const nodeEnv = process.env.NODE_ENV;
+
+    setTestResult((prev) => prev + `   瀏覽器環境: ${isBrowser}\n`);
+    setTestResult((prev) => prev + `   NODE_ENV: ${nodeEnv}\n`);
+
+    let clientType = "未知";
+    if (isBrowser) {
+      clientType = "瀏覽器端客戶端";
+    } else if (nodeEnv === "development") {
+      clientType = "本地開發環境客戶端";
+    } else {
+      clientType = "生產環境客戶端";
+    }
+
+    setTestResult((prev) => prev + `   選擇的客戶端: ${clientType}\n`);
+
+    // 檢查環境變數
+    const workerUrl = isBrowser
+      ? process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL
+      : nodeEnv === "development"
+      ? "http://localhost:8787"
+      : process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
+
+    const apiSecret = isBrowser
+      ? process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET
+      : nodeEnv === "development"
+      ? "local-dev-secret"
+      : process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET;
+
+    setTestResult((prev) => prev + `   Worker URL: ${workerUrl || "未設定"}\n`);
+    setTestResult(
+      (prev) => prev + `   API Secret: ${apiSecret ? "已設定" : "未設定"}\n`
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-black mb-4">
-            本地 Cloudflare API 測試
-          </h1>
-          <p className="text-lg text-black mb-6">
-            測試本地開發環境中的 Cloudflare Worker 與 D1 資料庫連接
-          </p>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">本地 API 測試頁面</h1>
 
-          <button
-            onClick={testLocalAPI}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "測試中..." : "重新測試"}
-          </button>
-        </div>
+      <div className="space-y-4 mb-8">
+        <button
+          onClick={testEnvironment}
+          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+        >
+          檢查環境
+        </button>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <strong>錯誤:</strong> {error}
-          </div>
-        )}
+        <button
+          onClick={testClientSelection}
+          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded ml-4"
+        >
+          測試客戶端選擇
+        </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 遊戲方法測試結果 */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-black mb-4">
-              遊戲方法 API 測試結果
-            </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-black">總數量:</span>
-                <span className="font-medium text-black">{games.length}</span>
-              </div>
+        <button
+          onClick={testGameAPI}
+          disabled={loading}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded ml-4"
+        >
+          {loading ? "測試中..." : "測試 Game API"}
+        </button>
 
-            </div>
+        <button
+          onClick={testDirectAPI}
+          disabled={loading}
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded ml-4"
+        >
+          {loading ? "測試中..." : "直接測試 API"}
+        </button>
+      </div>
 
-            {games.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-medium text-black mb-2">
-                  前 3 個遊戲方法:
-                </h3>
-                <div className="space-y-2">
-                  {games.slice(0, 3).map((game) => (
-                    <div
-                      key={game.id}
-                      className="text-sm text-black p-2 bg-gray-50 rounded"
-                    >
-                      <div className="font-medium">{game.title}</div>
-                      <div className="text-gray-600">
-                        {game.description}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-
-
-          {/* 站長消息測試結果 */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-black mb-4">
-              站長消息 API 測試結果
-            </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-black">總數量:</span>
-                <span className="font-medium text-black">
-                  {messages.length}
-                </span>
-              </div>
-
-            </div>
-
-            {messages.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-medium text-black mb-2">
-                  前 3 個站長消息:
-                </h3>
-                <div className="space-y-2">
-                  {messages.slice(0, 3).map((message) => (
-                    <div
-                      key={message.id}
-                      className="text-sm text-black p-2 bg-gray-50 rounded"
-                    >
-                      <div className="font-medium">{message.title}</div>
-                      <div className="text-gray-600">{message.content}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 統計資訊測試結果 */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-black mb-4">
-              統計資訊 API 測試結果
-            </h2>
-            {gameStats ? (
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-black">總遊戲數量:</span>
-                  <span className="font-medium text-black">
-                    {gameStats.total}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-black">已發布:</span>
-                  <span className="font-medium text-green-600">
-                    {gameStats.published}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-black">草稿:</span>
-                  <span className="font-medium text-yellow-600">
-                    {gameStats.draft}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-gray-500">尚未獲取統計資訊</div>
-            )}
-          </div>
-        </div>
-
-        {/* 連接狀態 */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-black mb-4">連接狀態</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {games.length > 0 ? "✅" : "❌"}
-              </div>
-              <div className="text-sm text-black">遊戲方法 API</div>
-            </div>
-
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">
-                {messages.length >= 0 ? "✅" : "❌"}
-              </div>
-              <div className="text-sm text-black">站長消息 API</div>
-            </div>
-          </div>
-        </div>
+      <div className="bg-gray-100 p-4 rounded">
+        <h2 className="text-xl font-semibold mb-2">測試結果:</h2>
+        <pre className="whitespace-pre-wrap text-sm bg-white p-4 rounded border">
+          {testResult || "點擊按鈕開始測試..."}
+        </pre>
       </div>
     </div>
   );

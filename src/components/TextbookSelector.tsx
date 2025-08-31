@@ -1,241 +1,203 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { Textbook, Unit, Vocabulary } from "@/types";
+import React, { useState, useEffect } from "react";
+import { WordTheme, Word, Grade } from "@/types/learning-content";
 
 interface TextbookSelectorProps {
-  onVocabularySelected: (vocabulary: Vocabulary[]) => void;
-  onSelectionChange?: (textbookId: string, unitIds: string[]) => void;
+  onVocabularySelected: (words: Word[], theme: WordTheme) => void;
+  selectedGrade?: number;
+  onGradeChange?: (gradeId: number) => void;
 }
 
 export default function TextbookSelector({
   onVocabularySelected,
-  onSelectionChange,
+  selectedGrade = 1,
+  onGradeChange,
 }: TextbookSelectorProps) {
-  const [textbooks, setTextbooks] = useState<Textbook[]>([]);
-  const [selectedTextbooks, setSelectedTextbooks] = useState<Set<string>>(
-    new Set()
-  );
-  const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(false);
+  const [themes, setThemes] = useState<WordTheme[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [selectedTheme, setSelectedTheme] = useState<WordTheme | null>(null);
+  const [words, setWords] = useState<Word[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // 使用 useRef 來避免函數依賴導致的無限循環
-  const onVocabularySelectedRef = useRef(onVocabularySelected);
-  const onSelectionChangeRef = useRef(onSelectionChange);
-
-  // 更新 ref 值
+  // Fetch themes and grades on component mount
   useEffect(() => {
-    onVocabularySelectedRef.current = onVocabularySelected;
-    onSelectionChangeRef.current = onSelectionChange;
-  }, [onVocabularySelected, onSelectionChange]);
-
-  // 載入教材資料
-  const loadTextbooks = useCallback(() => {
-    try {
-      const saved = localStorage.getItem("textbooks");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setTextbooks(parsed);
-      }
-    } catch (error) {
-      console.error("Error loading textbooks:", error);
-    }
+    fetchThemes();
+    fetchGrades();
   }, []);
 
+  // Fetch words when theme changes
   useEffect(() => {
-    loadTextbooks();
-  }, [loadTextbooks]);
-
-  // 當選擇的教材或單元改變時，更新單字列表
-  useEffect(() => {
-    if (selectedTextbooks.size > 0 && selectedUnits.size > 0) {
-      const allVocabulary: Vocabulary[] = [];
-
-      selectedTextbooks.forEach((textbookId) => {
-        const textbook = textbooks.find((t) => t.id === textbookId);
-        if (textbook) {
-          selectedUnits.forEach((unitId) => {
-            const unit = textbook.units.find((u) => u.id === unitId);
-            if (unit) {
-              allVocabulary.push(...unit.vocabulary);
-            }
-          });
-        }
-      });
-
-      onVocabularySelectedRef.current(allVocabulary);
-
-      if (onSelectionChangeRef.current) {
-        onSelectionChangeRef.current(
-          Array.from(selectedTextbooks)[0],
-          Array.from(selectedUnits)
-        );
-      }
-    } else {
-      onVocabularySelectedRef.current([]);
+    if (selectedTheme) {
+      fetchWordsByTheme(selectedTheme.id);
     }
-  }, [selectedTextbooks, selectedUnits, textbooks]);
+  }, [selectedTheme]);
 
-  // 切換教材選擇
-  const toggleTextbook = useCallback(
-    (textbookId: string) => {
-      const newSelected = new Set(selectedTextbooks);
-      if (newSelected.has(textbookId)) {
-        newSelected.delete(textbookId);
-        // 如果取消選擇教材，也要清除相關的單元選擇
-        const textbook = textbooks.find((t) => t.id === textbookId);
-        if (textbook) {
-          const newSelectedUnits = new Set(selectedUnits);
-          textbook.units.forEach((unit) => {
-            newSelectedUnits.delete(unit.id);
-          });
-          setSelectedUnits(newSelectedUnits);
+  const fetchThemes = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/learning-content?action=themes");
+      const data = await response.json();
+
+      if (data.success) {
+        setThemes(data.data);
+        // Auto-select first theme
+        if (data.data.length > 0) {
+          setSelectedTheme(data.data[0]);
         }
       } else {
-        newSelected.add(textbookId);
+        setError(data.error || "Failed to fetch themes");
       }
-      setSelectedTextbooks(newSelected);
-    },
-    [selectedTextbooks, selectedUnits, textbooks]
-  );
+    } catch (err) {
+      setError("Failed to fetch themes");
+      console.error("Error fetching themes:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // 切換單元選擇
-  const toggleUnit = useCallback(
-    (unitId: string) => {
-      const newSelected = new Set(selectedUnits);
-      if (newSelected.has(unitId)) {
-        newSelected.delete(unitId);
+  const fetchGrades = async () => {
+    try {
+      const response = await fetch("/api/learning-content?action=grades");
+      const data = await response.json();
+
+      if (data.success) {
+        setGrades(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching grades:", err);
+    }
+  };
+
+  const fetchWordsByTheme = async (themeId: number) => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `/api/learning-content?action=words_by_theme&theme_id=${themeId}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setWords(data.data);
       } else {
-        newSelected.add(unitId);
+        setError(data.error || "Failed to fetch words");
       }
-      setSelectedUnits(newSelected);
-    },
-    [selectedUnits]
-  );
+    } catch (err) {
+      setError("Failed to fetch words");
+      console.error("Error fetching words:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // 檢查單元是否可選（只有選中的教材的單元才可選）
-  const isUnitSelectable = useMemo(() => {
-    return (unitId: string) => {
-      return Array.from(selectedTextbooks).some((textbookId) => {
-        const textbook = textbooks.find((t) => t.id === textbookId);
-        return textbook?.units.some((u) => u.id === unitId);
-      });
-    };
-  }, [selectedTextbooks, textbooks]);
+  const handleThemeChange = (theme: WordTheme) => {
+    setSelectedTheme(theme);
+    setWords([]); // Clear words when theme changes
+  };
 
-  // 獲取所有可選的單元
-  const getAllUnits = useMemo(() => {
-    const allUnits: Unit[] = [];
-    selectedTextbooks.forEach((textbookId) => {
-      const textbook = textbooks.find((t) => t.id === textbookId);
-      if (textbook) {
-        allUnits.push(...textbook.units);
-      }
-    });
-    return allUnits;
-  }, [selectedTextbooks, textbooks]);
+  const handleGradeChange = (gradeId: number) => {
+    if (onGradeChange) {
+      onGradeChange(gradeId);
+    }
+  };
+
+  const handleVocabularySelect = () => {
+    if (selectedTheme && words.length > 0) {
+      onVocabularySelected(words, selectedTheme);
+    }
+  };
+
+  if (loading && themes.length === 0) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <p className="text-red-800 text-sm">{error}</p>
+        <button
+          onClick={fetchThemes}
+          className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">句型與單字主題</h2>
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h3 className="text-lg font-semibold text-black mb-4">選擇學習範圍</h3>
 
-      {/* 教材選擇 */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          選擇教材
+      {/* Grade Selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-black mb-2">
+          年級
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {textbooks.map((textbook) => (
-            <label
-              key={textbook.id}
-              className="flex items-center space-x-3 cursor-pointer"
+        <select
+          value={selectedGrade}
+          onChange={(e) => handleGradeChange(parseInt(e.target.value))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          {grades.map((grade) => (
+            <option key={grade.id} value={grade.id}>
+              {grade.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Theme Selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-black mb-2">
+          主題
+        </label>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          {themes.map((theme) => (
+            <button
+              key={theme.id}
+              onClick={() => handleThemeChange(theme)}
+              className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                selectedTheme?.id === theme.id
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-black hover:bg-gray-200"
+              }`}
             >
-              <input
-                type="checkbox"
-                checked={selectedTextbooks.has(textbook.id)}
-                onChange={() => toggleTextbook(textbook.id)}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-              />
-              <span className="text-sm text-gray-700">
-                {textbook.name} - {textbook.publisher} ({textbook.grade})
-              </span>
-            </label>
+              {theme.name}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* 單元選擇 */}
-      {selectedTextbooks.size > 0 && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            選擇單元
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {getAllUnits.map((unit) => (
-              <label
-                key={unit.id}
-                className={`flex items-center space-x-3 cursor-pointer ${
-                  isUnitSelectable(unit.id)
-                    ? ""
-                    : "opacity-50 cursor-not-allowed"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedUnits.has(unit.id)}
-                  onChange={() => toggleUnit(unit.id)}
-                  disabled={!isUnitSelectable(unit.id)}
-                  className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 disabled:opacity-50"
-                />
-                <span className="text-sm text-gray-700">{unit.name}</span>
-              </label>
-            ))}
-          </div>
+      {/* Word Count Display */}
+      {selectedTheme && (
+        <div className="mb-4 p-3 bg-blue-50 rounded-md">
+          <p className="text-sm text-blue-800">
+            <span className="font-medium">{selectedTheme.name}</span> 主題包含{" "}
+            <span className="font-bold">{words.length}</span> 個單字
+          </p>
         </div>
       )}
 
-      {/* 選擇狀態提示 */}
-      {selectedTextbooks.size > 0 && selectedUnits.size > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-          <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-blue-400 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="text-sm text-blue-800">
-              已選擇 {selectedTextbooks.size} 個教材，{selectedUnits.size}{" "}
-              個單元
-            </span>
-          </div>
-        </div>
+      {/* Action Button */}
+      {selectedTheme && words.length > 0 && (
+        <button
+          onClick={handleVocabularySelect}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          開始學習 {selectedTheme.name}
+        </button>
       )}
 
-      {/* 沒有選擇的提示 */}
-      {selectedTextbooks.size === 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-          <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-gray-400 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="text-sm text-gray-600">
-              請先選擇教材和單元以開始遊戲
-            </span>
-          </div>
+      {/* Loading State for Words */}
+      {selectedTheme && loading && (
+        <div className="flex justify-center items-center p-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
         </div>
       )}
     </div>

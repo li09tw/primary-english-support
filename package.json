@@ -1,6 +1,6 @@
 {
   "name": "zs-primary-english-support",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -20,6 +20,7 @@
     "next": "^14.2.32",
     "react": "^18",
     "react-dom": "^18",
+    "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

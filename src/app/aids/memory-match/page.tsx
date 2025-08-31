@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Vocabulary } from "@/types";
+import { Word, WordTheme } from "@/types/learning-content";
 import TextbookSelector from "@/components/TextbookSelector";
 import Link from "next/link";
 
@@ -21,8 +22,17 @@ export default function MemoryMatchPage() {
   const [moves, setMoves] = useState(0);
 
   // 處理單字選擇
-  const handleVocabularySelected = (selectedVocabulary: Vocabulary[]) => {
-    setVocabulary(selectedVocabulary);
+  const handleVocabularySelected = (words: Word[], theme: WordTheme) => {
+    // 將 Word[] 轉換為 Vocabulary[] 格式
+    const convertedVocabulary: Vocabulary[] = words.map((word) => ({
+      id: word.id.toString(),
+      english: word.english_singular,
+      chinese: word.chinese_meaning,
+      phonetic: "", // Word 類型沒有 phonetic 欄位，設為空字串
+      example: "", // Word 類型沒有 example 欄位，設為空字串
+      image: word.image_url,
+    }));
+    setVocabulary(convertedVocabulary);
   };
 
   // 開始記憶配對遊戲
@@ -129,17 +139,21 @@ export default function MemoryMatchPage() {
       <div className="pt-8 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* 頁面標題 */}
-            <div className="text-center mb-8">
+          <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              圖像記憶配對
+              中英文記憶配對
             </h1>
-            <p className="text-xl text-gray-600">配對圖片與單字，強化記憶</p>
+            <p className="text-xl text-gray-600">
+              配對英文單字與中文意思，強化記憶
+            </p>
           </div>
 
           {/* 句型與單字主題選擇 */}
           {!isGameStarted && (
             <>
-              <TextbookSelector onVocabularySelected={handleVocabularySelected} />
+              <TextbookSelector
+                onVocabularySelected={handleVocabularySelected}
+              />
 
               {/* 單字預覽 */}
               {vocabulary.length > 0 && (
@@ -236,10 +250,14 @@ export default function MemoryMatchPage() {
                       {card.isFlipped || card.isMatched ? (
                         <div>
                           <div className="font-medium text-sm mb-1">
-                            {card.id.startsWith("en") ? card.word : card.chinese}
+                            {card.id.startsWith("en")
+                              ? card.word
+                              : card.chinese}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {card.id.startsWith("en") ? card.chinese : card.word}
+                            {card.id.startsWith("en")
+                              ? card.chinese
+                              : card.word}
                           </div>
                         </div>
                       ) : (

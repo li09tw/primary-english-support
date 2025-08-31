@@ -158,7 +158,6 @@ export default function GardenPage() {
       content: messageForm.content.trim(),
       is_published: true,
       createdAt: new Date(),
-      updatedAt: new Date(),
     };
 
     const updatedMessages = [...messages, newMessage];

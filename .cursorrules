@@ -41,6 +41,14 @@
   - 品牌色彩和強調色
   - 邊框和背景色
 
+### 2.3 Background and Text Contrast Guidelines
+- **淺色背景必須配黑色文字以確保可讀性**
+- **禁止在淺色背景（如 `bg-primary-blue/90`、`bg-white`、`bg-gray-100` 等）上使用白色文字**
+- 淺色背景配白色文字會大幅降低對比度和可讀性
+- **正確做法**：淺色背景配黑色文字 (`text-black`)
+- **錯誤做法**：淺色背景配白色文字 (`text-white`)
+- 此規則適用於所有導航選單、卡片、按鈕等 UI 元素
+
 - 使用 TypeScript 進行類型安全開發
 - 遵循 Next.js 13+ App Router 的最佳實踐
 - 使用 Tailwind CSS 進行樣式設計
@@ -80,10 +88,11 @@
 - 此路徑替代了原本的 `/admin` 路徑，使用更友善的名稱
 
 ## 9. Code Selection Scope Guidelines
-- **當用戶圈選程式碼時，只更動與圈選程式碼直接相關的部分**
+- **當用戶圈選程式碼、指定頁面、或透過 cmd+L 選取檔案/片段時，只更動與選取內容直接相關的部分**
 - **禁止擅自更改設計、顏色、優化其他不相關的 component、更改排版等**
-- 保持修改範圍的精確性，避免影響未圈選的程式碼
-- 確保所有更改都與用戶明確圈選的程式碼有直接關聯
+- 保持修改範圍的精確性，避免影響未選取的程式碼
+- 確保所有更改都與用戶明確選取的內容有直接關聯
+- **適用範圍包括：手動圈選程式碼、指定頁面路徑、使用 cmd+L 選取檔案或程式碼片段**
 
 ## 10. File Naming Convention
 - **所有 `.md` 文件名必須使用字首大寫的命名方式（PascalCase）**
@@ -113,6 +122,10 @@
 - 讓用戶明確選擇要執行的方案
 - 避免過於急躁地做決定和執行動作
 - 確保用戶對每個步驟都有控制權
+- **執行條件：只有在用戶明確回應「執行」、「Y」、「Ｙ」或提供新的具體要求時才執行**
+- **執行前確認：每次執行前必須先說明對用戶要求的理解，讓用戶確認是否正確**
+- **禁止迴圈式執行：避免重複執行相同操作或陷入無限迴圈**
+- **問題重複檢查：如果同樣問題一再出現，必須檢查是否實際修改了程式碼，避免只做表面調整**
 
 ## 14. Reinstallation Procedure
 - **當用戶說「重新安裝」時，必須執行以下程序：**
@@ -125,3 +138,86 @@
   - 建置快取損壞
   - 其他與依賴或建置相關的問題
 - 執行此程序前應先停止開發伺服器，完成後可重新啟動
+
+## 15. Sentence Slot Game Protection
+- **句型拉霸機（`/aids/sentence-slot`）已完成並已鎖定保護，禁止修改**
+- **相關檔案狀態**: `@status locked`
+- **保護檔案**:
+  - `src/app/aids/sentence-slot/page.tsx` - 主頁面
+  - `src/app/aids/sentence-slot/game/page.tsx` - 遊戲頁面
+  - `src/lib/game-logic.ts` - 核心邏輯
+- **如需類似功能**: 必須建立新組件，不得修改現有檔案
+- **保護原因**: 確保功能穩定性和用戶體驗一致性
+- **修改許可**: 僅在站長明確許可下方可修改
+
+## 16. Pattern ↔ Default Theme Mapping
+- 除非另有指定，以下句型預設綁定字彙主題（用於自動選字與處理器）：
+  - `How old _____?` → `Numbers`
+  - `Are you a student?` → `Professions`（職業）
+  - `What's your/his/her favorite subject?` → `School Subjects`
+  - `Where are you from?` → `Countries`
+  - `Do you like sports?` → `Sports`
+- 實作原則：
+  - 前端處理器須優先使用對應主題中的字彙；若無可用字彙，才可使用安全的預設值。
+  - 若需新增/變更句型與主題的對應，必須先取得站長明確許可。
+
+## 17. Theme Selection Ordering Protection
+- `src/components/GameSetupSelector.tsx` 的單字主題清單排序為「已選在前、未選在後」，此行為屬於受保護規則。
+- 排序邏輯實作：使用 `useMemo` 產生 `displayThemes`，以 `selectedTopics` 將 `themes` 拆為 `selected` 與 `unselected`，再合併為 `[...selected, ...unselected]`。UI 僅以 `displayThemes.map(...)` 渲染。
+- 禁止修改下列內容，除非站長明確同意：
+  - `displayThemes` 的產生方式與資料來源（`themes`, `selectedTopics`）
+  - 渲染清單從 `themes.map(...)` 改回，或任何導致已選主題不會自動置頂的變更
+  - 任何會間接改變該排序行為的重構（包含將排序邏輯移走或共享成其他工具函式後被覆寫）
+- 目的：確保「選取主題後自動排到最前面」的使用者體驗穩定不變。
+
+## 18. Projection Q&A Fallback Rule
+- 生成 Projection Q&A 題目時，必須同時存在至少一個 `Question` 與一個 `Statement` 句型。
+- 若任一類型數量為 0，必須回退（fallback）到「填空題」（fill-in-the-blank）產生題目。
+- 依據位置：`src/lib/game-logic.ts` 的判斷邏輯（`if (questionPatterns.length === 0 || statementPatterns.length === 0) { return createFillBlankQuestion(...) }`）。
+
+## 19. 文件修改協作管理規則（防止多 Chat Tab 衝突）
+
+### 19.1 文件狀態標記系統
+每個被修改的文件必須在頂部添加狀態標記：
+
+```typescript
+/**
+ * @fileoverview 文件名和功能描述
+ * @modified 2024-01-XX XX:XX - 正在修改中
+ * @modified_by Assistant Name
+ * @modification_type feature|bugfix|refactor
+ * @status in_progress|completed|locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 具體功能描述
+ */
+```
+
+### 19.2 修改前檢查流程
+- **檢查文件是否有 `@modified` 標記**
+- **檢查 git 狀態是否有未提交的更改**
+- **如果文件被鎖定（`@status locked`），必須等待解鎖**
+
+### 19.3 修改中保護
+- **添加 `@modified` 標記防止其他 tab 修改**
+- **設置修改開始時間戳**
+- **記錄修改類型和目標功能**
+
+### 19.4 修改完成流程
+- **測試功能是否正常**
+- **更新狀態為 `@completed`**
+- **立即提交到 git（如果可用）**
+- **通知用戶修改完成**
+
+### 19.5 衝突處理
+- **如果發現文件被覆蓋，立即檢查 git 歷史**
+- **從最近的提交恢復文件**
+- **重新進行必要的修改**
+- **加強狀態標記和保護**
+
+### 19.6 狀態標記規範
+- `@status in_progress`: 正在修改中，其他 tab 不得修改
+- `@status completed`: 修改完成，可以進行其他修改
+- `@status locked`: 文件被鎖定，等待特定操作完成
+- `@modification_type feature`: 新功能開發
+- `@modification_type bugfix`: 錯誤修復
+- `@modification_type refactor`: 代碼重構
