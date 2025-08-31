@@ -25,7 +25,7 @@ export default function Home() {
     "@type": "EducationalOrganization",
     name: "Z的國小英語支援(ZPES)",
     description:
-      "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
+      "支援少紙化、有試教需求的老師，讓每個孩子都能享受優質的英語學習體驗。",
     url: "https://zsprimaryenglishsupport.com",
     logo: "https://zsprimaryenglishsupport.com/logo.png",
     sameAs: ["https://zsprimaryenglishsupport.com"],
@@ -40,7 +40,7 @@ export default function Home() {
     },
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "英語教學輔具",
+      name: "英語數位教具",
       itemListElement: [
         {
           "@type": "Offer",
@@ -54,8 +54,8 @@ export default function Home() {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
-            name: "英語教學輔具",
-            description: "多樣化的教學輔具，配合課本內容",
+            name: "英語數位教具",
+            description: "多樣化的數位教具，配合課本內容",
           },
         },
       ],
@@ -73,11 +73,9 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-primary-blue text-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            英語數位化教具
-          </h1>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">英語數位教具</h1>
           <p className="text-xl md:text-2xl mb-8 text-primary-blue-dark">
-            支援沒有拿到紙本教具的國小老師
+            支援少紙化、有試教需求的老師
           </p>
         </div>
       </section>

@@ -24,17 +24,6 @@ let client: any = null;
 function getClient() {
   if (!client) {
     try {
-      console.log("🔍 開始創建 Cloudflare 客戶端...");
-      console.log("🔧 環境檢查:", {
-        typeofWindow: typeof window,
-        NODE_ENV: process.env.NODE_ENV,
-        NEXT_PUBLIC_CLOUDFLARE_WORKER_URL:
-          process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL,
-        isLocalhost:
-          process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ===
-          "http://localhost:8787",
-      });
-
       // 根據環境選擇客戶端
       if (typeof window !== "undefined") {
         // 在瀏覽器中，檢查是否有本地開發環境變數
@@ -43,32 +32,25 @@ function getClient() {
           "http://localhost:8787"
         ) {
           // 本地開發環境，使用本地客戶端
-          console.log("🔧 瀏覽器中使用本地開發環境客戶端");
           client = createLocalCloudflareClient();
         } else {
           // 生產環境，使用瀏覽器端客戶端
-          console.log("🌐 使用瀏覽器端 Cloudflare 客戶端");
           client = createCloudflareClientBrowser();
         }
       } else if (process.env.NODE_ENV === "development") {
         // 在伺服器端開發環境中，使用本地客戶端
-        console.log("🔧 使用本地開發環境客戶端");
         client = createLocalCloudflareClient();
       } else {
         // 在伺服器端生產環境中，使用直接客戶端
-        console.log("🚀 使用生產環境 Cloudflare 客戶端");
         client = createCloudflareClient();
       }
-
-      console.log("✅ 客戶端創建成功:", client.constructor.name);
     } catch (error) {
-      console.warn("❌ Failed to create Cloudflare client:", error);
+      console.warn("Failed to create Cloudflare client:", error);
       // 返回一個模擬客戶端，避免錯誤
       client = {
         query: async () => ({ success: false, results: [] }),
         execute: async () => ({ success: false }),
       };
-      console.log("⚠️ 使用模擬客戶端");
     }
   }
   return client;
@@ -79,37 +61,26 @@ export const gameAPI = {
   // 獲取所有遊戲方法
   async getAllGames(): Promise<GameMethod[]> {
     try {
-      console.log("🔍 gameAPI.getAllGames() 開始執行...");
-      console.log("🔗 連接到 Cloudflare Worker...");
-
       const result = await getClient().query(
         "SELECT * FROM game_methods ORDER BY created_at DESC"
       );
 
-      console.log("📊 從 Worker 獲取到原始資料:", result);
-      console.log("📊 回應類型:", typeof result);
-      console.log("📊 回應鍵值:", Object.keys(result || {}));
-
       // 檢查回應格式
       if (!result.success) {
-        console.error("❌ Worker 回應失敗:", result.error);
-        console.error("❌ 完整回應:", result);
+        console.error("Worker 回應失敗:", result.error);
         return [];
       }
 
       if (!result.results || !Array.isArray(result.results)) {
-        console.error("❌ Worker 回應格式錯誤:", result);
+        console.error("Worker 回應格式錯誤:", result);
         return [];
       }
 
-      console.log("🔢 原始資料數量:", result.results.length);
-
       const transformedGames = transformGameMethodsFromDB(result.results);
-      console.log("✨ 資料轉換完成，轉換後數量:", transformedGames.length);
 
       return transformedGames;
     } catch (error) {
-      console.error("❌ Failed to fetch games:", error);
+      console.error("Failed to fetch games:", error);
       return [];
     }
   },
@@ -401,11 +372,7 @@ export const adminMessageAPI = {
   // 新增站長消息
   async createMessage(messageData: Partial<AdminMessage>): Promise<boolean> {
     try {
-      console.log("🔍 adminMessageAPI.createMessage 開始執行...");
-      console.log("📝 消息數據:", messageData);
-
       const client = getClient();
-      console.log("🔗 客戶端類型:", client.constructor.name);
 
       const result = await client.execute(
         `INSERT INTO admin_messages (
@@ -418,17 +385,9 @@ export const adminMessageAPI = {
         ]
       );
 
-      console.log("📊 execute 結果:", result);
-      console.log("✅ 新增站長消息成功:", result.success);
-
       return result.success;
     } catch (error) {
-      console.error("❌ Failed to create admin message:", error);
-      console.error("❌ 錯誤詳情:", {
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        name: error instanceof Error ? error.name : undefined,
-      });
+      console.error("Failed to create admin message:", error);
       return false;
     }
   },
