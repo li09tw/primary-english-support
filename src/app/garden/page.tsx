@@ -80,8 +80,11 @@ export default function GardenPage() {
       title: message.title || "",
       content: message.content || "",
       is_published:
-        message.is_published !== undefined ? message.is_published : true,
-      is_pinned: message.is_pinned !== undefined ? message.is_pinned : false,
+        message.is_published !== undefined
+          ? Boolean(message.is_published)
+          : true,
+      is_pinned:
+        message.is_pinned !== undefined ? Boolean(message.is_pinned) : false,
       createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
     };
 
@@ -841,6 +844,9 @@ export default function GardenPage() {
                         isPinned: message.is_pinned,
                         titleType: typeof message.title,
                         titleLength: message.title?.length,
+                        rawTitle: JSON.stringify(message.title),
+                        isPinnedValue: message.is_pinned,
+                        isPinnedType: typeof message.is_pinned,
                       });
 
                       return (
