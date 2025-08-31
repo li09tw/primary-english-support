@@ -308,14 +308,17 @@ export default function GardenPage() {
       };
 
       // 調用 API 保存到遠端資料庫
+      console.log("🔍 開始調用 adminMessageAPI.createMessage...");
       const success = await adminMessageAPI.createMessage(newMessage);
+      console.log("📊 createMessage 結果:", success);
 
       if (success) {
         // 成功推送到遠端後，添加到本地狀態
         setMessages((prev) => [newMessage, ...prev]);
         alert("管理員消息新增成功！已推送到遠端資料庫");
       } else {
-        alert("新增失敗，無法推送到遠端資料庫");
+        console.error("❌ 新增管理員消息失敗");
+        alert("新增失敗，無法推送到遠端資料庫。請檢查瀏覽器控制台的錯誤信息。");
         return;
       }
 
