@@ -307,8 +307,10 @@ export default function GardenPage() {
       const success = await gameAPI.createGame(newGame);
 
       if (success) {
-        // 成功推送到遠端後，添加到本地狀態
-        setGames((prev) => [newGame, ...prev]);
+        // 成功推送到遠端後，重新載入遊戲列表以確保數據一致性
+        const updatedGames = await gameAPI.getAllGames();
+        const validatedGames = updatedGames.map(validateGameData);
+        setGames(validatedGames);
         alert("遊戲方法新增成功！已推送到遠端資料庫");
       } else {
         alert("新增失敗，無法推送到遠端資料庫");
@@ -339,8 +341,10 @@ export default function GardenPage() {
         const success = await gameAPI.deleteGame(id);
 
         if (success) {
-          // 成功從遠端刪除後，從本地狀態移除
-          setGames((prev) => prev.filter((game) => game.id !== id));
+          // 成功從遠端刪除後，重新載入遊戲列表以確保數據一致性
+          const updatedGames = await gameAPI.getAllGames();
+          const validatedGames = updatedGames.map(validateGameData);
+          setGames(validatedGames);
           alert("刪除成功！已從遠端資料庫移除");
         } else {
           alert("刪除失敗，無法從遠端資料庫移除");
@@ -377,7 +381,9 @@ export default function GardenPage() {
         // 成功推送到遠端後，重新載入消息列表
         // 注意：由於 ID 是自動生成的，我們需要從資料庫重新獲取
         const updatedMessages = await adminMessageAPI.getAllMessages();
-        setMessages(updatedMessages);
+        // 驗證數據，確保 createdAt 是 Date 對象
+        const validatedMessages = updatedMessages.map(validateMessageData);
+        setMessages(validatedMessages);
         alert("管理員消息新增成功！已推送到遠端資料庫");
       } else {
         console.error("❌ 新增管理員消息失敗");
@@ -405,8 +411,10 @@ export default function GardenPage() {
         const success = await adminMessageAPI.deleteMessage(id);
 
         if (success) {
-          // 成功從遠端刪除後，從本地狀態移除
-          setMessages((prev) => prev.filter((message) => message.id !== id));
+          // 成功從遠端刪除後，重新載入消息列表以確保數據一致性
+          const updatedMessages = await adminMessageAPI.getAllMessages();
+          const validatedMessages = updatedMessages.map(validateMessageData);
+          setMessages(validatedMessages);
           alert("刪除成功！已從遠端資料庫移除");
         } else {
           alert("刪除失敗，無法從遠端資料庫移除");
@@ -440,37 +448,6 @@ export default function GardenPage() {
     "grade5",
     "grade6",
   ];
-
-  const categoryLabels = {
-    all: "全部",
-    單字學習: "單字學習",
-    句型練習: "句型練習",
-    口語訓練: "口語訓練",
-    聽力練習: "聽力練習",
-    閱讀練習: "閱讀練習",
-    寫作練習: "寫作練習",
-    發音練習: "發音練習",
-    拼寫練習: "拼寫練習",
-    教學輔具: "教學輔具",
-  };
-
-  const gradeLabels = {
-    all: "全部",
-    grade1: "1年級",
-    grade2: "2年級",
-    grade3: "3年級",
-    grade4: "4年級",
-    grade5: "5年級",
-    grade6: "6年級",
-  };
-
-  const handleCategoryChange = (category: string) => {
-    // This function was removed, so this effect is no longer relevant
-  };
-
-  const handleGradeChange = (grade: string) => {
-    // This function was removed, so this effect is no longer relevant
-  };
 
   // 載入中狀態
   if (loading && games.length === 0) {
@@ -684,7 +661,7 @@ export default function GardenPage() {
                             className="mr-2"
                           />
                           <span className="text-sm text-black">
-                            {gradeLabels[grade as keyof typeof gradeLabels]}
+                            {grade.replace("grade", "")}年級
                           </span>
                         </label>
                       ))}
@@ -861,134 +838,26 @@ export default function GardenPage() {
             )}
           </div>
 
-          {/* 右側：列表和篩選器 */}
+          {/* 右側：管理員消息列表 */}
           <div>
             {activeTab === "games" && (
-              <>
-                {/* 篩選器 */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* 分類篩選 */}
-                    <div>
-                      <label className="block text-sm font-medium text-black mb-2">
-                        分類
-                      </label>
-                      <div className="space-y-2">
-                        {Object.entries(categoryLabels).map(([key, label]) => (
-                          <label key={key} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={
-                                /* selectedCategories.includes(key) */ false
-                              } // selectedCategories state was removed
-                              onChange={() => handleCategoryChange(key)}
-                              className="mr-2 h-4 w-4 text-secondary-pink focus:ring-secondary-pink border-gray-300 rounded appearance-none checked:appearance-auto"
-                            />
-                            <span className="text-sm text-black">{label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 年級篩選 */}
-                    <div>
-                      <label className="block text-sm font-medium text-black mb-2">
-                        年級
-                      </label>
-                      <div className="space-y-2">
-                        {Object.entries(gradeLabels).map(([key, label]) => (
-                          <label key={key} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={/* selectedGrades.includes(key) */ false} // selectedGrades state was removed
-                              onChange={() => handleGradeChange(key)}
-                              className="mr-2 h-4 w-4 text-secondary-pink focus:ring-secondary-pink border-gray-300 rounded appearance-none checked:appearance-auto"
-                            />
-                            <span className="text-sm text-black">{label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-black mb-4">
+                  遊戲方法管理
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  使用左側表單新增遊戲方法。新增的遊戲方法會自動保存到遠端資料庫。
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-800 mb-2">功能說明</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• 填寫遊戲方法標題和描述</li>
+                    <li>• 選擇適用分類和年級</li>
+                    <li>• 添加所需材料和遊戲說明</li>
+                    <li>• 點擊新增按鈕保存到資料庫</li>
+                  </ul>
                 </div>
-
-                {/* 遊戲方法列表 */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h3 className="text-xl font-semibold text-black mb-4">
-                    遊戲方法列表
-                  </h3>
-                  <div className="space-y-4">
-                    {games.length === 0 ? (
-                      <p className="text-gray-500">暫無遊戲方法</p>
-                    ) : (
-                      games.map((game) => (
-                        <div
-                          key={game.id}
-                          className="border border-gray-200 rounded-lg p-4 space-y-2"
-                        >
-                          <div className="flex justify-between items-start">
-                            <h4 className="text-lg font-medium text-black">
-                              {game.title}
-                            </h4>
-                            <button
-                              onClick={() => deleteGame(game.id)}
-                              className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                            >
-                              刪除
-                            </button>
-                          </div>
-                          <p className="text-gray-600">{game.description}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {game.categories.map((category) => (
-                              <span
-                                key={category}
-                                className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
-                              >
-                                {category}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {game.grades.map((grade) => (
-                              <span
-                                key={grade}
-                                className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs"
-                              >
-                                {gradeLabels[
-                                  grade as keyof typeof gradeLabels
-                                ] || grade}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            創建時間: {game.createdAt.toLocaleDateString()}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* 載入更多按鈕 */}
-                  {/* hasMore && ( // hasMore state was removed
-                    <div className="text-center mt-6">
-                      <button
-                        onClick={loadMore}
-                        disabled={loadingMore}
-                        className="px-6 py-3 bg-white text-secondary-pink border border-secondary-pink rounded-lg hover:bg-secondary-pink hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loadingMore ? (
-                          <span className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-secondary-pink mr-2"></div>
-                            載入中...
-                          </span>
-                        ) : (
-                          "載入更多"
-                        )}
-                      </button>
-                    </div>
-                  ) */}
-                </div>
-              </>
+              </div>
             )}
 
             {activeTab === "messages" && (
