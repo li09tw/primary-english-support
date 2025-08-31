@@ -1,0 +1,55 @@
+name = "primary-english-api-gateway"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# 主要函數入口
+main = "functions/api-gateway.js"
+
+# 開發環境配置
+[env.development]
+name = "primary-english-api-gateway-dev"
+ENVIRONMENT = "development"
+API_SECRET = "local-dev-secret"
+
+[env.development.dev]
+port = 8787
+local = true
+
+[env.development.vars]
+ENVIRONMENT = "development"
+API_SECRET = "local-dev-secret"
+
+# 開發環境 D1 資料庫綁定
+[[env.development.d1_databases]]
+binding = "PRIMARY_ENGLISH_DB"
+database_name = "primary-english-db"
+database_id = "203cdead-8e8a-4c1d-a77b-9c5445e4f5f8"
+
+# 開發環境 R2 存儲綁定
+[[env.development.r2_buckets]]
+binding = "primary_english_storage"
+bucket_name = "primary-english-storage"
+
+# 生產環境配置
+[env.production]
+name = "primary-english-api-gateway"
+ENVIRONMENT = "production"
+API_SECRET = "your-production-api-secret"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+API_SECRET = "your-production-api-secret"
+
+# 生產環境 D1 資料庫綁定
+[[env.production.d1_databases]]
+binding = "PRIMARY_ENGLISH_DB"
+database_name = "primary-english-db"
+database_id = "203cdead-8e8a-4c1d-a77b-9c5445e4f5f8"
+
+# 生產環境 R2 存儲綁定
+[[env.production.r2_buckets]]
+binding = "primary_english_storage"
+bucket_name = "primary-english-storage"
+
+# 注意：生產環境的環境變數需要在 Cloudflare 後台設定
+# API_SECRET 用於驗證來自 Vercel 的請求
