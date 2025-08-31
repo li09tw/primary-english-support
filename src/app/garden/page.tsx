@@ -241,11 +241,17 @@ export default function GardenPage() {
         updatedAt: new Date(),
       };
 
-      // 這裡應該調用 API 保存到數據庫
-      // await gameAPI.createGame(newGame);
+      // 調用 API 保存到遠端資料庫
+      const success = await gameAPI.createGame(newGame);
 
-      // 暫時添加到本地狀態
-      setGames((prev) => [newGame, ...prev]);
+      if (success) {
+        // 成功推送到遠端後，添加到本地狀態
+        setGames((prev) => [newGame, ...prev]);
+        alert("遊戲方法新增成功！已推送到遠端資料庫");
+      } else {
+        alert("新增失敗，無法推送到遠端資料庫");
+        return;
+      }
 
       // 重置表單
       setGameForm({
@@ -267,12 +273,17 @@ export default function GardenPage() {
   const deleteGame = async (id: string) => {
     if (confirm("確定要刪除這個遊戲方法嗎？")) {
       try {
-        // 這裡應該調用 API 從數據庫刪除
-        // await gameAPI.deleteGame(id);
+        // 調用 API 從遠端資料庫刪除
+        const success = await gameAPI.deleteGame(id);
 
-        // 暫時從本地狀態移除
-        setGames((prev) => prev.filter((game) => game.id !== id));
-        alert("刪除成功！");
+        if (success) {
+          // 成功從遠端刪除後，從本地狀態移除
+          setGames((prev) => prev.filter((game) => game.id !== id));
+          alert("刪除成功！已從遠端資料庫移除");
+        } else {
+          alert("刪除失敗，無法從遠端資料庫移除");
+          return;
+        }
       } catch (error) {
         console.error("刪除遊戲方法失敗:", error);
         alert("刪除失敗，請重試");
@@ -296,11 +307,17 @@ export default function GardenPage() {
         createdAt: new Date(),
       };
 
-      // 這裡應該調用 API 保存到數據庫
-      // await adminMessageAPI.createMessage(newMessage);
+      // 調用 API 保存到遠端資料庫
+      const success = await adminMessageAPI.createMessage(newMessage);
 
-      // 暫時添加到本地狀態
-      setMessages((prev) => [newMessage, ...prev]);
+      if (success) {
+        // 成功推送到遠端後，添加到本地狀態
+        setMessages((prev) => [newMessage, ...prev]);
+        alert("管理員消息新增成功！已推送到遠端資料庫");
+      } else {
+        alert("新增失敗，無法推送到遠端資料庫");
+        return;
+      }
 
       // 重置表單
       setMessageForm({
@@ -318,12 +335,17 @@ export default function GardenPage() {
   const deleteMessage = async (id: string) => {
     if (confirm("確定要刪除這個管理員消息嗎？")) {
       try {
-        // 這裡應該調用 API 從數據庫刪除
-        // await adminMessageAPI.deleteMessage(id);
+        // 調用 API 從遠端資料庫刪除
+        const success = await adminMessageAPI.deleteMessage(id);
 
-        // 暫時從本地狀態移除
-        setMessages((prev) => prev.filter((message) => message.id !== id));
-        alert("刪除成功！");
+        if (success) {
+          // 成功從遠端刪除後，從本地狀態移除
+          setMessages((prev) => prev.filter((message) => message.id !== id));
+          alert("刪除成功！已從遠端資料庫移除");
+        } else {
+          alert("刪除失敗，無法從遠端資料庫移除");
+          return;
+        }
       } catch (error) {
         console.error("刪除管理員消息失敗:", error);
         alert("刪除失敗，請重試");
