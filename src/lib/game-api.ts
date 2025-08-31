@@ -347,7 +347,7 @@ export const adminMessageAPI = {
   async getAllMessages(): Promise<AdminMessage[]> {
     try {
       const result = await getClient().query(
-        "SELECT * FROM admin_messages ORDER BY created_at DESC"
+        "SELECT * FROM admin_messages ORDER BY is_pinned DESC, created_at DESC"
       );
       return result.results || [];
     } catch (error) {
@@ -360,7 +360,7 @@ export const adminMessageAPI = {
   async getPublishedMessages(): Promise<AdminMessage[]> {
     try {
       const result = await getClient().query(
-        "SELECT * FROM admin_messages WHERE is_published = 1 ORDER BY created_at DESC"
+        "SELECT * FROM admin_messages WHERE is_published = 1 ORDER BY is_pinned DESC, created_at DESC"
       );
       return result.results || [];
     } catch (error) {
@@ -376,12 +376,13 @@ export const adminMessageAPI = {
 
       const result = await client.execute(
         `INSERT INTO admin_messages (
-          title, content, is_published, created_at, updated_at
-        ) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+          title, content, is_published, is_pinned, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
         [
           messageData.title || "",
           messageData.content || "",
           messageData.is_published || 1,
+          messageData.is_pinned || 0,
         ]
       );
 
@@ -400,12 +401,13 @@ export const adminMessageAPI = {
     try {
       const result = await getClient().execute(
         `UPDATE admin_messages SET
-          title = ?, content = ?, is_published = ?, updated_at = CURRENT_TIMESTAMP
+          title = ?, content = ?, is_published = ?, is_pinned = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?`,
         [
           messageData.title || "",
           messageData.content || "",
           messageData.is_published || 1,
+          messageData.is_pinned || 0,
           id,
         ]
       );
@@ -440,6 +442,20 @@ export const adminMessageAPI = {
       return result.success;
     } catch (error) {
       console.error("Failed to toggle message publish status:", error);
+      return false;
+    }
+  },
+
+  // 切換站長消息的釘選狀態
+  async toggleMessagePinStatus(id: string): Promise<boolean> {
+    try {
+      const result = await getClient().execute(
+        "UPDATE admin_messages SET is_pinned = NOT is_pinned, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        [id]
+      );
+      return result.success;
+    } catch (error) {
+      console.error("Failed to toggle message pin status:", error);
       return false;
     }
   },

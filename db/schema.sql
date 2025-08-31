@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS admin_messages (
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   is_published BOOLEAN NOT NULL DEFAULT TRUE,
+  is_pinned BOOLEAN NOT NULL DEFAULT FALSE, -- 釘選狀態
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );

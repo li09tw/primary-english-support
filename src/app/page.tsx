@@ -114,8 +114,8 @@ export default function Home() {
           </div>
 
           {messages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {messages.map((message) => (
+            <div className="space-y-6">
+              {messages.slice(0, 6).map((message) => (
                 <AdminMessageCard key={message.id} message={message} />
               ))}
             </div>

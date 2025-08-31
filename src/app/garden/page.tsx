@@ -72,6 +72,7 @@ export default function GardenPage() {
       content: message.content || "",
       is_published:
         message.is_published !== undefined ? message.is_published : true,
+      is_pinned: message.is_pinned !== undefined ? message.is_pinned : false,
       createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
     };
   };
@@ -300,6 +301,7 @@ export default function GardenPage() {
         title: messageForm.title.trim(),
         content: messageForm.content.trim(),
         is_published: true,
+        is_pinned: false,
         createdAt: new Date(),
       };
 
@@ -352,6 +354,26 @@ export default function GardenPage() {
         console.error("刪除管理員消息失敗:", error);
         alert("刪除失敗，請重試");
       }
+    }
+  };
+
+  // 切換消息釘選狀態
+  const toggleMessagePin = async (id: string) => {
+    try {
+      const success = await adminMessageAPI.toggleMessagePinStatus(id);
+
+      if (success) {
+        // 成功切換後，重新載入消息列表
+        const updatedMessages = await adminMessageAPI.getAllMessages();
+        const validatedMessages = updatedMessages.map(validateMessageData);
+        setMessages(validatedMessages);
+        alert("釘選狀態已更新！");
+      } else {
+        alert("更新釘選狀態失敗，請重試");
+      }
+    } catch (error) {
+      console.error("切換釘選狀態失敗:", error);
+      alert("操作失敗，請重試");
     }
   };
 
@@ -800,18 +822,41 @@ export default function GardenPage() {
                     messages.map((message) => (
                       <div
                         key={message.id}
-                        className="border border-gray-200 rounded-lg p-4 space-y-2"
+                        className={`border rounded-lg p-4 space-y-2 ${
+                          message.is_pinned
+                            ? "border-yellow-400 bg-yellow-50"
+                            : "border-gray-200"
+                        }`}
                       >
                         <div className="flex justify-between items-start">
-                          <h4 className="text-lg font-medium text-black">
-                            {message.title}
-                          </h4>
-                          <button
-                            onClick={() => deleteMessage(message.id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                          >
-                            刪除
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {message.is_pinned && (
+                              <span className="text-yellow-600 text-sm font-medium">
+                                📌 釘選
+                              </span>
+                            )}
+                            <h4 className="text-lg font-medium text-black">
+                              {message.title}
+                            </h4>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => toggleMessagePin(message.id)}
+                              className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                                message.is_pinned
+                                  ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                                  : "bg-gray-500 text-white hover:bg-gray-600"
+                              }`}
+                            >
+                              {message.is_pinned ? "取消釘選" : "釘選"}
+                            </button>
+                            <button
+                              onClick={() => deleteMessage(message.id)}
+                              className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                            >
+                              刪除
+                            </button>
+                          </div>
                         </div>
                         <p className="text-gray-600">{message.content}</p>
                         <div className="text-sm text-gray-500">

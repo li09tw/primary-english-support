@@ -39,6 +39,7 @@ export interface AdminMessage {
   title: string;
   content: string;
   is_published: boolean; // 發布狀態
+  is_pinned: boolean; // 釘選狀態
   createdAt: Date;
 }
 
