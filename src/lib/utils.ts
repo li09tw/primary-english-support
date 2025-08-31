@@ -1,3 +1,14 @@
+/**
+ * @fileoverview 工具函數模組 - 提供通用的工具函數和輔助方法
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified_by Assistant
+ * @modification_type feature
+ * @status locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 工具函數已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ */
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 

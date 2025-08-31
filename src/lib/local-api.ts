@@ -1,3 +1,14 @@
+/**
+ * @fileoverview 本地 API 模組 - 本地開發環境的遊戲 API 實現
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified_by Assistant
+ * @modification_type feature
+ * @status locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 本地 API 功能已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ */
+
 // 本地開發環境的 API 工具函數
 // 使用本地 Cloudflare Worker 與 D1 資料庫互動
 

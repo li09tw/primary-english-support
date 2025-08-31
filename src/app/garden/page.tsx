@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { GameMethod, AdminMessage } from "@/types";
 import { generateId, saveGameMethods, saveAdminMessages } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { gameAPI, adminMessageAPI } from "@/lib/game-api";
 
 // 注意：由於這是 client component，metadata 需要在 layout 或 parent 中定義
 
@@ -12,9 +13,21 @@ export default function GardenPage() {
   const [activeTab, setActiveTab] = useState<"games" | "messages">("games");
   const [games, setGames] = useState<GameMethod[]>([]);
   const [messages, setMessages] = useState<AdminMessage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // 調試信息
   console.log("GardenPage render:", { games, messages });
+
+  // 安全的日期格式化函數
+  const safeFormatDate = (date: any): string => {
+    if (date instanceof Date) {
+      return date.toLocaleDateString();
+    }
+    if (typeof date === "string") {
+      return new Date(date).toLocaleDateString();
+    }
+    return new Date().toLocaleDateString();
+  };
 
   // 數據驗證函數
   const validateGameData = (game: any): GameMethod => {
@@ -35,6 +48,18 @@ export default function GardenPage() {
     };
   };
 
+  // 管理員消息數據驗證函數
+  const validateMessageData = (message: any): AdminMessage => {
+    return {
+      id: message.id || generateId(),
+      title: message.title || "",
+      content: message.content || "",
+      is_published:
+        message.is_published !== undefined ? message.is_published : true,
+      createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
+    };
+  };
+
   // 表單狀態
   const [gameForm, setGameForm] = useState({
     title: "",
@@ -50,53 +75,160 @@ export default function GardenPage() {
     content: "",
   });
 
-  useEffect(() => {
-    // 載入本地儲存的數據
-    const savedGames = localStorage.getItem("gameMethods");
-    const savedMessages = localStorage.getItem("adminMessages");
+  // 數據清理函數：修復任何格式不正確的數據
+  const cleanupData = () => {
+    try {
+      // 清理遊戲方法數據
+      if (games.length > 0) {
+        const cleanedGames = games.map(validateGameData);
+        setGames(cleanedGames);
+        saveGameMethods(cleanedGames);
+      }
 
-    // 數據遷移：將舊格式轉換為新格式
-    if (savedGames) {
-      try {
-        const parsedGames = JSON.parse(savedGames);
-        const migratedGames = parsedGames.map((game: any) => {
-          // 檢查是否需要遷移
-          if (game.category && !game.categories) {
-            return {
-              ...game,
-              categories: [game.category],
-              grades: game.grade ? [game.grade] : [],
-            };
+      // 清理管理員消息數據
+      if (messages.length > 0) {
+        const cleanedMessages = messages.map(validateMessageData);
+        setMessages(cleanedMessages);
+        saveAdminMessages(cleanedMessages);
+      }
+    } catch (error) {
+      console.error("Error cleaning up data:", error);
+    }
+  };
+
+  // 載入遊戲方法數據
+  const loadGames = async () => {
+    try {
+      setLoading(true);
+      console.log("🔍 開始載入遊戲方法數據...");
+
+      // 調試：檢查環境變數
+      console.log("🔧 環境變數檢查:", {
+        NODE_ENV: process.env.NODE_ENV,
+        NEXT_PUBLIC_CLOUDFLARE_WORKER_URL: process.env
+          .NEXT_PUBLIC_CLOUDFLARE_WORKER_URL
+          ? "SET"
+          : "NOT SET",
+        CLOUDFLARE_WORKER_URL: process.env.CLOUDFLARE_WORKER_URL
+          ? "SET"
+          : "NOT SET",
+      });
+
+      let fetchedGames: GameMethod[] = [];
+
+      // 方法1：嘗試直接從 Cloudflare Worker 獲取數據（如果環境變數設置了）
+      if (process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL) {
+        try {
+          console.log("🚀 嘗試直接從 Cloudflare Worker 獲取數據...");
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL}/query`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-API-Key":
+                  process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET || "",
+              },
+              body: JSON.stringify({
+                query: "SELECT * FROM game_methods ORDER BY created_at DESC",
+                params: [],
+              }),
+            }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.results) {
+              fetchedGames = data.results;
+              console.log("✅ 直接從 Worker 獲取成功:", fetchedGames.length);
+            }
           }
-          if (game.grade && !game.grades) {
-            return {
-              ...game,
-              categories: game.categories || [],
-              grades: [game.grade],
-            };
-          }
-          return game;
-        });
-        // 使用驗證函數確保數據格式正確
-        const validatedGames = migratedGames.map(validateGameData);
-        setGames(validatedGames);
-        // 保存遷移後的數據
-        saveGameMethods(validatedGames);
-      } catch (error) {
-        console.error("Error parsing saved games:", error);
+        } catch (directError) {
+          console.log("⚠️ 直接調用失敗，使用 API 路由:", directError);
+        }
+      }
+
+      // 方法2：如果直接調用失敗，使用 gameAPI
+      if (fetchedGames.length === 0) {
+        console.log("🔗 使用 gameAPI 獲取數據...");
+        fetchedGames = await gameAPI.getAllGames();
+        console.log("✅ 通過 gameAPI 獲取遊戲方法:", fetchedGames.length);
+      }
+
+      // 驗證和轉換數據
+      const validatedGames = fetchedGames.map(validateGameData);
+      setGames(validatedGames);
+
+      // 同時保存到 localStorage 作為備份
+      saveGameMethods(validatedGames);
+    } catch (error) {
+      console.error("❌ 載入遊戲方法失敗:", error);
+
+      // 如果 API 失敗，嘗試從 localStorage 載入備份數據
+      const savedGames = localStorage.getItem("gameMethods");
+      if (savedGames) {
+        try {
+          const parsedGames = JSON.parse(savedGames);
+          const validatedGames = parsedGames.map(validateGameData);
+          setGames(validatedGames);
+          console.log(
+            "📦 從 localStorage 載入備份數據:",
+            validatedGames.length
+          );
+        } catch (localError) {
+          console.error("❌ localStorage 數據解析失敗:", localError);
+          setGames([]);
+        }
+      } else {
         setGames([]);
       }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (savedMessages) {
-      try {
-        const parsedMessages = JSON.parse(savedMessages);
-        setMessages(parsedMessages);
-      } catch (error) {
-        console.error("Error parsing saved messages:", error);
+  // 載入管理員消息數據
+  const loadMessages = async () => {
+    try {
+      console.log("🔍 開始載入管理員消息數據...");
+
+      // 使用 Cloudflare Worker API 獲取管理員消息
+      const fetchedMessages = await adminMessageAPI.getAllMessages();
+      console.log("✅ 成功獲取管理員消息:", fetchedMessages.length);
+
+      // 驗證數據
+      const validatedMessages = fetchedMessages.map(validateMessageData);
+      setMessages(validatedMessages);
+
+      // 同時保存到 localStorage 作為備份
+      saveAdminMessages(validatedMessages);
+    } catch (error) {
+      console.error("❌ 載入管理員消息失敗:", error);
+
+      // 如果 API 失敗，嘗試從 localStorage 載入備份數據
+      const savedMessages = localStorage.getItem("adminMessages");
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          const validatedMessages = parsedMessages.map(validateMessageData);
+          setMessages(validatedMessages);
+          console.log(
+            "📦 從 localStorage 載入備份數據:",
+            validatedMessages.length
+          );
+        } catch (localError) {
+          console.error("❌ localStorage 數據解析失敗:", localError);
+          setMessages([]);
+        }
+      } else {
         setMessages([]);
       }
     }
+  };
+
+  useEffect(() => {
+    // 載入數據
+    loadGames();
+    loadMessages();
   }, []);
 
   // 遊戲方法相關函數
@@ -452,7 +584,9 @@ export default function GardenPage() {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-xl font-semibold text-black mb-4">遊戲方法列表</h3>
       <div className="space-y-4">
-        {games.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-500">載入中...</p>
+        ) : games.length === 0 ? (
           <p className="text-gray-500">暫無遊戲方法</p>
         ) : (
           games.map((game) => (
@@ -491,7 +625,7 @@ export default function GardenPage() {
                 ))}
               </div>
               <div className="text-sm text-gray-500">
-                創建時間: {game.createdAt.toLocaleDateString()}
+                創建時間: {safeFormatDate(game.createdAt)}
               </div>
             </div>
           ))
@@ -504,7 +638,9 @@ export default function GardenPage() {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-xl font-semibold text-black mb-4">管理員消息列表</h3>
       <div className="space-y-4">
-        {messages.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-500">載入中...</p>
+        ) : messages.length === 0 ? (
           <p className="text-gray-500">暫無管理員消息</p>
         ) : (
           messages.map((message) => (
@@ -525,7 +661,7 @@ export default function GardenPage() {
               </div>
               <p className="text-gray-600">{message.content}</p>
               <div className="text-sm text-gray-500">
-                創建時間: {message.createdAt.toLocaleDateString()}
+                創建時間: {safeFormatDate(message.createdAt)}
               </div>
             </div>
           ))
@@ -549,7 +685,7 @@ export default function GardenPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-black mb-2">遊戲方法</h3>
             <p className="text-3xl font-bold text-secondary-pink">
-              {games.length}
+              {loading ? "載入中..." : games.length}
             </p>
             <p className="text-sm text-gray-500">總數量</p>
           </div>
@@ -558,7 +694,7 @@ export default function GardenPage() {
               管理員消息
             </h3>
             <p className="text-3xl font-bold text-secondary-pink">
-              {messages.length}
+              {loading ? "載入中..." : messages.length}
             </p>
             <p className="text-sm text-gray-500">總數量</p>
           </div>
@@ -568,8 +704,16 @@ export default function GardenPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex space-x-4">
             {[
-              { id: "games", name: "遊戲方法", count: games.length },
-              { id: "messages", name: "管理員消息", count: messages.length },
+              {
+                id: "games",
+                name: "遊戲方法",
+                count: loading ? "載入中..." : games.length,
+              },
+              {
+                id: "messages",
+                name: "管理員消息",
+                count: loading ? "載入中..." : messages.length,
+              },
             ].map((tab) => (
               <button
                 key={tab.id}

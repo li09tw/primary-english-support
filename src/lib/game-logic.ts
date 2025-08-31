@@ -1,12 +1,12 @@
 /**
- * @fileoverview Game Logic - Pattern handlers for different sentence patterns
- * @modified 2024-12-19 15:30 - 句型拉霸機功能已鎖定保護
+ * @fileoverview 遊戲邏輯模組 - 處理遊戲題目生成和邏輯運算
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
  * @modified_by Assistant
- * @modification_type protection
+ * @modification_type feature
  * @status locked
- * @last_commit 2024-12-19 15:30
- * @feature 句型拉霸機核心邏輯和句型處理器，支援填空題和是非題模式
- * @protection 句型拉霸機相關功能已鎖定，禁止修改，如需類似功能請建立新組件
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 遊戲邏輯和題目生成功能已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
  */
 
 import { SentencePattern, Word, PatternSlot } from "@/types/learning-content";

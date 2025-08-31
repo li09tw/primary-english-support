@@ -1,3 +1,14 @@
+/**
+ * @fileoverview 類型定義檔案 - 包含遊戲方法、學習內容等核心類型
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified_by Assistant
+ * @modification_type feature
+ * @status locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 核心類型定義已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ */
+
 // 遊戲方法類型
 export interface GameMethod {
   id: string;

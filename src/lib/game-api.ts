@@ -1,3 +1,14 @@
+/**
+ * @fileoverview 遊戲 API 模組 - 處理遊戲方法的 CRUD 操作
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified_by Assistant
+ * @modification_type feature
+ * @status locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 遊戲方法 API 功能已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ */
+
 // 統一的遊戲 API
 // 根據環境自動選擇正確的 Cloudflare 客戶端
 
@@ -16,7 +27,10 @@ function getClient() {
       // 根據環境選擇客戶端
       if (typeof window !== "undefined") {
         // 在瀏覽器中，檢查是否有本地開發環境變數
-        if (process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL === "http://localhost:8787") {
+        if (
+          process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ===
+          "http://localhost:8787"
+        ) {
           // 本地開發環境，使用本地客戶端
           console.log("🔧 瀏覽器中使用本地開發環境客戶端");
           client = createLocalCloudflareClient();

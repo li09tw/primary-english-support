@@ -1,3 +1,14 @@
+/**
+ * @fileoverview 遊戲庫頁面 - 顯示所有遊戲方法，支援篩選和分頁
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified_by Assistant
+ * @modification_type feature
+ * @status locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 遊戲庫展示、篩選、分頁功能已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ */
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";

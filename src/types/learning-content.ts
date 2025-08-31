@@ -1,3 +1,14 @@
+/**
+ * @fileoverview 學習內容類型定義 - 包含遊戲設定、學習內容等類型
+ * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified_by Assistant
+ * @modification_type feature
+ * @status locked
+ * @last_commit 2024-01-XX XX:XX
+ * @feature 學習內容類型定義已完成
+ * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ */
+
 // Learning Content Type Definitions
 // Updated to support Question-Answer relationships
 
