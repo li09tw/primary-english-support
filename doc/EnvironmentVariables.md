@@ -25,10 +25,16 @@ CLOUDFLARE_API_SECRET=your-secret-api-key-here
 NODE_ENV=production
 ```
 
-### 方法 2: 使用 vercel.env.example
-1. 複製 `vercel.env.example` 為 `.env.local`
-2. 更新其中的 URL 和 API 密鑰
-3. 執行 `vercel env pull` 同步到 Vercel
+### EmailJS 設定（Server-side 使用 REST API）
+請在 Vercel 專案的 Environment Variables 新增以下變數（不需 `NEXT_PUBLIC_` 前綴即可在伺服器端使用；若你需要前端也讀取純公開的 ID，可加 `NEXT_PUBLIC_` 版本）：
+
+```
+EMAILJS_SERVICE_ID=your_service_id
+EMAILJS_TEMPLATE_ID=your_template_id
+EMAILJS_PUBLIC_KEY=your_public_user_id
+```
+
+注意：若發信在伺服器端執行，建議不要將任何敏感金鑰暴露到前端。此專案已改為使用 EmailJS REST API 於伺服器端寄信。
 
 ## 重要提醒
 

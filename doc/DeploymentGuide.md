@@ -1,20 +1,20 @@
-# Vercel 部署指南
+# 部署指南
 
-本指南說明如何將專案部署到 Vercel，同時保持使用 Cloudflare D1 和 R2 服務。
+## 🎯 架構概述
 
-## 架構概述
+專案採用 Vercel + Cloudflare 的混合架構：
 
 ```
-Vercel (Next.js) → Cloudflare Worker API Gateway → Cloudflare D1/R2
+用戶 → Vercel (Next.js) → Cloudflare Worker API Gateway → Cloudflare D1/R2
 ```
 
 - **前端**: 部署在 Vercel 的 Next.js 應用
 - **API 閘道**: Cloudflare Worker 處理 D1 和 R2 操作
 - **資料存儲**: Cloudflare D1 (SQLite) 和 R2 (物件存儲)
 
-## 部署步驟
+## 🚀 部署步驟
 
-### 1. 部署 Cloudflare Worker API 閘道
+### 步驟 1: 部署 Cloudflare Worker
 
 #### 1.1 安裝 Wrangler CLI
 ```bash
@@ -39,7 +39,7 @@ wrangler deploy --config wrangler-api-gateway.toml
 在 Cloudflare Dashboard 中為你的 Worker 設定環境變數：
 - `API_SECRET`: 設定一個安全的 API 密鑰
 
-### 2. 部署到 Vercel
+### 步驟 2: 部署到 Vercel
 
 #### 2.1 安裝 Vercel CLI
 ```bash
@@ -63,6 +63,11 @@ CLOUDFLARE_API_SECRET=your-secret-api-key-here
 
 # 環境
 NODE_ENV=production
+
+# EmailJS 設定（Server-side 使用 REST API）
+EMAILJS_SERVICE_ID=your_service_id
+EMAILJS_TEMPLATE_ID=your_template_id
+EMAILJS_PUBLIC_KEY=your_public_user_id
 ```
 
 #### 2.4 部署專案
@@ -70,33 +75,23 @@ NODE_ENV=production
 vercel --prod
 ```
 
-## 環境變數配置
+## 🛠️ 本地開發
 
-### Vercel 環境變數
-- `CLOUDFLARE_WORKER_URL`: Cloudflare Worker 的 URL
-- `CLOUDFLARE_API_SECRET`: 用於驗證的 API 密鑰
-- `NODE_ENV`: 環境設定
-
-### Cloudflare Worker 環境變數
-- `API_SECRET`: 用於驗證來自 Vercel 的請求
-- `PRIMARY_ENGLISH_DB`: D1 資料庫綁定
-- `primary_english_storage`: R2 存儲綁定
-
-## 本地開發
-
-### 1. 啟動 Cloudflare Worker 本地開發
+### 啟動完整開發環境
 ```bash
-# 在一個終端中
-wrangler dev --config wrangler-api-gateway.toml
+npm run dev:full
 ```
 
-### 2. 啟動 Next.js 開發伺服器
+### 分別啟動服務
 ```bash
-# 在另一個終端中
+# 終端 1: 啟動 Worker
+npm run dev:worker
+
+# 終端 2: 啟動 Next.js
 npm run dev
 ```
 
-### 3. 設定本地環境變數
+### 環境變數配置
 創建 `.env.local` 文件：
 ```bash
 CLOUDFLARE_WORKER_URL=http://localhost:8787
@@ -104,22 +99,29 @@ CLOUDFLARE_API_SECRET=local-dev-secret
 NODE_ENV=development
 ```
 
-## 測試部署
+## ✅ 部署檢查清單
 
-### 1. 測試 D1 查詢
-```bash
-curl -X POST https://your-worker-url.workers.dev/query \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: your-secret-api-key-here" \
-  -d '{"query": "SELECT COUNT(*) as total FROM game_methods"}'
-```
+### 部署前準備
+- [ ] `.env.local` 文件已設定
+- [ ] `wrangler` CLI 已安裝並登入
+- [ ] `vercel` CLI 已安裝並登入
+- [ ] 有 Cloudflare 帳戶權限
+- [ ] 有 Vercel 專案權限
 
-### 2. 測試 Next.js API
-```bash
-curl "https://your-vercel-app.vercel.app/api/games?page=1&limit=10"
-```
+### 部署流程
+- [ ] Worker 部署成功
+- [ ] 獲得生產環境 Worker URL
+- [ ] Vercel 部署成功
+- [ ] 環境變數已正確設定
 
-## 故障排除
+### 部署後檢查
+- [ ] 訪問 Worker URL 確認服務正常
+- [ ] 訪問生產環境網站
+- [ ] 確認遊戲頁面能正常載入
+- [ ] 測試與 Cloudflare Worker 的連接
+- [ ] 測試聯絡表單功能
+
+## 🔧 故障排除
 
 ### 常見問題
 
@@ -135,9 +137,9 @@ curl "https://your-vercel-app.vercel.app/api/games?page=1&limit=10"
 - 確認 Worker 的 D1 綁定正確
 - 檢查 SQL 查詢語法
 
-#### 4. R2 操作失敗
-- 確認 Worker 的 R2 綁定正確
-- 檢查物件鍵名和權限
+#### 4. 環境變數缺失
+- 確認 Vercel 環境變數設定
+- 檢查 `.env.local` 文件格式
 
 ### 日誌檢查
 
@@ -149,21 +151,21 @@ vercel logs
 #### Cloudflare Worker 日誌
 在 Cloudflare Dashboard 中查看 Worker 的即時日誌。
 
-## 性能優化
+## 📊 性能優化
 
 ### 1. 快取策略
 - 在 Vercel 端實作適當的快取
 - 考慮使用 Cloudflare 的邊緣快取
 
-### 2. 連接池
-- Worker 會自動管理 D1 連接
-- 避免在 Vercel 端建立持久連接
-
-### 3. 批量操作
+### 2. 批量操作
 - 盡可能批量處理 D1 查詢
 - 減少 Worker 調用次數
 
-## 安全考量
+### 3. 連接優化
+- Worker 會自動管理 D1 連接
+- 避免在 Vercel 端建立持久連接
+
+## 🔒 安全考量
 
 ### 1. API 密鑰管理
 - 使用強密碼作為 API 密鑰
@@ -178,7 +180,7 @@ vercel logs
 - 在 Worker 中實作速率限制
 - 防止濫用 API
 
-## 成本考量
+## 💰 成本考量
 
 ### Vercel 成本
 - Serverless Function 執行時間
@@ -190,7 +192,7 @@ vercel logs
 - D1 讀寫操作
 - R2 存儲和操作
 
-## 監控和維護
+## 📈 監控和維護
 
 ### 1. 性能監控
 - 監控 API 響應時間
@@ -206,3 +208,19 @@ vercel logs
 - 定期備份 D1 資料
 - 設定 R2 物件版本控制
 - 測試恢復程序
+
+## 🔄 回滾步驟
+
+如果部署失敗，可以：
+
+1. **回滾 Worker**：使用 `wrangler rollback` 命令
+2. **回滾 Vercel**：在 Vercel 儀表板中回滾到上一個版本
+3. **檢查日誌**：查看 Worker 和 Vercel 的錯誤日誌
+
+## 📚 相關文檔
+
+- [環境變數設定](EnvironmentVariables.md)
+- [專案結構說明](ProjectStructure.md)
+- [功能指南](FeaturesGuide.md)
+- [EmailJS 設定](EmailjsSetup.md)
+- [SEO 優化](SeoOptimization.md)

@@ -8,7 +8,7 @@ export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    type: "general", // 新增類型欄位
+    type: "technical", // 新增類型欄位（預設為技術支援）
     title: "", // 新增標題欄位
     content: "", // 將 message 改為 content
   });
@@ -73,7 +73,7 @@ export default function ContactForm() {
       setFormData({
         name: "",
         email: "",
-        type: "general",
+        type: "technical",
         title: "",
         content: "",
       });
@@ -155,10 +155,8 @@ export default function ContactForm() {
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:border-transparent"
           >
-            <option value="general">一般詢問</option>
             <option value="technical">技術支援</option>
             <option value="feedback">意見回饋</option>
-            <option value="cooperation">合作提案</option>
             <option value="game_aid_suggestion">遊戲、輔具提議</option>
             <option value="other">其他</option>
           </select>

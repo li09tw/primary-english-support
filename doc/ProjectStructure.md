@@ -8,6 +8,9 @@ Primary English Support 採用 Vercel + Cloudflare 的混合架構，結合兩�
 - **API 閘道**: Cloudflare Worker 處理 D1 和 R2 操作
 - **資料庫**: Cloudflare D1 (SQLite)
 - **檔案存儲**: Cloudflare R2
+- **郵件服務**: EmailJS
+
+> 📖 **詳細部署說明請參考**: [部署指南](DeploymentGuide.md)
 
 ## 📁 專案結構
 
@@ -161,3 +164,11 @@ NODE_ENV=development
 - 升級到最新的 Next.js 版本
 - 優化 Worker 性能
 - 改進錯誤處理和日誌記錄
+
+## 📚 相關文檔
+
+- [部署指南](DeploymentGuide.md)
+- [功能指南](FeaturesGuide.md)
+- [環境變數設定](EnvironmentVariables.md)
+- [EmailJS 設定](EmailjsSetup.md)
+- [SEO 優化](SeoOptimization.md)

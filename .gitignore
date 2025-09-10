@@ -35,4 +35,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# security - sensitive scripts with hardcoded credentials
+scripts/deploy-zoralitw09-account.sh
+scripts/setup-zoralitw09-account.sql
+scripts/generate-zoralitw09-password.js
+scripts/generate-admin-password.js
+scripts/deploy-secure-verification-system.sh
+
+# temporary credential files
+temp_*_credentials.txt
+*_insert.sql
+*_credentials.txt
 

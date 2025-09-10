@@ -90,13 +90,15 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
 
 #### 5.2 生產環境
 在 Vercel 中設定環境變數：
-1. 前往 Cloudflare Dashboard
-2. 選擇您的 Pages 專案
-3. 點擊 "Settings" > "Environment variables"
+1. 前往 Vercel Dashboard
+2. 選擇您的專案
+3. 點擊 "Settings" > "Environment Variables"
 4. 新增以下變數：
-   - `NEXT_PUBLIC_EMAILJS_SERVICE_ID`
-   - `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID`
-   - `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`
+   - `EMAILJS_SERVICE_ID`
+   - `EMAILJS_TEMPLATE_ID`
+   - `EMAILJS_PUBLIC_KEY`
+
+> 📖 **詳細部署說明請參考**: [部署指南](DeploymentGuide.md)
 
 ### 6. 測試設定
 

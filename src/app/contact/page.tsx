@@ -24,39 +24,6 @@ export default function ContactPage() {
 
           {/* 聯絡資訊 */}
           <div className="space-y-8">
-            {/* 常見問題 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                常見問題
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">
-                    如何新增遊戲方法？
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    您可以透過管理介面新增遊戲方法，包括遊戲說明、所需材料和操作步驟等資訊。
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">
-                    可以自訂教學輔具嗎？
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    是的，您可以根據課本內容和教學需求，自訂適合的教學輔具。
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">
-                    如何發布站長消息？
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    在管理介面中，您可以撰寫和發布站長消息，讓使用者了解最新的更新和重要資訊。
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* 技術支援 */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -72,6 +39,40 @@ export default function ContactPage() {
                   這樣我們能更快地為您提供解決方案。
                 </p>
               </div>
+            </div>
+
+            {/* 意見回饋 */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                意見回饋
+              </h3>
+              <p className="text-gray-600">
+                歡迎提供對網站內容、互動設計與學習體驗的建議，我們會持續改進。
+              </p>
+            </div>
+
+            {/* 遊戲、輔具提議 */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                遊戲、輔具提議
+              </h3>
+              <p className="text-gray-600 mb-4">
+                請描述教材、年級、句型/單字，以及希望增加或投放的電子教具。
+              </p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-800">
+                  <strong>建議格式：</strong>{" "}
+                  教材／年級／句型或單字／教具說明與使用方式。
+                </p>
+              </div>
+            </div>
+
+            {/* 其他 */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">其他</h3>
+              <p className="text-gray-600">
+                若上述項目不符合您的需求，請在表單中選擇「其他」並說明。
+              </p>
             </div>
           </div>
         </div>

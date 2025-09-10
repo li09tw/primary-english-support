@@ -1,10 +1,10 @@
 /**
  * @fileoverview Garden 管理介面 - 管理遊戲方法和管理員消息
- * @modified 2024-01-XX XX:XX - 修復遊戲方法數量顯示問題
+ * @modified 2024-01-XX XX:XX - 新增帳號驗證系統
  * @modified_by Assistant
- * @modification_type bugfix
- * @status completed
- * @feature 從 Cloudflare Worker API 獲取數據，修復數量顯示
+ * @modification_type feature
+ * @status in_progress
+ * @feature 新增帳號驗證和驗證碼驗證功能，保護管理介面安全
  */
 
 "use client";
@@ -14,6 +14,7 @@ import { GameMethod, AdminMessage } from "@/types";
 import { generateId, saveGameMethods, saveAdminMessages } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { gameAPI, adminMessageAPI } from "@/lib/game-api";
+import AuthGuard from "@/components/AuthGuard";
 
 export default function GardenPage() {
   const router = useRouter();
