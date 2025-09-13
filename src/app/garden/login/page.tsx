@@ -169,9 +169,27 @@ export default function GardenLoginPage() {
         }));
 
         // 驗證成功，重定向到 Garden 頁面
-        setTimeout(() => {
+        console.log("✅ 驗證成功，準備跳轉到 /garden");
+        console.log("🔍 當前環境:", process.env.NODE_ENV);
+        console.log("🔍 當前 URL:", window.location.href);
+
+        // 嘗試多種跳轉方式
+        const performRedirect = () => {
+          console.log("🚀 執行跳轉到 /garden");
+
+          // 方法1: 使用 router.push
           router.push("/garden");
-        }, 1000);
+
+          // 方法2: 使用 window.location (備用)
+          setTimeout(() => {
+            if (window.location.pathname === "/garden/login") {
+              console.log("⚠️ router.push 失敗，使用 window.location");
+              window.location.href = "/garden";
+            }
+          }, 2000);
+        };
+
+        setTimeout(performRedirect, 1000);
       } else {
         setLoginState((prev) => ({
           ...prev,
