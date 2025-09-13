@@ -6,6 +6,7 @@ export const EMAILJS_CONFIG = {
 };
 
 async function emailjsSend(templateParams: Record<string, unknown>) {
+  // EmailJS 的正確 API 端點和格式
   const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: {
@@ -19,11 +20,24 @@ async function emailjsSend(templateParams: Record<string, unknown>) {
     }),
   });
 
+  console.log("EmailJS Request:", {
+    service_id: EMAILJS_CONFIG.serviceId,
+    template_id: EMAILJS_CONFIG.templateId,
+    user_id: EMAILJS_CONFIG.publicKey,
+    template_params: templateParams,
+  });
+
+  console.log("EmailJS Response Status:", response.status);
+
   if (!response.ok) {
     const text = await response.text();
+    console.error("EmailJS Error:", text);
     throw new Error(`EmailJS REST failed: ${response.status} ${text}`);
   }
-  return await response.text();
+
+  const result = await response.text();
+  console.log("EmailJS Success:", result);
+  return result;
 }
 
 // 發送聯絡表單郵件
