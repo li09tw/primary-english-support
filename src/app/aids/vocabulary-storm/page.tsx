@@ -28,13 +28,13 @@ export default function VocabularyStormPage() {
   // 處理單字選擇
   const handleVocabularySelected = (words: Word[], theme: WordTheme) => {
     // 將 Word[] 轉換為 Vocabulary[] 格式
-    const convertedVocabulary: Vocabulary[] = words.map(word => ({
+    const convertedVocabulary: Vocabulary[] = words.map((word) => ({
       id: word.id.toString(),
       english: word.english_singular,
       chinese: word.chinese_meaning,
-      phonetic: '', // Word 類型沒有 phonetic 欄位，設為空字串
-      example: '', // Word 類型沒有 example 欄位，設為空字串
-      image: word.image_url
+      phonetic: "", // Word 類型沒有 phonetic 欄位，設為空字串
+      example: "", // Word 類型沒有 example 欄位，設為空字串
+      image: word.image_url,
     }));
     setVocabulary(convertedVocabulary);
   };
@@ -64,102 +64,24 @@ export default function VocabularyStormPage() {
     const rounds: StormRound[] = [];
     const shuffledVocab = [...vocab].sort(() => Math.random() - 0.5);
 
-    // 定義分類
-    const categories = [
-      {
-        name: "動物",
-        keywords: [
-          "cat",
-          "dog",
-          "bird",
-          "fish",
-          "lion",
-          "tiger",
-          "elephant",
-          "monkey",
-          "bear",
-          "rabbit",
-        ],
-      },
-      {
-        name: "食物",
-        keywords: [
-          "apple",
-          "banana",
-          "bread",
-          "rice",
-          "meat",
-          "fish",
-          "egg",
-          "milk",
-          "cake",
-          "pizza",
-        ],
-      },
-      {
-        name: "顏色",
-        keywords: [
-          "red",
-          "blue",
-          "green",
-          "yellow",
-          "black",
-          "white",
-          "pink",
-          "purple",
-          "orange",
-          "brown",
-        ],
-      },
-      {
-        name: "數字",
-        keywords: [
-          "one",
-          "two",
-          "three",
-          "four",
-          "five",
-          "six",
-          "seven",
-          "eight",
-          "nine",
-          "ten",
-        ],
-      },
-      {
-        name: "家庭",
-        keywords: [
-          "father",
-          "mother",
-          "sister",
-          "brother",
-          "grandfather",
-          "grandmother",
-          "uncle",
-          "aunt",
-          "cousin",
-          "baby",
-        ],
-      },
-    ];
+    // 使用模擬資料庫中的主題資訊，而不是硬編碼的分類
+    // 基於可用的單字數量生成回合
+    const maxRounds = Math.min(5, Math.floor(vocab.length / 5));
 
-    // 為每個分類生成回合
-    categories.forEach((category, index) => {
-      if (index < Math.floor(vocab.length / 5)) {
-        const targetWords = shuffledVocab.slice(index * 5, (index + 1) * 5);
+    for (let i = 0; i < maxRounds; i++) {
+      const targetWords = shuffledVocab.slice(i * 5, (i + 1) * 5);
 
-        rounds.push({
-          id: `round-${index}`,
-          category: category.name,
-          targetWords,
-          userWords: [],
-          timeLeft: 60, // 60秒
-          isActive: false,
-        });
-      }
-    });
+      rounds.push({
+        id: `round-${i}`,
+        category: `主題 ${i + 1}`, // 使用通用主題名稱
+        targetWords,
+        userWords: [],
+        timeLeft: 60, // 60秒
+        isActive: false,
+      });
+    }
 
-    return rounds.slice(0, 5); // 最多5個回合
+    return rounds;
   };
 
   // 開始回合

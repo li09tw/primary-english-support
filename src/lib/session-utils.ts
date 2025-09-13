@@ -30,25 +30,35 @@ export class SessionManagerLite {
     error?: string;
   }> {
     try {
-      const response = await fetch(
-        `${process.env.CLOUDFLARE_WORKER_URL}/query`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-          },
-          body: JSON.stringify({
-            query: `
+      // 使用 NEXT_PUBLIC_ 前綴的環境變數（Vercel 要求）
+      const workerUrl =
+        process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ||
+        process.env.CLOUDFLARE_WORKER_URL;
+      const apiSecret =
+        process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET ||
+        process.env.CLOUDFLARE_API_SECRET;
+
+      if (!workerUrl || !apiSecret) {
+        console.error("Missing Cloudflare environment variables in middleware");
+        return { valid: false, error: "環境變數配置錯誤" };
+      }
+
+      const response = await fetch(`${workerUrl}/query`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": apiSecret,
+        },
+        body: JSON.stringify({
+          query: `
             SELECT s.account_id, s.expires_at, a.username, a.is_active, a.is_locked
             FROM admin_sessions s
             JOIN admin_accounts a ON s.account_id = a.id
             WHERE s.session_token = ? AND s.expires_at > datetime('now')
           `,
-            params: [sessionToken],
-          }),
-        }
-      );
+          params: [sessionToken],
+        }),
+      });
 
       if (response.ok) {
         const data = await response.json();

@@ -2437,7 +2437,7 @@ const mockWords: Word[] = [
 
   // Toys words (Theme 14) - all have plurals
   {
-    id: 112,
+    id: 300,
     english_singular: "doll",
     english_plural: "dolls",
     chinese_meaning: "娃娃",
@@ -2447,7 +2447,7 @@ const mockWords: Word[] = [
     audio_url: undefined,
   },
   {
-    id: 113,
+    id: 301,
     english_singular: "car",
     english_plural: "cars",
     chinese_meaning: "車子",
@@ -2457,7 +2457,7 @@ const mockWords: Word[] = [
     audio_url: undefined,
   },
   {
-    id: 114,
+    id: 302,
     english_singular: "ball",
     english_plural: "balls",
     chinese_meaning: "球",
@@ -2467,7 +2467,7 @@ const mockWords: Word[] = [
     audio_url: undefined,
   },
   {
-    id: 115,
+    id: 303,
     english_singular: "robot",
     english_plural: "robots",
     chinese_meaning: "機器人",
@@ -2477,7 +2477,7 @@ const mockWords: Word[] = [
     audio_url: undefined,
   },
   {
-    id: 116,
+    id: 304,
     english_singular: "puzzle",
     english_plural: "puzzles",
     chinese_meaning: "拼圖",
@@ -2487,50 +2487,10 @@ const mockWords: Word[] = [
     audio_url: undefined,
   },
   {
-    id: 117,
+    id: 305,
     english_singular: "teddy bear",
     english_plural: "teddy bears",
     chinese_meaning: "泰迪熊",
-    part_of_speech: "noun",
-    has_plural: true,
-    image_url: undefined,
-    audio_url: undefined,
-  },
-  {
-    id: 118,
-    english_singular: "building blocks",
-    english_plural: "building blocks",
-    chinese_meaning: "積木",
-    part_of_speech: "noun",
-    has_plural: false,
-    image_url: undefined,
-    audio_url: undefined,
-  },
-  {
-    id: 119,
-    english_singular: "train",
-    english_plural: "trains",
-    chinese_meaning: "火車",
-    part_of_speech: "noun",
-    has_plural: true,
-    image_url: undefined,
-    audio_url: undefined,
-  },
-  {
-    id: 120,
-    english_singular: "airplane",
-    english_plural: "airplanes",
-    chinese_meaning: "飛機",
-    part_of_speech: "noun",
-    has_plural: true,
-    image_url: undefined,
-    audio_url: undefined,
-  },
-  {
-    id: 121,
-    english_singular: "boat",
-    english_plural: "boats",
-    chinese_meaning: "船",
     part_of_speech: "noun",
     has_plural: true,
     image_url: undefined,
@@ -3772,17 +3732,13 @@ const wordThemeMap = new Map<number, number[]>([
   [46, [13]],
   [47, [13]],
 
-  // Toys (theme_id: 14) - words 112-121
-  [112, [14]],
-  [113, [14]],
-  [114, [14]],
-  [115, [14]],
-  [116, [14]],
-  [117, [14]],
-  [118, [14]],
-  [119, [14]],
-  [120, [14]],
-  [121, [14]],
+  // Toys (theme_id: 14) - words 300-305
+  [300, [14]],
+  [301, [14]],
+  [302, [14]],
+  [303, [14]],
+  [304, [14]],
+  [305, [14]],
 
   // Drinks (theme_id: 15) - words 48-53
   [48, [15]],
@@ -3812,17 +3768,7 @@ const wordThemeMap = new Map<number, number[]>([
   [110, [18]],
   [111, [18]],
 
-  // Professions (theme_id: 19) - words 112-137
-  [112, [19]],
-  [113, [19]],
-  [114, [19]],
-  [115, [19]],
-  [116, [19]],
-  [117, [19]],
-  [118, [19]],
-  [119, [19]],
-  [120, [19]],
-  [121, [19]],
+  // Professions (theme_id: 19) - words 122-137
   [122, [19]],
   [123, [19]],
   [124, [19]],

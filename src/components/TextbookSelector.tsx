@@ -4,14 +4,14 @@ import React, { useState, useEffect } from "react";
 import { WordTheme, Word, Grade } from "@/types/learning-content";
 
 interface TextbookSelectorProps {
-  onVocabularySelected: (words: Word[], theme: WordTheme) => void;
+  onVocabularySelected: (words: Word[], themes: WordTheme[]) => void;
 }
 
 export default function TextbookSelector({
   onVocabularySelected,
 }: TextbookSelectorProps) {
   const [themes, setThemes] = useState<WordTheme[]>([]);
-  const [selectedTheme, setSelectedTheme] = useState<WordTheme | null>(null);
+  const [selectedThemes, setSelectedThemes] = useState<WordTheme[]>([]);
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,12 +21,19 @@ export default function TextbookSelector({
     fetchThemes();
   }, []);
 
-  // Fetch words when theme changes
+  // Fetch words when selected themes change
   useEffect(() => {
-    if (selectedTheme) {
-      fetchWordsByTheme(selectedTheme.id);
+    if (selectedThemes.length > 0) {
+      fetchWordsByThemes(selectedThemes.map((theme) => theme.id));
     }
-  }, [selectedTheme]);
+  }, [selectedThemes]);
+
+  // Auto-select vocabulary when 2 themes are selected and words are loaded
+  useEffect(() => {
+    if (selectedThemes.length === 2 && words.length > 0) {
+      onVocabularySelected(words, selectedThemes);
+    }
+  }, [selectedThemes, words, onVocabularySelected]);
 
   const fetchThemes = async () => {
     try {
@@ -36,10 +43,6 @@ export default function TextbookSelector({
 
       if (data.success) {
         setThemes(data.data);
-        // Auto-select first theme
-        if (data.data.length > 0) {
-          setSelectedTheme(data.data[0]);
-        }
       } else {
         setError(data.error || "Failed to fetch themes");
       }
@@ -51,19 +54,33 @@ export default function TextbookSelector({
     }
   };
 
-  const fetchWordsByTheme = async (themeId: number) => {
+  const fetchWordsByThemes = async (themeIds: number[]) => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/learning-content?action=words_by_theme&theme_id=${themeId}`
-      );
-      const data = await response.json();
+      const allWords: Word[] = [];
 
-      if (data.success) {
-        setWords(data.data);
-      } else {
-        setError(data.error || "Failed to fetch words");
-      }
+      // 並行獲取所有主題的單字
+      const promises = themeIds.map((themeId) =>
+        fetch(
+          `/api/learning-content?action=words_by_theme&theme_id=${themeId}`
+        ).then((response) => response.json())
+      );
+
+      const results = await Promise.all(promises);
+
+      // 合併所有單字
+      results.forEach((result) => {
+        if (result.success) {
+          allWords.push(...result.data);
+        }
+      });
+
+      // 去重複（基於單字ID）
+      const uniqueWords = allWords.filter(
+        (word, index, self) => index === self.findIndex((w) => w.id === word.id)
+      );
+
+      setWords(uniqueWords);
     } catch (err) {
       setError("Failed to fetch words");
       console.error("Error fetching words:", err);
@@ -73,14 +90,19 @@ export default function TextbookSelector({
   };
 
   const handleThemeChange = (theme: WordTheme) => {
-    setSelectedTheme(theme);
-    setWords([]); // Clear words when theme changes
-  };
-
-  const handleVocabularySelect = () => {
-    if (selectedTheme && words.length > 0) {
-      onVocabularySelected(words, selectedTheme);
-    }
+    setSelectedThemes((prev) => {
+      const isSelected = prev.some((t) => t.id === theme.id);
+      if (isSelected) {
+        // 如果已選擇，則移除
+        return prev.filter((t) => t.id !== theme.id);
+      } else if (prev.length < 2) {
+        // 如果未選擇且未達到上限，則添加
+        return [...prev, theme];
+      } else {
+        // 如果已達到上限，則替換第一個
+        return [prev[1], theme];
+      }
+    });
   };
 
   if (loading && themes.length === 0) {
@@ -110,47 +132,72 @@ export default function TextbookSelector({
       {/* Theme Selection */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-black mb-2">
-          單字主題
+          單字主題 (請選擇2個主題)
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-          {themes.map((theme) => (
-            <button
-              key={theme.id}
-              onClick={() => handleThemeChange(theme)}
-              className={`px-3 py-2 text-sm rounded-md transition-colors ${
-                selectedTheme?.id === theme.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-black hover:bg-gray-200"
-              }`}
-            >
-              {theme.name}
-            </button>
-          ))}
+          {themes.map((theme) => {
+            const isSelected = selectedThemes.some((t) => t.id === theme.id);
+            const isDisabled = selectedThemes.length >= 2 && !isSelected;
+            return (
+              <button
+                key={theme.id}
+                onClick={() => handleThemeChange(theme)}
+                disabled={isDisabled}
+                className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                  isSelected
+                    ? "bg-blue-600 text-white"
+                    : isDisabled
+                    ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 text-black hover:bg-gray-200"
+                }`}
+              >
+                {theme.name}
+              </button>
+            );
+          })}
         </div>
+
+        {/* 已選擇的主題顯示 */}
+        {selectedThemes.length > 0 && (
+          <div className="mt-3 p-3 bg-blue-50 rounded-md">
+            <p className="text-sm text-blue-800 mb-2">
+              已選擇的主題 ({selectedThemes.length}/2)
+              {selectedThemes.length === 2 && words.length > 0
+                ? `，共包含 ${words.length} 個單字`
+                : ""}
+              :
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {selectedThemes.map((theme, index) => (
+                <span
+                  key={theme.id}
+                  className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                >
+                  {theme.name}
+                  <button
+                    onClick={() => handleThemeChange(theme)}
+                    className="ml-1 text-blue-600 hover:text-blue-800"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Word Count Display */}
-      {selectedTheme && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-md">
-          <p className="text-sm text-blue-800">
-            <span className="font-medium">{selectedTheme.name}</span> 主題包含{" "}
-            <span className="font-bold">{words.length}</span> 個單字
-          </p>
+      {/* Auto-select vocabulary when 2 themes are selected */}
+      {selectedThemes.length === 2 && words.length > 0 && (
+        <div className="text-center">
+          <div className="text-sm text-green-600 font-medium">
+            ✓ 已準備好開始遊戲
+          </div>
         </div>
-      )}
-
-      {/* Action Button */}
-      {selectedTheme && words.length > 0 && (
-        <button
-          onClick={handleVocabularySelect}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          開始學習 {selectedTheme.name}
-        </button>
       )}
 
       {/* Loading State for Words */}
-      {selectedTheme && loading && (
+      {selectedThemes.length > 0 && loading && (
         <div className="flex justify-center items-center p-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
         </div>

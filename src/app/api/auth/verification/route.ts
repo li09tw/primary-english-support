@@ -18,6 +18,7 @@ import {
   AUTH_CONFIG,
 } from "@/lib/auth-utils";
 import { generateId } from "@/lib/utils";
+import { getCloudflareConfig } from "@/lib/env-config";
 
 // POST: 發送驗證碼
 export async function POST(request: NextRequest) {
@@ -58,20 +59,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 獲取帳戶資訊
-    const accountResponse = await fetch(
-      `${process.env.CLOUDFLARE_WORKER_URL}/query`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-        },
-        body: JSON.stringify({
-          query: "SELECT username, email FROM admin_accounts WHERE id = ?",
-          params: [accountId],
-        }),
-      }
-    );
+    const { workerUrl, apiSecret } = getCloudflareConfig();
+    const accountResponse = await fetch(`${workerUrl}/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiSecret,
+      },
+      body: JSON.stringify({
+        query: "SELECT username, email FROM admin_accounts WHERE id = ?",
+        params: [accountId],
+      }),
+    });
 
     if (!accountResponse.ok) {
       return NextResponse.json(
@@ -108,23 +107,20 @@ export async function POST(request: NextRequest) {
     );
 
     // 儲存驗證碼到資料庫
-    const saveResponse = await fetch(
-      `${process.env.CLOUDFLARE_WORKER_URL}/execute`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-        },
-        body: JSON.stringify({
-          query: `
+    const saveResponse = await fetch(`${workerUrl}/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiSecret,
+      },
+      body: JSON.stringify({
+        query: `
           INSERT INTO verification_codes (id, account_id, code_hash, expires_at, created_at)
           VALUES (?, ?, ?, ?, datetime('now'))
         `,
-          params: [generateId(), accountId, codeHash, expiresAt.toISOString()],
-        }),
-      }
-    );
+        params: [generateId(), accountId, codeHash, expiresAt.toISOString()],
+      }),
+    });
 
     if (!saveResponse.ok) {
       return NextResponse.json(
@@ -222,26 +218,24 @@ export async function PUT(request: NextRequest) {
     const cleanCode = code.trim().replace(/[<>\"'&]/g, "");
 
     // 查詢驗證碼
-    const codeResponse = await fetch(
-      `${process.env.CLOUDFLARE_WORKER_URL}/query`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-        },
-        body: JSON.stringify({
-          query: `
+    const { workerUrl, apiSecret } = getCloudflareConfig();
+    const codeResponse = await fetch(`${workerUrl}/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiSecret,
+      },
+      body: JSON.stringify({
+        query: `
           SELECT id, code_hash, expires_at, is_used
           FROM verification_codes
           WHERE account_id = ? AND is_used = FALSE
           ORDER BY created_at DESC
           LIMIT 1
         `,
-          params: [accountId],
-        }),
-      }
-    );
+        params: [accountId],
+      }),
+    });
 
     if (!codeResponse.ok) {
       return NextResponse.json(
@@ -294,11 +288,11 @@ export async function PUT(request: NextRequest) {
     }
 
     // 標記驗證碼為已使用
-    await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/execute`, {
+    await fetch(`${workerUrl}/execute`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+        "X-API-Key": apiSecret,
       },
       body: JSON.stringify({
         query: "UPDATE verification_codes SET is_used = TRUE WHERE id = ?",
@@ -307,11 +301,11 @@ export async function PUT(request: NextRequest) {
     });
 
     // 更新會話狀態為已驗證
-    await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/execute`, {
+    await fetch(`${workerUrl}/execute`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+        "X-API-Key": apiSecret,
       },
       body: JSON.stringify({
         query: `

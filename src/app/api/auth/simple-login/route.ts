@@ -14,6 +14,7 @@ import {
   getClientIP,
   getSecurityHeaders,
 } from "@/lib/auth-utils";
+import { getCloudflareConfig } from "@/lib/env-config";
 
 // POST: 處理簡化登入請求
 export async function POST(request: NextRequest) {
@@ -53,24 +54,22 @@ export async function POST(request: NextRequest) {
     }
 
     // 查詢帳戶資訊（使用參數化查詢防止 SQL Injection）
-    const accountResponse = await fetch(
-      `${process.env.CLOUDFLARE_WORKER_URL}/query`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-        },
-        body: JSON.stringify({
-          query: `
+    const { workerUrl, apiSecret } = getCloudflareConfig();
+    const accountResponse = await fetch(`${workerUrl}/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiSecret,
+      },
+      body: JSON.stringify({
+        query: `
             SELECT id, username, email, is_active, is_locked
             FROM admin_accounts
             WHERE username = ? AND is_active = TRUE
           `,
-          params: [cleanUsername],
-        }),
-      }
-    );
+        params: [cleanUsername],
+      }),
+    });
 
     // 無論帳號是否存在，都回傳相同的錯誤訊息（防止帳號枚舉）
     if (!accountResponse.ok) {
@@ -116,30 +115,27 @@ export async function POST(request: NextRequest) {
     expiresAt.setHours(expiresAt.getHours() + 24); // 24小時後過期
 
     // 儲存會話到資料庫
-    const sessionResponse = await fetch(
-      `${process.env.CLOUDFLARE_WORKER_URL}/execute`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-        },
-        body: JSON.stringify({
-          query: `
+    const sessionResponse = await fetch(`${workerUrl}/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiSecret,
+      },
+      body: JSON.stringify({
+        query: `
             INSERT INTO admin_sessions (id, account_id, session_token, expires_at, ip_address, user_agent, created_at)
             VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
           `,
-          params: [
-            sessionToken,
-            account.id,
-            sessionToken,
-            expiresAt.toISOString(),
-            clientIP,
-            request.headers.get("user-agent") || "",
-          ],
-        }),
-      }
-    );
+        params: [
+          sessionToken,
+          account.id,
+          sessionToken,
+          expiresAt.toISOString(),
+          clientIP,
+          request.headers.get("user-agent") || "",
+        ],
+      }),
+    });
 
     if (!sessionResponse.ok) {
       return NextResponse.json(

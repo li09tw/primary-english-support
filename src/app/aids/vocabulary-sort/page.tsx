@@ -15,16 +15,16 @@ interface Category {
 
 export default function VocabularySortPage() {
   const [vocabulary, setVocabulary] = useState<Vocabulary[]>([]);
+  const [selectedThemes, setSelectedThemes] = useState<WordTheme[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [unassignedWords, setUnassignedWords] = useState<Vocabulary[]>([]);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [totalWords, setTotalWords] = useState(0);
-  const [showHint, setShowHint] = useState(false);
   const [isGameComplete, setIsGameComplete] = useState(false);
 
   // 處理單字選擇
-  const handleVocabularySelected = (words: Word[], theme: WordTheme) => {
+  const handleVocabularySelected = (words: Word[], themes: WordTheme[]) => {
     // 將 Word[] 轉換為 Vocabulary[] 格式
     const convertedVocabulary: Vocabulary[] = words.map((word) => ({
       id: word.id.toString(),
@@ -35,6 +35,7 @@ export default function VocabularySortPage() {
       image: word.image_url,
     }));
     setVocabulary(convertedVocabulary);
+    setSelectedThemes(themes);
   };
 
   // 開始詞彙分類遊戲
@@ -44,276 +45,73 @@ export default function VocabularySortPage() {
       return;
     }
 
-    // 讓使用者選擇2個分類
-    const allCategories = [
-      { id: "animals", name: "動物", color: "bg-blue-100" },
-      { id: "food", name: "食物", color: "bg-green-100" },
-      { id: "colors", name: "顏色", color: "bg-yellow-100" },
-      { id: "numbers", name: "數字", color: "bg-purple-100" },
-      { id: "family", name: "家庭", color: "bg-pink-100" },
-      { id: "school", name: "學校", color: "bg-indigo-100" },
-      { id: "body", name: "身體", color: "bg-red-100" },
-      { id: "clothes", name: "衣服", color: "bg-orange-100" },
-      { id: "weather", name: "天氣", color: "bg-cyan-100" },
-      { id: "transport", name: "交通工具", color: "bg-teal-100" },
-    ];
+    if (selectedThemes.length !== 2) {
+      alert("需要選擇2個主題才能開始遊戲！");
+      return;
+    }
 
-    // 隨機選擇2個分類
-    const shuffledCategories = [...allCategories].sort(
-      () => Math.random() - 0.5
+    // 使用選擇的主題名稱作為分類名稱
+    const colors = ["bg-blue-100", "bg-green-100"];
+
+    const predefinedCategories: Category[] = selectedThemes.map(
+      (theme, index) => ({
+        id: `category${index + 1}`,
+        name: theme.name,
+        color: colors[index],
+        words: [],
+      })
     );
-    const selectedCategories = shuffledCategories.slice(0, 2);
 
-    const predefinedCategories: Category[] = selectedCategories.map((cat) => ({
-      ...cat,
-      words: [],
-    }));
-
-    // 隨機選擇單字
+    // 將所有單字打散並放到未分類區域
     const shuffledWords = [...vocabulary].sort(() => Math.random() - 0.5);
-    const selectedWords = shuffledWords.slice(
-      0,
-      Math.min(24, vocabulary.length)
-    );
-
-    // 將單字分配到分類中（基於簡單的關鍵字匹配）
-    const categorizedWords: Vocabulary[] = [];
-    const uncategorizedWords: Vocabulary[] = [];
-
-    // 定義關鍵字映射
-    const keywordMap: { [key: string]: string[] } = {
-      animals: [
-        "cat",
-        "dog",
-        "bird",
-        "fish",
-        "lion",
-        "tiger",
-        "elephant",
-        "monkey",
-        "bear",
-        "cow",
-        "pig",
-        "duck",
-        "chicken",
-        "rabbit",
-        "mouse",
-        "horse",
-        "sheep",
-        "goat",
-        "frog",
-        "snake",
-      ],
-      food: [
-        "apple",
-        "banana",
-        "bread",
-        "rice",
-        "meat",
-        "fish",
-        "egg",
-        "milk",
-        "cake",
-        "pizza",
-        "burger",
-        "sandwich",
-        "soup",
-        "salad",
-        "fruit",
-        "vegetable",
-        "chicken",
-        "beef",
-        "pork",
-        "cheese",
-      ],
-      colors: [
-        "red",
-        "blue",
-        "green",
-        "yellow",
-        "black",
-        "white",
-        "pink",
-        "purple",
-        "orange",
-        "brown",
-        "gray",
-        "grey",
-        "silver",
-        "gold",
-        "rainbow",
-      ],
-      numbers: [
-        "one",
-        "two",
-        "three",
-        "four",
-        "five",
-        "six",
-        "seven",
-        "eight",
-        "nine",
-        "ten",
-        "eleven",
-        "twelve",
-        "thirteen",
-        "fourteen",
-        "fifteen",
-        "sixteen",
-        "seventeen",
-        "eighteen",
-        "nineteen",
-        "twenty",
-      ],
-      family: [
-        "mother",
-        "father",
-        "sister",
-        "brother",
-        "family",
-        "baby",
-        "grandma",
-        "grandpa",
-        "uncle",
-        "aunt",
-        "cousin",
-        "parent",
-        "child",
-        "son",
-        "daughter",
-      ],
-      school: [
-        "book",
-        "pen",
-        "pencil",
-        "school",
-        "teacher",
-        "student",
-        "classroom",
-        "desk",
-        "chair",
-        "blackboard",
-        "computer",
-        "bag",
-        "ruler",
-        "eraser",
-        "notebook",
-      ],
-      body: [
-        "head",
-        "eye",
-        "ear",
-        "nose",
-        "mouth",
-        "hand",
-        "foot",
-        "leg",
-        "arm",
-        "finger",
-        "toe",
-        "hair",
-        "face",
-        "body",
-        "shoulder",
-        "knee",
-        "elbow",
-      ],
-      clothes: [
-        "shirt",
-        "pants",
-        "dress",
-        "shoes",
-        "hat",
-        "coat",
-        "jacket",
-        "sweater",
-        "skirt",
-        "socks",
-        "gloves",
-        "scarf",
-        "belt",
-        "tie",
-        "uniform",
-      ],
-      weather: [
-        "sun",
-        "rain",
-        "cloud",
-        "wind",
-        "snow",
-        "storm",
-        "hot",
-        "cold",
-        "warm",
-        "cool",
-        "sunny",
-        "rainy",
-        "cloudy",
-        "windy",
-        "snowy",
-      ],
-      transport: [
-        "car",
-        "bus",
-        "train",
-        "plane",
-        "bike",
-        "boat",
-        "ship",
-        "truck",
-        "motorcycle",
-        "taxi",
-        "subway",
-        "helicopter",
-        "rocket",
-        "tram",
-        "van",
-      ],
-    };
-
-    selectedWords.forEach((word) => {
-      const wordLower = word.english.toLowerCase();
-      let assigned = false;
-
-      // 檢查每個選中的分類
-      for (let i = 0; i < predefinedCategories.length; i++) {
-        const categoryId = predefinedCategories[i].id;
-        const keywords = keywordMap[categoryId] || [];
-
-        // 檢查單字是否包含該分類的關鍵字
-        if (keywords.some((keyword) => wordLower.includes(keyword))) {
-          predefinedCategories[i].words.push(word);
-          assigned = true;
-          break;
-        }
-      }
-
-      if (!assigned) {
-        uncategorizedWords.push(word);
-      }
-    });
 
     setCategories(predefinedCategories);
-    setUnassignedWords(uncategorizedWords);
-    setScore(categorizedWords.length);
-    setTotalWords(selectedWords.length);
+    setUnassignedWords(shuffledWords);
+    setScore(0);
+    setTotalWords(shuffledWords.length);
     setIsGameStarted(true);
     setIsGameComplete(false);
   };
 
   // 重置遊戲
   const resetGame = () => {
-    setIsGameStarted(false);
-    setCategories([]);
-    setUnassignedWords([]);
-    setScore(0);
-    setTotalWords(0);
-    setShowHint(false);
-    setIsGameComplete(false);
+    if (vocabulary.length > 0 && selectedThemes.length === 2) {
+      // 重新打散單字並重新開始遊戲
+      const shuffledWords = [...vocabulary].sort(() => Math.random() - 0.5);
+      const colors = ["bg-blue-100", "bg-green-100"];
+
+      const predefinedCategories: Category[] = selectedThemes.map(
+        (theme, index) => ({
+          id: `category${index + 1}`,
+          name: theme.name,
+          color: colors[index],
+          words: [],
+        })
+      );
+
+      setCategories(predefinedCategories);
+      setUnassignedWords(shuffledWords);
+      setScore(0);
+      setTotalWords(shuffledWords.length);
+      setIsGameComplete(false);
+    } else {
+      // 如果沒有單字或主題，則完全重置
+      setIsGameStarted(false);
+      setCategories([]);
+      setUnassignedWords([]);
+      setScore(0);
+      setTotalWords(0);
+      setIsGameComplete(false);
+    }
   };
 
   // 拖拽單字到分類
   const dragWordToCategory = (word: Vocabulary, categoryId: string) => {
+    // 檢查單字是否在未分類區域
+    if (!unassignedWords.some((w) => w.id === word.id)) {
+      return; // 如果單字不在未分類區域，則不執行任何操作
+    }
+
     const updatedCategories = categories.map((category) => {
       if (category.id === categoryId) {
         return { ...category, words: [...category.words, word] };
@@ -353,11 +151,6 @@ export default function VocabularySortPage() {
     setIsGameComplete(false);
   };
 
-  // 切換提示
-  const toggleHint = () => {
-    setShowHint(!showHint);
-  };
-
   return (
     <div className="min-h-screen bg-primary-blue">
       <div className="pt-8 pb-8">
@@ -375,38 +168,22 @@ export default function VocabularySortPage() {
                 onVocabularySelected={handleVocabularySelected}
               />
 
-              {/* 單字預覽 */}
-              {vocabulary.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                  <h3 className="text-lg font-semibold text-black mb-4">
-                    單字列表 ({vocabulary.length} 個)
-                  </h3>
-                  <div className="bg-gray-50 p-4 rounded-md max-h-40 overflow-y-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                      {vocabulary.map((word) => (
-                        <div key={word.id} className="text-sm text-black">
-                          {word.english} - {word.chinese}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              {/* 開始遊戲按鈕 */}
+              {vocabulary.length >= 2 && (
+                <div className="text-center mb-8">
+                  <button
+                    onClick={startVocabularySortGame}
+                    className="px-8 py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium text-lg"
+                  >
+                    開始詞彙分類遊戲
+                  </button>
+                </div>
+              )}
 
-                  {/* 開始遊戲按鈕 */}
-                  {vocabulary.length >= 2 && (
-                    <button
-                      onClick={startVocabularySortGame}
-                      className="w-full mt-4 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors font-medium"
-                    >
-                      開始詞彙分類遊戲
-                    </button>
-                  )}
-
-                  {vocabulary.length < 2 && vocabulary.length > 0 && (
-                    <div className="text-center text-red-600 text-sm mt-4">
-                      需要至少2個單字才能開始詞彙分類遊戲，目前只有{" "}
-                      {vocabulary.length} 個單字
-                    </div>
-                  )}
+              {vocabulary.length < 2 && vocabulary.length > 0 && (
+                <div className="text-center text-red-600 text-sm mb-8">
+                  需要至少2個單字才能開始詞彙分類遊戲，目前只有{" "}
+                  {vocabulary.length} 個單字
                 </div>
               )}
             </>
@@ -420,12 +197,6 @@ export default function VocabularySortPage() {
                   詞彙分類遊戲進行中
                 </h2>
                 <div className="flex space-x-2">
-                  <button
-                    onClick={toggleHint}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    {showHint ? "隱藏提示" : "顯示提示"}
-                  </button>
                   <button
                     onClick={resetGame}
                     className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
@@ -531,23 +302,6 @@ export default function VocabularySortPage() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 提示區域 */}
-              {showHint && (
-                <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-blue-800 mb-2">
-                    分類提示：
-                  </h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-blue-700">
-                    {categories.map((category) => (
-                      <div key={category.id}>
-                        <strong>{category.name}:</strong>{" "}
-                        {category.words.length} 個單字
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}

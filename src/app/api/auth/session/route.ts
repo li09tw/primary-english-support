@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { SessionManager, getSecurityHeaders } from "@/lib/auth-utils";
+import { getCloudflareConfig } from "@/lib/env-config";
 
 // GET: 檢查會話狀態
 export async function GET(request: NextRequest) {
@@ -64,11 +65,12 @@ export async function DELETE(request: NextRequest) {
 
     if (sessionToken) {
       // 從資料庫中刪除會話
-      await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/execute`, {
+      const { workerUrl, apiSecret } = getCloudflareConfig();
+      await fetch(`${workerUrl}/execute`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+          "X-API-Key": apiSecret,
         },
         body: JSON.stringify({
           query: "DELETE FROM admin_sessions WHERE session_token = ?",
