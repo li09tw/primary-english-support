@@ -47,3 +47,18 @@ temp_*_credentials.txt
 *_insert.sql
 *_credentials.txt
 
+# wakatime
+.wakatime-project
+
+########################################################
+# 檔案組織規則
+########################################################
+
+# Markdown 檔案組織規則
+# 所有 .md 副檔名的檔案都必須在 doc 資料夾裡面，除了 README.md
+# 根目錄下的 .md 檔案（除了 README.md）應該被忽略，提醒移至 doc 資料夾
+# 本專案只能有一個 README.md（位於根目錄）
+*.md
+!README.md
+!doc/**/*.md
+

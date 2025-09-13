@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateId } from "@/lib/utils";
 import { SessionManager, VerificationCodeManager } from "@/lib/auth-utils";
+import { getCloudflareConfig } from "@/lib/env-config";
 
 // 驗證碼有效期：30分鐘
 const VERIFICATION_CODE_EXPIRY_MINUTES = 30;
@@ -29,11 +30,13 @@ async function checkAccount(
   username: string
 ): Promise<{ exists: boolean; accountId?: string }> {
   try {
-    const response = await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/query`, {
+    const { workerUrl, apiSecret } = getCloudflareConfig();
+
+    const response = await fetch(`${workerUrl}/query`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+        "X-API-Key": apiSecret,
       },
       body: JSON.stringify({
         query:
@@ -67,11 +70,13 @@ async function saveVerificationCode(
     );
 
     // 先使舊驗證碼失效
-    await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/execute`, {
+    const { workerUrl, apiSecret } = getCloudflareConfig();
+
+    await fetch(`${workerUrl}/execute`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+        "X-API-Key": apiSecret,
       },
       body: JSON.stringify({
         query: `UPDATE verification_codes SET is_used = TRUE WHERE account_id = ? AND is_used = FALSE`,
@@ -81,29 +86,26 @@ async function saveVerificationCode(
 
     const codeHash = VerificationCodeManager.hashCode(code);
 
-    const response = await fetch(
-      `${process.env.CLOUDFLARE_WORKER_URL}/execute`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-        },
-        body: JSON.stringify({
-          query: `
+    const response = await fetch(`${workerUrl}/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiSecret,
+      },
+      body: JSON.stringify({
+        query: `
           INSERT INTO verification_codes (id, account_id, code_hash, expires_at, created_at) 
           VALUES (?, ?, ?, ?, ?)
         `,
-          params: [
-            generateId(),
-            accountId,
-            codeHash,
-            expiresAt.toISOString(),
-            new Date().toISOString(),
-          ],
-        }),
-      }
-    );
+        params: [
+          generateId(),
+          accountId,
+          codeHash,
+          expiresAt.toISOString(),
+          new Date().toISOString(),
+        ],
+      }),
+    });
 
     return response.ok;
   } catch (error) {
@@ -125,11 +127,13 @@ async function verifyCode(
     }
 
     // 檢查驗證碼
-    const response = await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/query`, {
+    const { workerUrl, apiSecret } = getCloudflareConfig();
+
+    const response = await fetch(`${workerUrl}/query`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+        "X-API-Key": apiSecret,
       },
       body: JSON.stringify({
         query: `
@@ -165,11 +169,11 @@ async function verifyCode(
         }
 
         // 標記驗證碼為已使用
-        await fetch(`${process.env.CLOUDFLARE_WORKER_URL}/execute`, {
+        await fetch(`${workerUrl}/execute`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
+            "X-API-Key": apiSecret,
           },
           body: JSON.stringify({
             query: "UPDATE verification_codes SET is_used = TRUE WHERE id = ?",
@@ -286,30 +290,29 @@ export async function PUT(request: NextRequest) {
 
       const userAgent = request.headers.get("user-agent") || "";
 
-      const sessionSave = await fetch(
-        `${process.env.CLOUDFLARE_WORKER_URL}/execute`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": process.env.CLOUDFLARE_API_SECRET || "",
-          },
-          body: JSON.stringify({
-            query: `
+      const { workerUrl, apiSecret } = getCloudflareConfig();
+
+      const sessionSave = await fetch(`${workerUrl}/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": apiSecret,
+        },
+        body: JSON.stringify({
+          query: `
               INSERT INTO admin_sessions (id, account_id, session_token, expires_at, ip_address, user_agent, created_at)
               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
             `,
-            params: [
-              sessionToken,
-              verificationResult.accountId,
-              sessionToken,
-              expiresAt.toISOString(),
-              "unknown",
-              userAgent,
-            ],
-          }),
-        }
-      );
+          params: [
+            sessionToken,
+            verificationResult.accountId,
+            sessionToken,
+            expiresAt.toISOString(),
+            "unknown",
+            userAgent,
+          ],
+        }),
+      });
 
       if (!sessionSave.ok) {
         return NextResponse.json(

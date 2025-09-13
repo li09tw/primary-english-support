@@ -26,135 +26,266 @@ export default function VocabularySortPage() {
   // 處理單字選擇
   const handleVocabularySelected = (words: Word[], theme: WordTheme) => {
     // 將 Word[] 轉換為 Vocabulary[] 格式
-    const convertedVocabulary: Vocabulary[] = words.map(word => ({
+    const convertedVocabulary: Vocabulary[] = words.map((word) => ({
       id: word.id.toString(),
       english: word.english_singular,
       chinese: word.chinese_meaning,
-      phonetic: '', // Word 類型沒有 phonetic 欄位，設為空字串
-      example: '', // Word 類型沒有 example 欄位，設為空字串
-      image: word.image_url
+      phonetic: "", // Word 類型沒有 phonetic 欄位，設為空字串
+      example: "", // Word 類型沒有 example 欄位，設為空字串
+      image: word.image_url,
     }));
     setVocabulary(convertedVocabulary);
   };
 
   // 開始詞彙分類遊戲
   const startVocabularySortGame = () => {
-    if (vocabulary.length < 12) {
-      alert("需要至少12個單字才能開始詞彙分類遊戲！");
+    if (vocabulary.length < 2) {
+      alert("需要至少2個單字才能開始詞彙分類遊戲！");
       return;
     }
 
-    // 預定義分類
-    const predefinedCategories: Category[] = [
-      { id: "animals", name: "動物", color: "bg-blue-100", words: [] },
-      { id: "food", name: "食物", color: "bg-green-100", words: [] },
-      { id: "colors", name: "顏色", color: "bg-yellow-100", words: [] },
-      { id: "numbers", name: "數字", color: "bg-purple-100", words: [] },
-      { id: "family", name: "家庭", color: "bg-pink-100", words: [] },
-      { id: "school", name: "學校", color: "bg-indigo-100", words: [] },
+    // 讓使用者選擇2個分類
+    const allCategories = [
+      { id: "animals", name: "動物", color: "bg-blue-100" },
+      { id: "food", name: "食物", color: "bg-green-100" },
+      { id: "colors", name: "顏色", color: "bg-yellow-100" },
+      { id: "numbers", name: "數字", color: "bg-purple-100" },
+      { id: "family", name: "家庭", color: "bg-pink-100" },
+      { id: "school", name: "學校", color: "bg-indigo-100" },
+      { id: "body", name: "身體", color: "bg-red-100" },
+      { id: "clothes", name: "衣服", color: "bg-orange-100" },
+      { id: "weather", name: "天氣", color: "bg-cyan-100" },
+      { id: "transport", name: "交通工具", color: "bg-teal-100" },
     ];
 
+    // 隨機選擇2個分類
+    const shuffledCategories = [...allCategories].sort(
+      () => Math.random() - 0.5
+    );
+    const selectedCategories = shuffledCategories.slice(0, 2);
+
+    const predefinedCategories: Category[] = selectedCategories.map((cat) => ({
+      ...cat,
+      words: [],
+    }));
+
     // 隨機選擇單字
-    const shuffled = [...vocabulary].sort(() => Math.random() - 0.5);
-    const selectedWords = shuffled.slice(0, Math.min(24, vocabulary.length));
+    const shuffledWords = [...vocabulary].sort(() => Math.random() - 0.5);
+    const selectedWords = shuffledWords.slice(
+      0,
+      Math.min(24, vocabulary.length)
+    );
 
     // 將單字分配到分類中（基於簡單的關鍵字匹配）
     const categorizedWords: Vocabulary[] = [];
     const uncategorizedWords: Vocabulary[] = [];
 
+    // 定義關鍵字映射
+    const keywordMap: { [key: string]: string[] } = {
+      animals: [
+        "cat",
+        "dog",
+        "bird",
+        "fish",
+        "lion",
+        "tiger",
+        "elephant",
+        "monkey",
+        "bear",
+        "cow",
+        "pig",
+        "duck",
+        "chicken",
+        "rabbit",
+        "mouse",
+        "horse",
+        "sheep",
+        "goat",
+        "frog",
+        "snake",
+      ],
+      food: [
+        "apple",
+        "banana",
+        "bread",
+        "rice",
+        "meat",
+        "fish",
+        "egg",
+        "milk",
+        "cake",
+        "pizza",
+        "burger",
+        "sandwich",
+        "soup",
+        "salad",
+        "fruit",
+        "vegetable",
+        "chicken",
+        "beef",
+        "pork",
+        "cheese",
+      ],
+      colors: [
+        "red",
+        "blue",
+        "green",
+        "yellow",
+        "black",
+        "white",
+        "pink",
+        "purple",
+        "orange",
+        "brown",
+        "gray",
+        "grey",
+        "silver",
+        "gold",
+        "rainbow",
+      ],
+      numbers: [
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+        "twelve",
+        "thirteen",
+        "fourteen",
+        "fifteen",
+        "sixteen",
+        "seventeen",
+        "eighteen",
+        "nineteen",
+        "twenty",
+      ],
+      family: [
+        "mother",
+        "father",
+        "sister",
+        "brother",
+        "family",
+        "baby",
+        "grandma",
+        "grandpa",
+        "uncle",
+        "aunt",
+        "cousin",
+        "parent",
+        "child",
+        "son",
+        "daughter",
+      ],
+      school: [
+        "book",
+        "pen",
+        "pencil",
+        "school",
+        "teacher",
+        "student",
+        "classroom",
+        "desk",
+        "chair",
+        "blackboard",
+        "computer",
+        "bag",
+        "ruler",
+        "eraser",
+        "notebook",
+      ],
+      body: [
+        "head",
+        "eye",
+        "ear",
+        "nose",
+        "mouth",
+        "hand",
+        "foot",
+        "leg",
+        "arm",
+        "finger",
+        "toe",
+        "hair",
+        "face",
+        "body",
+        "shoulder",
+        "knee",
+        "elbow",
+      ],
+      clothes: [
+        "shirt",
+        "pants",
+        "dress",
+        "shoes",
+        "hat",
+        "coat",
+        "jacket",
+        "sweater",
+        "skirt",
+        "socks",
+        "gloves",
+        "scarf",
+        "belt",
+        "tie",
+        "uniform",
+      ],
+      weather: [
+        "sun",
+        "rain",
+        "cloud",
+        "wind",
+        "snow",
+        "storm",
+        "hot",
+        "cold",
+        "warm",
+        "cool",
+        "sunny",
+        "rainy",
+        "cloudy",
+        "windy",
+        "snowy",
+      ],
+      transport: [
+        "car",
+        "bus",
+        "train",
+        "plane",
+        "bike",
+        "boat",
+        "ship",
+        "truck",
+        "motorcycle",
+        "taxi",
+        "subway",
+        "helicopter",
+        "rocket",
+        "tram",
+        "van",
+      ],
+    };
+
     selectedWords.forEach((word) => {
       const wordLower = word.english.toLowerCase();
       let assigned = false;
 
-      // 動物分類
-      if (
-        wordLower.includes("cat") ||
-        wordLower.includes("dog") ||
-        wordLower.includes("bird") ||
-        wordLower.includes("fish") ||
-        wordLower.includes("lion") ||
-        wordLower.includes("tiger") ||
-        wordLower.includes("elephant") ||
-        wordLower.includes("monkey") ||
-        wordLower.includes("bear")
-      ) {
-        predefinedCategories[0].words.push(word);
-        assigned = true;
-      }
-      // 食物分類
-      else if (
-        wordLower.includes("apple") ||
-        wordLower.includes("banana") ||
-        wordLower.includes("bread") ||
-        wordLower.includes("rice") ||
-        wordLower.includes("meat") ||
-        wordLower.includes("fish") ||
-        wordLower.includes("egg") ||
-        wordLower.includes("milk") ||
-        wordLower.includes("cake")
-      ) {
-        predefinedCategories[1].words.push(word);
-        assigned = true;
-      }
-      // 顏色分類
-      else if (
-        wordLower.includes("red") ||
-        wordLower.includes("blue") ||
-        wordLower.includes("green") ||
-        wordLower.includes("yellow") ||
-        wordLower.includes("black") ||
-        wordLower.includes("white") ||
-        wordLower.includes("pink") ||
-        wordLower.includes("purple") ||
-        wordLower.includes("orange")
-      ) {
-        predefinedCategories[2].words.push(word);
-        assigned = true;
-      }
-      // 數字分類
-      else if (
-        wordLower.includes("one") ||
-        wordLower.includes("two") ||
-        wordLower.includes("three") ||
-        wordLower.includes("four") ||
-        wordLower.includes("five") ||
-        wordLower.includes("six") ||
-        wordLower.includes("seven") ||
-        wordLower.includes("eight") ||
-        wordLower.includes("nine") ||
-        wordLower.includes("ten")
-      ) {
-        predefinedCategories[3].words.push(word);
-        assigned = true;
-      }
-      // 家庭分類
-      else if (
-        wordLower.includes("mother") ||
-        wordLower.includes("father") ||
-        wordLower.includes("sister") ||
-        wordLower.includes("brother") ||
-        wordLower.includes("family") ||
-        wordLower.includes("baby") ||
-        wordLower.includes("grandma") ||
-        wordLower.includes("grandpa")
-      ) {
-        predefinedCategories[4].words.push(word);
-        assigned = true;
-      }
-      // 學校分類
-      else if (
-        wordLower.includes("book") ||
-        wordLower.includes("pen") ||
-        wordLower.includes("pencil") ||
-        wordLower.includes("school") ||
-        wordLower.includes("teacher") ||
-        wordLower.includes("student") ||
-        wordLower.includes("classroom") ||
-        wordLower.includes("desk") ||
-        wordLower.includes("chair")
-      ) {
-        predefinedCategories[5].words.push(word);
-        assigned = true;
+      // 檢查每個選中的分類
+      for (let i = 0; i < predefinedCategories.length; i++) {
+        const categoryId = predefinedCategories[i].id;
+        const keywords = keywordMap[categoryId] || [];
+
+        // 檢查單字是否包含該分類的關鍵字
+        if (keywords.some((keyword) => wordLower.includes(keyword))) {
+          predefinedCategories[i].words.push(word);
+          assigned = true;
+          break;
+        }
       }
 
       if (!assigned) {
@@ -240,7 +371,9 @@ export default function VocabularySortPage() {
           {/* 句型與單字主題選擇 */}
           {!isGameStarted && (
             <>
-              <TextbookSelector onVocabularySelected={handleVocabularySelected} />
+              <TextbookSelector
+                onVocabularySelected={handleVocabularySelected}
+              />
 
               {/* 單字預覽 */}
               {vocabulary.length > 0 && (
@@ -259,7 +392,7 @@ export default function VocabularySortPage() {
                   </div>
 
                   {/* 開始遊戲按鈕 */}
-                  {vocabulary.length >= 12 && (
+                  {vocabulary.length >= 2 && (
                     <button
                       onClick={startVocabularySortGame}
                       className="w-full mt-4 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors font-medium"
@@ -268,9 +401,9 @@ export default function VocabularySortPage() {
                     </button>
                   )}
 
-                  {vocabulary.length < 12 && vocabulary.length > 0 && (
+                  {vocabulary.length < 2 && vocabulary.length > 0 && (
                     <div className="text-center text-red-600 text-sm mt-4">
-                      需要至少12個單字才能開始詞彙分類遊戲，目前只有{" "}
+                      需要至少2個單字才能開始詞彙分類遊戲，目前只有{" "}
                       {vocabulary.length} 個單字
                     </div>
                   )}
@@ -315,7 +448,7 @@ export default function VocabularySortPage() {
               </div>
 
               {/* 分類區域 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {categories.map((category) => (
                   <div
                     key={category.id}
@@ -375,7 +508,8 @@ export default function VocabularySortPage() {
                                 "):"
                             );
 
-                            const categoryIndex = parseInt(categoryId || "0") - 1;
+                            const categoryIndex =
+                              parseInt(categoryId || "0") - 1;
                             if (
                               categoryIndex >= 0 &&
                               categoryIndex < categories.length
@@ -410,8 +544,8 @@ export default function VocabularySortPage() {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-blue-700">
                     {categories.map((category) => (
                       <div key={category.id}>
-                        <strong>{category.name}:</strong> {category.words.length}{" "}
-                        個單字
+                        <strong>{category.name}:</strong>{" "}
+                        {category.words.length} 個單字
                       </div>
                     ))}
                   </div>

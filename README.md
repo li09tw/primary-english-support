@@ -137,11 +137,31 @@ src/
 
 ## 📖 文檔
 
-- [GitHub + Vercel 部署指南](doc/GitHubVercelDeployment.md)
-- [專案結構說明](doc/ProjectStructure.md)
-- [遊戲頁面指南](doc/GamePagesGuide.md)
-- [架構說明](doc/MigrationSummary.md)
-- [SEO 優化指南](doc/SeoOptimization.md)
+### 🏗️ 架構與部署
+- [專案結構說明](doc/ProjectStructure.md) - 完整的專案架構說明
+- [部署指南](doc/DeploymentGuide.md) - 從本地開發到生產環境的完整部署流程
+- [環境變數設定](doc/EnvironmentVariables.md) - 本地開發和生產環境的環境變數配置
+
+### 🎯 功能與使用
+- [功能指南](doc/FeaturesGuide.md) - 各項功能的詳細使用說明和開發指南
+- [遊戲頁面導覽](doc/GamePagesGuide.md) - 電子教具遊戲頁面的詳細說明
+- [站長消息系統](doc/AdminMessagesSystem.md) - 站長消息系統的使用指南
+
+### 🔧 技術與設定
+- [EmailJS 設定](doc/EmailjsSetup.md) - 郵件服務的設定指南
+- [SEO 優化](doc/SeoOptimization.md) - 搜尋引擎優化指南
+- [安全驗證系統](doc/SecureVerificationSystemGuide.md) - 安全驗證系統的詳細說明
+- [驗證系統設定](doc/VerificationSystemSetup.md) - 驗證系統的設定指南
+
+### 📊 資料與內容
+- [學習內容系統](doc/LearningContentSystem.md) - 學習內容系統的技術文檔
+- [單字主題擴充總結](doc/WordExpansionSummary.md) - 單字主題擴充的詳細記錄
+- [時間表達實現](doc/TimeExpressionsImplementation.md) - 時間表達主題的實現說明
+
+### 🛠️ 維護與故障排除
+- [D1 資料庫故障排除](doc/D1DatabaseTroubleshooting.md) - D1 資料庫問題的解決方案
+- [句型拉霸機保護說明](doc/SentenceSlotProtection.md) - 句型拉霸機功能的保護狀態
+- [資料庫同步報告](doc/DATABASE_SYNC_REPORT.md) - 資料庫同步的詳細報告
 
 ## 🤝 貢獻
 

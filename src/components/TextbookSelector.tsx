@@ -5,26 +5,20 @@ import { WordTheme, Word, Grade } from "@/types/learning-content";
 
 interface TextbookSelectorProps {
   onVocabularySelected: (words: Word[], theme: WordTheme) => void;
-  selectedGrade?: number;
-  onGradeChange?: (gradeId: number) => void;
 }
 
 export default function TextbookSelector({
   onVocabularySelected,
-  selectedGrade = 1,
-  onGradeChange,
 }: TextbookSelectorProps) {
   const [themes, setThemes] = useState<WordTheme[]>([]);
-  const [grades, setGrades] = useState<Grade[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<WordTheme | null>(null);
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch themes and grades on component mount
+  // Fetch themes on component mount
   useEffect(() => {
     fetchThemes();
-    fetchGrades();
   }, []);
 
   // Fetch words when theme changes
@@ -57,19 +51,6 @@ export default function TextbookSelector({
     }
   };
 
-  const fetchGrades = async () => {
-    try {
-      const response = await fetch("/api/learning-content?action=grades");
-      const data = await response.json();
-
-      if (data.success) {
-        setGrades(data.data);
-      }
-    } catch (err) {
-      console.error("Error fetching grades:", err);
-    }
-  };
-
   const fetchWordsByTheme = async (themeId: number) => {
     try {
       setLoading(true);
@@ -94,12 +75,6 @@ export default function TextbookSelector({
   const handleThemeChange = (theme: WordTheme) => {
     setSelectedTheme(theme);
     setWords([]); // Clear words when theme changes
-  };
-
-  const handleGradeChange = (gradeId: number) => {
-    if (onGradeChange) {
-      onGradeChange(gradeId);
-    }
   };
 
   const handleVocabularySelect = () => {
@@ -132,30 +107,10 @@ export default function TextbookSelector({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h3 className="text-lg font-semibold text-black mb-4">選擇學習範圍</h3>
-
-      {/* Grade Selection */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-black mb-2">
-          年級
-        </label>
-        <select
-          value={selectedGrade}
-          onChange={(e) => handleGradeChange(parseInt(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          {grades.map((grade) => (
-            <option key={grade.id} value={grade.id}>
-              {grade.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* Theme Selection */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-black mb-2">
-          主題
+          單字主題
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {themes.map((theme) => (
