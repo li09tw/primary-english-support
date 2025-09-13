@@ -8,7 +8,6 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { sendNotificationEmail } from "@/lib/emailjs";
 import { generateId } from "@/lib/utils";
 import { SessionManager, VerificationCodeManager } from "@/lib/auth-utils";
 
@@ -237,25 +236,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 發送驗證碼到預設信箱
-    // EmailJS 會根據模板設定自動發送到預設信箱
-    const emailResult = await sendNotificationEmail(
-      DEFAULT_EMAIL,
-      "Garden 管理介面驗證碼",
-      `您的驗證碼是：${verificationCode}\n\n此驗證碼將在 ${VERIFICATION_CODE_EXPIRY_MINUTES} 分鐘後過期。\n\n請勿將此驗證碼分享給他人。`
-    );
-
-    if (!emailResult.success) {
-      return NextResponse.json(
-        { success: false, message: "無法發送驗證碼到信箱" },
-        { status: 500 }
-      );
-    }
-
+    // 回傳驗證碼給前端，由前端發送郵件
     return NextResponse.json({
       success: true,
-      message: `驗證碼已發送到預設信箱`,
-      email: DEFAULT_EMAIL, // 回傳使用的信箱地址
+      message: "驗證碼已生成",
+      verificationCode: verificationCode, // 將驗證碼傳給前端
+      email: DEFAULT_EMAIL,
+      expiresIn: VERIFICATION_CODE_EXPIRY_MINUTES,
     });
   } catch (error) {
     console.error("發送驗證碼失敗:", error);

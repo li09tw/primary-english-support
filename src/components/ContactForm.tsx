@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { sendContactEmail } from "@/lib/emailjs";
+import { sendContactEmail } from "@/lib/emailjs-client";
 import { isValidEmail } from "@/lib/utils";
 
 export default function ContactForm() {

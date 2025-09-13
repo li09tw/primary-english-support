@@ -11,6 +11,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  sendVerificationCodeEmail,
+  isEmailJSConfigured,
+} from "@/lib/emailjs-client";
 
 interface LoginState {
   step: "username" | "verification";
@@ -67,6 +71,7 @@ export default function GardenLoginPage() {
     setLoginState((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
+      // 1. 從後端獲取驗證碼
       const response = await fetch("/api/auth", {
         method: "POST",
         headers: {
@@ -79,14 +84,41 @@ export default function GardenLoginPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        setLoginState((prev) => ({
-          ...prev,
-          step: "verification",
-          loading: false,
-          success: data.message,
-          error: "",
-        }));
+      if (data.success && data.verificationCode) {
+        // 2. 檢查 EmailJS 配置
+        if (!isEmailJSConfigured()) {
+          setLoginState((prev) => ({
+            ...prev,
+            loading: false,
+            error: "EmailJS 配置不完整，請檢查環境變數設定",
+          }));
+          return;
+        }
+
+        // 3. 使用前端 EmailJS 發送郵件
+        const emailResult = await sendVerificationCodeEmail(
+          data.email,
+          data.verificationCode,
+          data.expiresIn
+        );
+
+        if (emailResult.success) {
+          setLoginState((prev) => ({
+            ...prev,
+            step: "verification",
+            loading: false,
+            success: "驗證碼已發送，請至信箱檢查",
+            error: "",
+          }));
+        } else {
+          setLoginState((prev) => ({
+            ...prev,
+            step: "verification",
+            loading: false,
+            success: `驗證碼已生成：${data.verificationCode}\n\n郵件發送失敗：${emailResult.error}`,
+            error: "",
+          }));
+        }
       } else {
         setLoginState((prev) => ({
           ...prev,
@@ -215,7 +247,14 @@ export default function GardenLoginPage() {
               disabled={loginState.loading}
               className="w-full bg-secondary-pink hover:bg-white hover:text-primary-blue-dark text-black font-medium py-3 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:ring-offset-2 transition-colors duration-200 border-2 border-transparent hover:border-primary-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loginState.loading ? "發送中..." : "發送驗證碼"}
+              {loginState.loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
+                  發送中，請稍候...
+                </div>
+              ) : (
+                "發送驗證碼"
+              )}
             </button>
           </form>
         )}
@@ -230,6 +269,14 @@ export default function GardenLoginPage() {
               <p className="text-xs text-gray-500">
                 帳號：{loginState.username}
               </p>
+              <button
+                type="button"
+                onClick={sendVerificationCode}
+                disabled={loginState.loading}
+                className="text-xs text-blue-600 hover:text-blue-800 underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                重新發送驗證碼
+              </button>
             </div>
 
             <form onSubmit={verifyCode} className="space-y-6">
@@ -273,7 +320,14 @@ export default function GardenLoginPage() {
                   disabled={loginState.loading}
                   className="w-full bg-secondary-pink hover:bg-white hover:text-primary-blue-dark text-black font-medium py-3 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:ring-offset-2 transition-colors duration-200 border-2 border-transparent hover:border-primary-blue-dark disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loginState.loading ? "驗證中..." : "驗證"}
+                  {loginState.loading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
+                      驗證中...
+                    </div>
+                  ) : (
+                    "驗證"
+                  )}
                 </button>
 
                 <button
@@ -297,6 +351,9 @@ export default function GardenLoginPage() {
             <li>• 請勿將驗證碼分享給他人</li>
             <li>• 驗證碼會發送到預設信箱</li>
             <li>• 每次登入都需要新的驗證碼</li>
+            <li>• 郵件由前端直接發送，速度較快</li>
+            <li>• 如果未收到郵件，請檢查垃圾郵件夾</li>
+            <li>• 可以點擊「重新發送驗證碼」重試</li>
           </ul>
         </div>
       </div>

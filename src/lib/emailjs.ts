@@ -1,43 +1,41 @@
-// EmailJS REST API via server-side fetch
+// EmailJS 配置
 export const EMAILJS_CONFIG = {
   serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "",
   templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "",
   publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "",
 };
 
+// 檢查 EmailJS 配置是否完整
+export function isEmailJSConfigured(): boolean {
+  return !!(
+    EMAILJS_CONFIG.serviceId &&
+    EMAILJS_CONFIG.templateId &&
+    EMAILJS_CONFIG.publicKey
+  );
+}
+
 async function emailjsSend(templateParams: Record<string, unknown>) {
-  // EmailJS 的正確 API 端點和格式
-  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      service_id: EMAILJS_CONFIG.serviceId,
-      template_id: EMAILJS_CONFIG.templateId,
-      user_id: EMAILJS_CONFIG.publicKey,
-      template_params: templateParams,
-    }),
-  });
-
-  console.log("EmailJS Request:", {
-    service_id: EMAILJS_CONFIG.serviceId,
-    template_id: EMAILJS_CONFIG.templateId,
-    user_id: EMAILJS_CONFIG.publicKey,
-    template_params: templateParams,
-  });
-
-  console.log("EmailJS Response Status:", response.status);
-
-  if (!response.ok) {
-    const text = await response.text();
-    console.error("EmailJS Error:", text);
-    throw new Error(`EmailJS REST failed: ${response.status} ${text}`);
+  if (!isEmailJSConfigured()) {
+    throw new Error("EmailJS 配置不完整，請檢查環境變數設定");
   }
 
-  const result = await response.text();
-  console.log("EmailJS Success:", result);
-  return result;
+  try {
+    // 動態導入 EmailJS
+    const emailjs = await import("@emailjs/browser");
+
+    const result = await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.templateId,
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    );
+
+    console.log("EmailJS 發送成功:", result);
+    return result;
+  } catch (error) {
+    console.error("EmailJS 發送失敗:", error);
+    throw error;
+  }
 }
 
 // 發送聯絡表單郵件
