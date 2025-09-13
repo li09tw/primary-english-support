@@ -18,7 +18,11 @@ const PROTECTED_PATHS = ["/garden"];
 const PUBLIC_LOGIN_PATHS = ["/garden/login"];
 
 // 公開的 API 路徑
-const PUBLIC_API_PATHS = ["/api/auth", "/api/auth/session"];
+const PUBLIC_API_PATHS = [
+  "/api/auth",
+  "/api/auth/session",
+  "/api/learning-content",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

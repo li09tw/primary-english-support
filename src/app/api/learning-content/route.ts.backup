@@ -617,7 +617,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2010,
+    id: 103,
     english_singular: "teacher",
     english_plural: "teachers",
     chinese_meaning: "老師",
@@ -625,7 +625,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2011,
+    id: 104,
     english_singular: "friend",
     english_plural: "friends",
     chinese_meaning: "朋友",
@@ -633,7 +633,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2012,
+    id: 105,
     english_singular: "classmate",
     english_plural: "classmates",
     chinese_meaning: "同學",
@@ -641,7 +641,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2013,
+    id: 106,
     english_singular: "family",
     english_plural: "families",
     chinese_meaning: "家人",
@@ -649,7 +649,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2014,
+    id: 107,
     english_singular: "parent",
     english_plural: "parents",
     chinese_meaning: "父母",
@@ -657,7 +657,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2015,
+    id: 108,
     english_singular: "child",
     english_plural: "children",
     chinese_meaning: "小孩",
@@ -665,7 +665,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2016,
+    id: 109,
     english_singular: "sister",
     english_plural: "sisters",
     chinese_meaning: "姐妹",
@@ -673,7 +673,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2017,
+    id: 110,
     english_singular: "brother",
     english_plural: "brothers",
     chinese_meaning: "兄弟",
@@ -681,7 +681,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2018,
+    id: 111,
     english_singular: "cousin",
     english_plural: "cousins",
     chinese_meaning: "堂/表兄弟姊妹",
@@ -693,7 +693,7 @@ const mockWords: Word[] = [
 
   // Professions words (Theme 19) - Expanded list
   {
-    id: 2019,
+    id: 112,
     english_singular: "doctor",
     english_plural: "doctors",
     chinese_meaning: "醫生",
@@ -701,7 +701,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2020,
+    id: 113,
     english_singular: "nurse",
     english_plural: "nurses",
     chinese_meaning: "護士",
@@ -709,7 +709,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2021,
+    id: 114,
     english_singular: "engineer",
     english_plural: "engineers",
     chinese_meaning: "工程師",
@@ -717,7 +717,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2022,
+    id: 115,
     english_singular: "artist",
     english_plural: "artists",
     chinese_meaning: "藝術家",
@@ -725,7 +725,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2023,
+    id: 116,
     english_singular: "chef",
     english_plural: "chefs",
     chinese_meaning: "廚師",
@@ -733,7 +733,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2024,
+    id: 117,
     english_singular: "driver",
     english_plural: "drivers",
     chinese_meaning: "司機",
@@ -741,7 +741,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2025,
+    id: 118,
     english_singular: "police officer",
     english_plural: "police officers",
     chinese_meaning: "警察",
@@ -749,7 +749,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2026,
+    id: 119,
     english_singular: "firefighter",
     english_plural: "firefighters",
     chinese_meaning: "消防員",
@@ -757,7 +757,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2027,
+    id: 120,
     english_singular: "scientist",
     english_plural: "scientists",
     chinese_meaning: "科學家",
@@ -765,7 +765,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2028,
+    id: 121,
     english_singular: "musician",
     english_plural: "musicians",
     chinese_meaning: "音樂家",
@@ -773,7 +773,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2029,
+    id: 122,
     english_singular: "dentist",
     english_plural: "dentists",
     chinese_meaning: "牙醫",
@@ -781,7 +781,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2030,
+    id: 123,
     english_singular: "lawyer",
     english_plural: "lawyers",
     chinese_meaning: "律師",
@@ -789,7 +789,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2031,
+    id: 124,
     english_singular: "architect",
     english_plural: "architects",
     chinese_meaning: "建築師",
@@ -797,7 +797,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2032,
+    id: 125,
     english_singular: "designer",
     english_plural: "designers",
     chinese_meaning: "設計師",
@@ -805,7 +805,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2033,
+    id: 126,
     english_singular: "photographer",
     english_plural: "photographers",
     chinese_meaning: "攝影師",
@@ -813,7 +813,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2034,
+    id: 127,
     english_singular: "journalist",
     english_plural: "journalists",
     chinese_meaning: "記者",
@@ -821,7 +821,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2035,
+    id: 128,
     english_singular: "accountant",
     english_plural: "accountants",
     chinese_meaning: "會計師",
@@ -829,7 +829,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2036,
+    id: 129,
     english_singular: "salesperson",
     english_plural: "salespeople",
     chinese_meaning: "銷售員",
@@ -837,7 +837,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2037,
+    id: 130,
     english_singular: "waiter",
     english_plural: "waiters",
     chinese_meaning: "服務生",
@@ -845,7 +845,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2038,
+    id: 131,
     english_singular: "waitress",
     english_plural: "waitresses",
     chinese_meaning: "女服務生",
@@ -853,7 +853,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2039,
+    id: 132,
     english_singular: "pilot",
     english_plural: "pilots",
     chinese_meaning: "飛行員",
@@ -861,7 +861,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2040,
+    id: 133,
     english_singular: "sailor",
     english_plural: "sailors",
     chinese_meaning: "水手",
@@ -869,7 +869,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2041,
+    id: 134,
     english_singular: "farmer",
     english_plural: "farmers",
     chinese_meaning: "農夫",
@@ -877,7 +877,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2042,
+    id: 135,
     english_singular: "fisherman",
     english_plural: "fishermen",
     chinese_meaning: "漁夫",
@@ -885,7 +885,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2043,
+    id: 136,
     english_singular: "carpenter",
     english_plural: "carpenters",
     chinese_meaning: "木匠",
@@ -893,7 +893,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2044,
+    id: 137,
     english_singular: "plumber",
     english_plural: "plumbers",
     chinese_meaning: "水管工",
@@ -901,7 +901,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2045,
+    id: 138,
     english_singular: "electrician",
     english_plural: "electricians",
     chinese_meaning: "電工",
@@ -909,7 +909,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2046,
+    id: 139,
     english_singular: "mechanic",
     english_plural: "mechanics",
     chinese_meaning: "技工",
@@ -1523,7 +1523,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2000,
+    id: 202,
     english_singular: "fire station",
     english_plural: "fire stations",
     chinese_meaning: "消防局",
@@ -1531,7 +1531,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2001,
+    id: 203,
     english_singular: "restaurant",
     english_plural: "restaurants",
     chinese_meaning: "餐廳",
@@ -1539,7 +1539,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2002,
+    id: 204,
     english_singular: "cafe",
     english_plural: "cafes",
     chinese_meaning: "咖啡廳",
@@ -1547,7 +1547,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2003,
+    id: 205,
     english_singular: "supermarket",
     english_plural: "supermarkets",
     chinese_meaning: "超市",
@@ -1555,7 +1555,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2004,
+    id: 206,
     english_singular: "store",
     english_plural: "stores",
     chinese_meaning: "商店",
@@ -1563,7 +1563,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2005,
+    id: 207,
     english_singular: "shop",
     english_plural: "shops",
     chinese_meaning: "商店",
@@ -1571,7 +1571,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2006,
+    id: 208,
     english_singular: "market",
     english_plural: "markets",
     chinese_meaning: "市場",
@@ -1579,7 +1579,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2007,
+    id: 209,
     english_singular: "pharmacy",
     english_plural: "pharmacies",
     chinese_meaning: "藥局",
@@ -1667,7 +1667,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2008,
+    id: 219,
     english_singular: "house",
     english_plural: "houses",
     chinese_meaning: "房子",
@@ -1725,18 +1725,10 @@ const mockWords: Word[] = [
 
   // Furniture words (Theme 13) - all have plurals
   {
-    id: 2009,
+    id: 504,
     english_singular: "chair",
     english_plural: "chairs",
     chinese_meaning: "椅子",
-    part_of_speech: "noun",
-    has_plural: true,
-  },
-  {
-    id: 66,
-    english_singular: "Monday",
-    english_plural: "Mondays",
-    chinese_meaning: "星期一",
     part_of_speech: "noun",
     has_plural: true,
   },
@@ -2341,7 +2333,7 @@ const mockWords: Word[] = [
 
   // Daily Actions (theme_id: 20) - words 144-159
   {
-    id: 2047,
+    id: 144,
     english_singular: "wake up",
     english_plural: "wake ups",
     chinese_meaning: "起床",
@@ -2349,7 +2341,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2048,
+    id: 145,
     english_singular: "get up",
     english_plural: "get ups",
     chinese_meaning: "起床",
@@ -2357,7 +2349,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2049,
+    id: 146,
     english_singular: "brush teeth",
     english_plural: "brush teeth",
     chinese_meaning: "刷牙",
@@ -2365,7 +2357,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2050,
+    id: 147,
     english_singular: "wash face",
     english_plural: "wash face",
     chinese_meaning: "洗臉",
@@ -2373,7 +2365,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2051,
+    id: 148,
     english_singular: "take a shower",
     english_plural: "take showers",
     chinese_meaning: "洗澡",
@@ -2381,7 +2373,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2052,
+    id: 149,
     english_singular: "eat breakfast",
     english_plural: "eat breakfasts",
     chinese_meaning: "吃早餐",
@@ -2389,7 +2381,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2053,
+    id: 150,
     english_singular: "go to school",
     english_plural: "go to schools",
     chinese_meaning: "上學",
@@ -2397,7 +2389,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2054,
+    id: 151,
     english_singular: "study",
     english_plural: "studies",
     chinese_meaning: "讀書",
@@ -2405,7 +2397,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2055,
+    id: 152,
     english_singular: "read",
     english_plural: "reads",
     chinese_meaning: "閱讀",
@@ -2413,7 +2405,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2056,
+    id: 153,
     english_singular: "write",
     english_plural: "writes",
     chinese_meaning: "寫字",
@@ -2421,7 +2413,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2057,
+    id: 154,
     english_singular: "listen",
     english_plural: "listens",
     chinese_meaning: "聽",
@@ -2429,7 +2421,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2058,
+    id: 155,
     english_singular: "speak",
     english_plural: "speaks",
     chinese_meaning: "說話",
@@ -2437,7 +2429,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2059,
+    id: 156,
     english_singular: "cook",
     english_plural: "cooks",
     chinese_meaning: "煮飯",
@@ -2445,7 +2437,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2060,
+    id: 157,
     english_singular: "clean",
     english_plural: "cleans",
     chinese_meaning: "打掃",
@@ -2453,7 +2445,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2061,
+    id: 158,
     english_singular: "sleep",
     english_plural: "sleeps",
     chinese_meaning: "睡覺",
@@ -2461,7 +2453,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2062,
+    id: 159,
     english_singular: "work",
     english_plural: "works",
     chinese_meaning: "工作",
@@ -2471,7 +2463,7 @@ const mockWords: Word[] = [
 
   // Clothing (theme_id: 21) - words 160-175
   {
-    id: 2063,
+    id: 160,
     english_singular: "shirt",
     english_plural: "shirts",
     chinese_meaning: "襯衫",
@@ -2479,7 +2471,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2064,
+    id: 161,
     english_singular: "pants",
     english_plural: "pants",
     chinese_meaning: "褲子",
@@ -2487,7 +2479,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2065,
+    id: 162,
     english_singular: "dress",
     english_plural: "dresses",
     chinese_meaning: "洋裝",
@@ -2495,7 +2487,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2066,
+    id: 163,
     english_singular: "skirt",
     english_plural: "skirts",
     chinese_meaning: "裙子",
@@ -2503,7 +2495,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2067,
+    id: 164,
     english_singular: "jacket",
     english_plural: "jackets",
     chinese_meaning: "外套",
@@ -2511,7 +2503,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2068,
+    id: 165,
     english_singular: "coat",
     english_plural: "coats",
     chinese_meaning: "大衣",
@@ -2519,7 +2511,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2069,
+    id: 166,
     english_singular: "sweater",
     english_plural: "sweaters",
     chinese_meaning: "毛衣",
@@ -2527,7 +2519,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2070,
+    id: 167,
     english_singular: "hat",
     english_plural: "hats",
     chinese_meaning: "帽子",
@@ -2535,7 +2527,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2071,
+    id: 168,
     english_singular: "cap",
     english_plural: "caps",
     chinese_meaning: "棒球帽",
@@ -2543,7 +2535,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2072,
+    id: 169,
     english_singular: "shoes",
     english_plural: "shoes",
     chinese_meaning: "鞋子",
@@ -2551,7 +2543,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2073,
+    id: 170,
     english_singular: "sneakers",
     english_plural: "sneakers",
     chinese_meaning: "運動鞋",
@@ -2559,7 +2551,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2074,
+    id: 171,
     english_singular: "boots",
     english_plural: "boots",
     chinese_meaning: "靴子",
@@ -2567,7 +2559,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2075,
+    id: 172,
     english_singular: "socks",
     english_plural: "socks",
     chinese_meaning: "襪子",
@@ -2575,7 +2567,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2076,
+    id: 173,
     english_singular: "underwear",
     english_plural: "underwear",
     chinese_meaning: "內衣",
@@ -2583,7 +2575,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2077,
+    id: 174,
     english_singular: "belt",
     english_plural: "belts",
     chinese_meaning: "皮帶",
@@ -2591,7 +2583,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2078,
+    id: 175,
     english_singular: "scarf",
     english_plural: "scarves",
     chinese_meaning: "圍巾",
@@ -2599,10 +2591,9 @@ const mockWords: Word[] = [
     has_plural: true,
   },
 
-  //  [2000, [22]],
   // Buildings & Places (theme_id: 22) - words 176-195
   {
-    id: 2079,
+    id: 176,
     english_singular: "school",
     english_plural: "schools",
     chinese_meaning: "學校",
@@ -2610,7 +2601,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2080,
+    id: 177,
     english_singular: "hospital",
     english_plural: "hospitals",
     chinese_meaning: "醫院",
@@ -2618,7 +2609,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2081,
+    id: 178,
     english_singular: "library",
     english_plural: "libraries",
     chinese_meaning: "圖書館",
@@ -2626,7 +2617,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2082,
+    id: 179,
     english_singular: "bank",
     english_plural: "banks",
     chinese_meaning: "銀行",
@@ -2634,7 +2625,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2083,
+    id: 180,
     english_singular: "post office",
     english_plural: "post offices",
     chinese_meaning: "郵局",
@@ -2642,7 +2633,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2084,
+    id: 181,
     english_singular: "police station",
     english_plural: "police stations",
     chinese_meaning: "警察局",
@@ -2650,7 +2641,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2085,
+    id: 182,
     english_singular: "fire station",
     english_plural: "fire stations",
     chinese_meaning: "消防局",
@@ -2658,7 +2649,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2086,
+    id: 183,
     english_singular: "restaurant",
     english_plural: "restaurants",
     chinese_meaning: "餐廳",
@@ -2666,7 +2657,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2087,
+    id: 184,
     english_singular: "cafe",
     english_plural: "cafes",
     chinese_meaning: "咖啡廳",
@@ -2674,7 +2665,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2088,
+    id: 185,
     english_singular: "supermarket",
     english_plural: "supermarkets",
     chinese_meaning: "超市",
@@ -2682,7 +2673,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2089,
+    id: 186,
     english_singular: "store",
     english_plural: "stores",
     chinese_meaning: "商店",
@@ -2690,7 +2681,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2090,
+    id: 187,
     english_singular: "shop",
     english_plural: "shops",
     chinese_meaning: "商店",
@@ -2698,7 +2689,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2091,
+    id: 188,
     english_singular: "market",
     english_plural: "markets",
     chinese_meaning: "市場",
@@ -2706,7 +2697,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2092,
+    id: 189,
     english_singular: "pharmacy",
     english_plural: "pharmacies",
     chinese_meaning: "藥局",
@@ -2714,7 +2705,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2093,
+    id: 190,
     english_singular: "gas station",
     english_plural: "gas stations",
     chinese_meaning: "加油站",
@@ -2722,7 +2713,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2094,
+    id: 191,
     english_singular: "bus stop",
     english_plural: "bus stops",
     chinese_meaning: "公車站",
@@ -2730,7 +2721,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2095,
+    id: 192,
     english_singular: "train station",
     english_plural: "train stations",
     chinese_meaning: "火車站",
@@ -2738,7 +2729,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2096,
+    id: 193,
     english_singular: "airport",
     english_plural: "airports",
     chinese_meaning: "機場",
@@ -2746,7 +2737,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2097,
+    id: 194,
     english_singular: "park",
     english_plural: "parks",
     chinese_meaning: "公園",
@@ -2754,7 +2745,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2098,
+    id: 195,
     english_singular: "museum",
     english_plural: "museums",
     chinese_meaning: "博物館",
@@ -2762,7 +2753,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2099,
+    id: 196,
     english_singular: "cinema",
     english_plural: "cinemas",
     chinese_meaning: "電影院",
@@ -2770,7 +2761,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2100,
+    id: 197,
     english_singular: "theater",
     english_plural: "theaters",
     chinese_meaning: "劇院",
@@ -2778,7 +2769,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2101,
+    id: 198,
     english_singular: "hotel",
     english_plural: "hotels",
     chinese_meaning: "旅館",
@@ -2786,7 +2777,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2102,
+    id: 199,
     english_singular: "office",
     english_plural: "offices",
     chinese_meaning: "辦公室",
@@ -2810,7 +2801,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2000,
+    id: 202,
     english_singular: "building",
     english_plural: "buildings",
     chinese_meaning: "建築物",
@@ -2818,7 +2809,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2001,
+    id: 203,
     english_singular: "street",
     english_plural: "streets",
     chinese_meaning: "街道",
@@ -2826,7 +2817,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2002,
+    id: 204,
     english_singular: "road",
     english_plural: "roads",
     chinese_meaning: "道路",
@@ -2834,7 +2825,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2003,
+    id: 205,
     english_singular: "bridge",
     english_plural: "bridges",
     chinese_meaning: "橋樑",
@@ -2842,7 +2833,7 @@ const mockWords: Word[] = [
     has_plural: true,
   },
   {
-    id: 2004,
+    id: 206,
     english_singular: "tower",
     english_plural: "towers",
     chinese_meaning: "塔",
@@ -3114,6 +3105,14 @@ const wordThemeMap = new Map<number, number[]>([
   // Additional color words as nouns
   [200, [2]],
   [201, [2]],
+  [202, [2]],
+  [203, [2]],
+  [204, [2]],
+  [205, [2]],
+  [206, [2]],
+  [207, [2]],
+  [208, [2]],
+  [209, [2]],
 
   // Sports (theme_id: 3) - words 20-27
   [20, [3]],
@@ -3209,10 +3208,9 @@ const wordThemeMap = new Map<number, number[]>([
 
   // Furniture (theme_id: 13) - words 42, 504-506
   [42, [13]], // 保留原始的 hamburger (Fast Food)
-  // chair
-  [505, [13]], // table
+  [504, [13]], // chair
+  [505, [13]], // table  
   [506, [13]], // bed
-
   [45, [13]],
   [46, [13]],
   [47, [13]],
@@ -3243,36 +3241,91 @@ const wordThemeMap = new Map<number, number[]>([
 
   // Identity (theme_id: 18) - words 102-111
   [102, [18]],
+  [103, [18]],
+  [104, [18]],
+  [105, [18]],
+  [106, [18]],
+  [107, [18]],
+  [108, [18]],
+  [109, [18]],
+  [110, [18]],
+  [111, [18]],
 
   // Professions (theme_id: 19) - words 122-137
+  [122, [19]],
+  [123, [19]],
+  [124, [19]],
+  [125, [19]],
+  [126, [19]],
+  [127, [19]],
+  [128, [19]],
+  [129, [19]],
+  [130, [19]],
+  [131, [19]],
+  [132, [19]],
+  [133, [19]],
+  [134, [19]],
+  [135, [19]],
+  [136, [19]],
+  [137, [19]],
 
   // Daily Actions (theme_id: 20) - words 144-159
+  [144, [20]],
+  [145, [20]],
+  [146, [20]],
+  [147, [20]],
+  [148, [20]],
+  [149, [20]],
+  [150, [20]],
+  [151, [20]],
+  [152, [20]],
+  [153, [20]],
+  [154, [20]],
+  [155, [20]],
+  [156, [20]],
+  [157, [20]],
+  [158, [20]],
+  [159, [20]],
 
   // Clothing (theme_id: 21) - words 160-175
+  [160, [21]],
+  [161, [21]],
+  [162, [21]],
+  [163, [21]],
+  [164, [21]],
+  [165, [21]],
+  [166, [21]],
+  [167, [21]],
+  [168, [21]],
+  [169, [21]],
+  [170, [21]],
+  [171, [21]],
+  [172, [21]],
+  [173, [21]],
+  [174, [21]],
+  [175, [21]],
 
   // Buildings & Places (theme_id: 22) - words 176-195
-
-  [2001, [22]],
-  [2003, [22]],
-  [2004, [22]],
-  [2006, [22]],
-  [2008, [22]],
-  [2079, [22]],
-  [2080, [22]],
-  [2081, [22]],
-  [2082, [22]],
-  [2083, [22]],
-  [2084, [22]],
-  [2085, [22]],
-  [2086, [22]],
-  [2088, [22]],
-  [2089, [22]],
-  [2091, [22]],
-  [2097, [22]],
-  [2098, [22]],
-  [2099, [22]],
-  [2100, [22]],
-  [2101, [22]],
+  [176, [22]],
+  [177, [22]],
+  [178, [22]],
+  [179, [22]],
+  [180, [22]],
+  [181, [22]],
+  [182, [22]],
+  [183, [22]],
+  [184, [22]],
+  [185, [22]],
+  [186, [22]],
+  [187, [22]],
+  [188, [22]],
+  [189, [22]],
+  [190, [22]],
+  [191, [22]],
+  [192, [22]],
+  [193, [22]],
+  [194, [22]],
+  [195, [22]],
 ]);
 
 export async function GET(request: NextRequest) {

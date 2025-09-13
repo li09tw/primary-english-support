@@ -602,7 +602,7 @@ const mockD1: D1Database = {
               english_singular: "usa",
               english_plural: null,
               chinese_meaning: "美國",
-              part_of_speech: null,
+              part_of_speech: "noun",
               image_url: null,
               audio_url: null,
             },
@@ -615,11 +615,20 @@ const mockD1: D1Database = {
               image_url: null,
               audio_url: null,
             },
+            {
+              id: 59,
+              english_singular: "china",
+              english_plural: null,
+              chinese_meaning: "中國",
+              part_of_speech: "noun",
+              image_url: null,
+              audio_url: null,
+            },
           ],
           14: [
             // Toys
             {
-              id: 58,
+              id: 60,
               english_singular: "doll",
               english_plural: "dolls",
               chinese_meaning: "娃娃",

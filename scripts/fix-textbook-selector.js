@@ -3,9 +3,7 @@ const path = require("path");
 
 // 需要修正的頁面列表
 const pagesToFix = [
-  "src/app/aids/vocabulary-storm/page.tsx",
   "src/app/aids/memory-match/page.tsx",
-  "src/app/aids/yes-no-judgment/page.tsx",
   "src/app/aids/vocabulary-sort/page.tsx",
 ];
 
