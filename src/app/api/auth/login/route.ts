@@ -9,7 +9,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import {
-  PasswordManager,
   SessionManager,
   RateLimiter,
   getClientIP,
@@ -64,7 +63,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           query: `
-          SELECT id, username, email, password_hash, salt, is_active, is_locked
+          SELECT id, username, email, is_active, is_locked
           FROM admin_accounts
           WHERE username = ? AND is_active = TRUE
         `,
@@ -105,20 +104,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 驗證密碼
-    const isPasswordValid = PasswordManager.verifyPassword(
-      cleanPassword,
-      account.salt,
-      account.password_hash
-    );
-
-    if (!isPasswordValid) {
-      await RateLimiter.recordLoginAttempt(cleanUsername, clientIP, false);
-      return NextResponse.json(
-        { success: false, message: "帳號或密碼錯誤" },
-        { status: 401 }
-      );
-    }
+    // 密碼登入已棄用：請使用驗證碼登入系統
+    // 注意：此路由已棄用，請使用 /api/auth/verification
 
     // 密碼驗證成功，記錄成功登入
     await RateLimiter.recordLoginAttempt(cleanUsername, clientIP, true);

@@ -8,14 +8,11 @@
  */
 
 import { cookies, headers } from "next/headers";
-import bcrypt from "bcryptjs";
 import { generateId } from "./utils";
+import crypto from "crypto";
 
 // 安全設定常數
 export const AUTH_CONFIG = {
-  // 密碼設定
-  PASSWORD_SALT_ROUNDS: 12,
-
   // 驗證碼設定
   VERIFICATION_CODE_LENGTH: 6,
   VERIFICATION_CODE_EXPIRY_MINUTES: 30,
@@ -40,29 +37,7 @@ export const AUTH_CONFIG = {
   },
 };
 
-// 密碼雜湊和驗證
-export class PasswordManager {
-  /**
-   * 生成隨機鹽值
-   */
-  static generateSalt(): string {
-    return bcrypt.genSaltSync(AUTH_CONFIG.PASSWORD_SALT_ROUNDS);
-  }
-
-  /**
-   * 雜湊密碼
-   */
-  static hashPassword(password: string, salt: string): string {
-    return bcrypt.hashSync(password + salt, AUTH_CONFIG.PASSWORD_SALT_ROUNDS);
-  }
-
-  /**
-   * 驗證密碼
-   */
-  static verifyPassword(password: string, salt: string, hash: string): boolean {
-    return bcrypt.compareSync(password + salt, hash);
-  }
-}
+// 密碼管理類別已移除 - 使用驗證碼登入系統
 
 // 會話管理
 export class SessionManager {
@@ -393,14 +368,15 @@ export class VerificationCodeManager {
    * 雜湊驗證碼
    */
   static hashCode(code: string): string {
-    return bcrypt.hashSync(code, 10);
+    return crypto.createHash("sha256").update(code).digest("hex");
   }
 
   /**
    * 驗證驗證碼
    */
   static verifyCode(code: string, hash: string): boolean {
-    return bcrypt.compareSync(code, hash);
+    const codeHash = crypto.createHash("sha256").update(code).digest("hex");
+    return codeHash === hash;
   }
 
   /**
