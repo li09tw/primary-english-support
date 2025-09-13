@@ -21,8 +21,6 @@ export interface GameWord {
   english_plural?: string;
   chinese_meaning: string;
   part_of_speech: string;
-  image_url?: string;
-  audio_url?: string;
 }
 
 export interface GamePattern {
@@ -300,18 +298,17 @@ const genericFavoriteHandler: PatternHandler = ({ words }) => {
     (word) => word.part_of_speech === "adjective"
   );
 
-  // 如果沒有可用單字，返回預設值
+  // 如果沒有可用單字，從所有傳入的單字中選擇
   if (nouns.length === 0 && adjectives.length === 0) {
-    const fallbackWord = {
-      id: -1,
-      english_singular: "toy",
-      chinese_meaning: "玩具",
-      part_of_speech: "noun",
-    } as GameWord;
-
-    const question = `What's ${possessive} favorite toy?`;
-    const answer = `${pronounAnswerMap[possessive]} favorite toy is ${fallbackWord.english_singular}.`;
-    return { question, answer, selectedWord: fallbackWord };
+    const allWords = words.filter((word) => word && word.part_of_speech);
+    if (allWords.length === 0) {
+      // 如果完全沒有單字，這不應該發生，因為前一頁會確保有單字
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const question = `What's ${possessive} favorite thing?`;
+    const answer = `${pronounAnswerMap[possessive]} favorite thing is ${selectedWord.english_singular}.`;
+    return { question, answer, selectedWord };
   }
 
   // 隨機選擇一個可用單字
@@ -405,9 +402,24 @@ const whereFromHandler: PatternHandler = ({ words }) => {
   const countryKeywords = ["taiwan", "japan", "korea", "usa", "canada"];
   const picked =
     pickWordByKeywords(words, countryKeywords) || pickAnyNoun(words);
-  const country = picked ? picked.english_singular : "Taiwan";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const country = selectedWord.english_singular;
+    const answer = `${v.aPrefix} from ${country}.`;
+    return { question: v.q, answer, selectedWord };
+  }
+
+  const country = picked.english_singular;
   const answer = `${v.aPrefix} from ${country}.`;
-  return { question: v.q, answer, selectedWord: picked || undefined };
+  return { question: v.q, answer, selectedWord: picked };
 };
 
 // Handler: Do you like sports? (Enhanced for Yes/No Q&A)
@@ -441,15 +453,16 @@ const likeSportsHandler: PatternHandler = ({ words }) => {
       : words.filter((word) => word.part_of_speech === "noun");
 
   if (availableWords.length === 0) {
-    // 如果完全沒有可用單字，使用預設值
-    const fallbackWord = {
-      id: -1,
-      english_singular: "basketball",
-      chinese_meaning: "籃球",
-      part_of_speech: "noun",
-    } as GameWord;
-
-    const question = `${v.qAux} ${v.qSubj} like ${fallbackWord.english_singular}?`;
+    // 如果完全沒有可用單字，從所有傳入的單字中選擇
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      // 如果完全沒有單字，這不應該發生，因為前一頁會確保有單字
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const question = `${v.qAux} ${v.qSubj} like ${selectedWord.english_singular}?`;
     const answer = `Yes, ${
       v.aSubj.toLowerCase() === "i"
         ? "I do"
@@ -458,8 +471,8 @@ const likeSportsHandler: PatternHandler = ({ words }) => {
         : v.aSubj === "He"
         ? "he does"
         : "she does"
-    } like ${fallbackWord.english_singular}.`;
-    return { question, answer, selectedWord: fallbackWord };
+    } like ${selectedWord.english_singular}.`;
+    return { question, answer, selectedWord };
   }
 
   const picked = selectRandom(availableWords);
@@ -505,7 +518,7 @@ const likeSportsHandler: PatternHandler = ({ words }) => {
         : v.aSubj === "He"
         ? "He"
         : "She"
-    } likes ${randomSport}.`;
+    } ${v.aSubj === "They" ? "like" : "likes"} ${randomSport}.`;
     return { question, answer, selectedWord: randomWord || undefined };
   }
 };
@@ -617,10 +630,35 @@ const whatColorIsItHandler: PatternHandler = ({ words }) => {
     colorWords.length > 0
       ? selectRandom(colorWords)
       : pickByKeywordsOrPOS(words, [], "adjective");
-  const color = picked ? picked.english_singular : "red";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "adjective"
+    );
+    if (allWords.length === 0) {
+      // 如果沒有形容詞，使用任何名詞
+      const nounWords = words.filter(
+        (word) => word && word.part_of_speech === "noun"
+      );
+      if (nounWords.length === 0) {
+        throw new Error("No words available for pattern");
+      }
+      const selectedWord = selectRandom(nounWords);
+      const question = "What color is it?";
+      const answer = `It is ${selectedWord.english_singular}.`;
+      return { question, answer, selectedWord };
+    }
+    const selectedWord = selectRandom(allWords);
+    const question = "What color is it?";
+    const answer = `It is ${selectedWord.english_singular}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const color = picked.english_singular;
   const question = "What color is it?";
   const answer = `It is ${color}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: Where's _____? -> pick place/building noun
@@ -650,10 +688,26 @@ const wheresBlankHandler: PatternHandler = ({ words }) => {
     placeWords.length > 0
       ? selectRandom(placeWords)
       : pickByKeywordsOrPOS(words, [], "noun");
-  const place = picked ? picked.english_singular : "school";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const place = selectedWord.english_singular;
+    const question = `Where's the ${place}?`;
+    const answer = `It is ${place}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const place = picked.english_singular;
   const question = `Where's the ${place}?`;
   const answer = `It is ${place}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: What day is today? -> pick weekday
@@ -675,10 +729,26 @@ const whatDayIsTodayHandler: PatternHandler = ({ words }) => {
 
   const picked =
     dayWords.length > 0 ? selectRandom(dayWords) : pickAnyNoun(words);
-  const day = picked ? picked.english_singular : "Monday";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const day = selectedWord.english_singular;
+    const question = "What day is today?";
+    const answer = `It\'s ${day}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const day = picked.english_singular;
   const question = "What day is today?";
   const answer = `It\'s ${day}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: Do you have a pen/an eraser? -> generalize to stationery noun (Enhanced for Yes/No Q&A)
@@ -696,7 +766,45 @@ const doYouHaveStationeryHandler: PatternHandler = ({ words }) => {
     stationeryWords.length > 0
       ? selectRandom(stationeryWords)
       : pickAnyNoun(words);
-  const noun = picked ? picked.english_singular : "pen";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const noun = selectedWord.english_singular;
+    const article = startsWithVowelSound(noun) ? "an" : "a";
+    const question = `Do you have ${article} ${noun}?`;
+    const isYes = Math.random() < 0.5;
+
+    if (isYes) {
+      // Yes 回答：選中的單字是原本問句中的文具，答案句子是 "Yes, I do have a pen."
+      const answer = `Yes, I do have ${article} ${noun}.`;
+      return { question, answer, selectedWord: selectedWord };
+    } else {
+      // No 回答：選中的單字是隨機的其他文具，答案句子是 "No, I don't. I have a ruler."
+      // 從傳入的 words 中選擇其他文具單字
+      const otherStationery = allWords.filter(
+        (word) => word.id !== selectedWord.id
+      );
+
+      const randomStationery =
+        otherStationery.length > 0
+          ? selectRandom(otherStationery)
+          : selectedWord;
+      const randomNoun = randomStationery.english_singular;
+      const randomArticle = startsWithVowelSound(randomNoun) ? "an" : "a";
+
+      const answer = `No, I don't. I have ${randomArticle} ${randomNoun}.`;
+      return { question, answer, selectedWord: randomStationery };
+    }
+  }
+
+  const noun = picked.english_singular;
   const article = startsWithVowelSound(noun) ? "an" : "a";
   const question = `Do you have ${article} ${noun}?`;
   const isYes = Math.random() < 0.5;
@@ -704,14 +812,14 @@ const doYouHaveStationeryHandler: PatternHandler = ({ words }) => {
   if (isYes) {
     // Yes 回答：選中的單字是原本問句中的文具，答案句子是 "Yes, I do have a pen."
     const answer = `Yes, I do have ${article} ${noun}.`;
-    return { question, answer, selectedWord: picked || undefined };
+    return { question, answer, selectedWord: picked };
   } else {
     // No 回答：選中的單字是隨機的其他文具，答案句子是 "No, I don't. I have a ruler."
     // 從傳入的 words 中選擇其他文具單字
     const otherStationery = words.filter(
       (word) =>
         word.part_of_speech === "noun" &&
-        word.id !== picked?.id &&
+        word.id !== picked.id &&
         ["pen", "pencil", "eraser", "ruler", "marker", "notebook", "book"].some(
           (stationery) =>
             word.english_singular.toLowerCase().includes(stationery)
@@ -720,13 +828,11 @@ const doYouHaveStationeryHandler: PatternHandler = ({ words }) => {
 
     const randomStationery =
       otherStationery.length > 0 ? selectRandom(otherStationery) : picked;
-    const randomNoun = randomStationery
-      ? randomStationery.english_singular
-      : "ruler";
+    const randomNoun = randomStationery.english_singular;
     const randomArticle = startsWithVowelSound(randomNoun) ? "an" : "a";
 
     const answer = `No, I don't. I have ${randomArticle} ${randomNoun}.`;
-    return { question, answer, selectedWord: randomStationery || undefined };
+    return { question, answer, selectedWord: randomStationery };
   }
 };
 
@@ -740,6 +846,10 @@ const whatWouldYouLikeToEatHandler: PatternHandler = ({ words }) => {
         "hamburger",
         "bread",
         "cake",
+        "cookie",
+        "donut",
+        "pie",
+        "candy",
         "pizza",
         "sandwich",
         "noodles",
@@ -759,10 +869,26 @@ const whatWouldYouLikeToEatHandler: PatternHandler = ({ words }) => {
 
   const picked =
     foodWords.length > 0 ? selectRandom(foodWords) : pickAnyNoun(words);
-  const food = picked ? picked.english_singular : "hamburger";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const food = selectedWord.english_singular;
+    const question = "What would you like to eat?";
+    const answer = `I would like some ${food}, please.`;
+    return { question, answer, selectedWord };
+  }
+
+  const food = picked.english_singular;
   const question = "What would you like to eat?";
   const answer = `I would like some ${food}, please.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: What time do you _____? -> pick daily action + time
@@ -830,11 +956,28 @@ const iHaveAHandler: PatternHandler = ({ words }) => {
 
   const picked =
     fruitWords.length > 0 ? selectRandom(fruitWords) : pickAnyNoun(words);
-  const noun = picked ? picked.english_singular : "apple";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const noun = selectedWord.english_singular;
+    const article = startsWithVowelSound(noun) ? "an" : "a";
+    const question = "I have a _____.".replace("_____", noun);
+    const answer = `I have ${article} ${noun}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const noun = picked.english_singular;
   const article = startsWithVowelSound(noun) ? "an" : "a";
   const question = "I have a _____.".replace("_____", noun);
   const answer = `I have ${article} ${noun}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Helper: pluralize naive
@@ -868,8 +1011,83 @@ const howManyNeedHandler: PatternHandler = ({ words }) => {
     stationeryWords.length > 0
       ? selectRandom(stationeryWords)
       : pickAnyNoun(words);
-  const singular = picked ? picked.english_singular : "pen";
-  const plural = toPlural(singular, picked?.english_plural);
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const singular = selectedWord.english_singular;
+    const plural = toPlural(singular, selectedWord.english_plural);
+
+    const subjects = [
+      { who: "you", aux: "do", ansSubj: "I", verb: "need" },
+      { who: "he", aux: "does", ansSubj: "He", verb: "needs" },
+      { who: "she", aux: "does", ansSubj: "She", verb: "needs" },
+      { who: "they", aux: "do", ansSubj: "They", verb: "need" },
+    ];
+    const s = selectRandom(subjects);
+
+    // 從傳入的 words 中選擇數字單字
+    const numberWords = allWords.filter((word) =>
+      [
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+        "twelve",
+      ].some((number) => word.english_singular.toLowerCase().includes(number))
+    );
+
+    let numberPicked =
+      numberWords.length > 0 ? selectRandom(numberWords) : null;
+    let n: number | null = null;
+    if (numberPicked) {
+      const c = (numberPicked.chinese_meaning || "").trim();
+      const parsed = parseInt(c, 10);
+      if (!Number.isNaN(parsed)) {
+        n = parsed;
+      } else {
+        const map: Record<string, number> = {
+          one: 1,
+          two: 2,
+          three: 3,
+          four: 4,
+          five: 5,
+          six: 6,
+          seven: 7,
+          eight: 8,
+          nine: 9,
+          ten: 10,
+          eleven: 11,
+          twelve: 12,
+        };
+        n = map[numberPicked.english_singular.toLowerCase()] ?? null;
+      }
+    }
+    if (n === null) {
+      n = Math.max(1, Math.floor(Math.random() * 5) + 1);
+    }
+
+    const question = `How many ${plural} ${s.aux} ${s.who} need?`;
+    const nounForAnswer = n === 1 ? singular : plural;
+    const answer = `${s.ansSubj} ${s.verb} ${n} ${nounForAnswer}.`;
+    return { question, answer, selectedWord: selectedWord };
+  }
+
+  const singular = picked.english_singular;
+  const plural = toPlural(singular, picked.english_plural);
 
   const subjects = [
     { who: "you", aux: "do", ansSubj: "I", verb: "need" },
@@ -931,7 +1149,7 @@ const howManyNeedHandler: PatternHandler = ({ words }) => {
   const question = `How many ${plural} ${s.aux} ${s.who} need?`;
   const nounForAnswer = n === 1 ? singular : plural;
   const answer = `${s.ansSubj} ${s.verb} ${n} ${nounForAnswer}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: Do you have lunch at _____? -> Supports both locations and time (Enhanced for Yes/No Q&A)
@@ -943,34 +1161,29 @@ const haveLunchAtHandler: PatternHandler = ({ words }) => {
   );
 
   if (availableWords.length === 0) {
-    // 如果沒有可用單字，回退到時間邏輯
-    const fallback = ["seven", "eight", "nine", "ten", "eleven", "twelve"];
-    const text = selectRandom(fallback);
-    const fallbackWord = {
-      id: -1,
-      english_singular: text,
-      chinese_meaning: "",
-      part_of_speech: "noun",
-    } as GameWord;
-
-    const timeText = `${text} o'clock`;
-    const question = `Do you have lunch at ${timeText}?`;
+    // 如果沒有可用單字，從所有傳入的單字中選擇
+    const allWords = words.filter(
+      (word) =>
+        word &&
+        (word.part_of_speech === "noun" || word.part_of_speech === "adjective")
+    );
+    if (allWords.length === 0) {
+      // 如果完全沒有單字，這不應該發生，因為前一頁會確保有單字
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const question = `Do you have lunch at ${selectedWord.english_singular}?`;
     const isYes = Math.random() < 0.5;
 
     if (isYes) {
-      const answer = `Yes, I do have lunch at ${timeText}.`;
-      return { question, answer, selectedWord: fallbackWord };
+      const answer = `Yes, I do have lunch at ${selectedWord.english_singular}.`;
+      return { question, answer, selectedWord };
     } else {
-      const randomTime = selectRandom(fallback.filter((t) => t !== text));
-      const randomTimeText = `${randomTime} o'clock`;
-      const randomTimeWord = {
-        id: -2,
-        english_singular: randomTime,
-        chinese_meaning: randomTime,
-        part_of_speech: "noun",
-      } as GameWord;
-      const answer = `No, I don't. I have lunch at ${randomTimeText}.`;
-      return { question, answer, selectedWord: randomTimeWord };
+      const otherWords = allWords.filter((w) => w.id !== selectedWord.id);
+      const randomWord =
+        otherWords.length > 0 ? selectRandom(otherWords) : selectedWord;
+      const answer = `No, I don't. I have lunch at ${randomWord.english_singular}.`;
+      return { question, answer, selectedWord: randomWord };
     }
   }
 
@@ -1110,23 +1323,59 @@ const isHeSheTeacherHandler: PatternHandler = ({ words }) => {
 // Handler: What's this/that? -> Identification (singular)
 const whatsThisThatHandler: PatternHandler = ({ words }) => {
   const picked = pickAnyNoun(words);
-  const noun = picked ? picked.english_singular : "pen";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const noun = selectedWord.english_singular;
+    const article = startsWithVowelSound(noun) ? "an" : "a";
+    const deictic = selectRandom(["this", "that"]);
+    const question = `What\'s ${deictic}?`;
+    const answer = `It is ${article} ${noun}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const noun = picked.english_singular;
   const article = startsWithVowelSound(noun) ? "an" : "a";
   const deictic = selectRandom(["this", "that"]);
   const question = `What\'s ${deictic}?`;
   const answer = `It is ${article} ${noun}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: What are these/those? -> Identification (plural)
 const whatAreTheseThoseHandler: PatternHandler = ({ words }) => {
   const picked = pickAnyNoun(words);
-  const singular = picked ? picked.english_singular : "pen";
-  const plural = toPlural(singular, picked?.english_plural);
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const singular = selectedWord.english_singular;
+    const plural = toPlural(singular, selectedWord.english_plural);
+    const deictic = selectRandom(["these", "those"]);
+    const question = `What are ${deictic}?`;
+    const answer = `They are ${plural}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const singular = picked.english_singular;
+  const plural = toPlural(singular, picked.english_plural);
   const deictic = selectRandom(["these", "those"]);
   const question = `What are ${deictic}?`;
   const answer = `They are ${plural}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: Who is he/she? -> Professions/Identity
@@ -1177,13 +1426,32 @@ const whatDoesHeSheLikeHandler: PatternHandler = ({ words }) => {
       "apple",
       "banana",
     ]) || pickAnyNoun(words);
-  const thing = picked ? picked.english_singular : "pizza";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const thing = selectedWord.english_singular;
+    const who = selectRandom(["he", "she"]);
+    const question = `What does ${who} like?`;
+    const answer = `${
+      who.charAt(0).toUpperCase() + who.slice(1)
+    } likes ${thing}.`;
+    return { question, answer, selectedWord };
+  }
+
+  const thing = picked.english_singular;
   const who = selectRandom(["he", "she"]);
   const question = `What does ${who} like?`;
   const answer = `${
     who.charAt(0).toUpperCase() + who.slice(1)
   } likes ${thing}.`;
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 // Handler: How much is it? -> simple price
@@ -1256,10 +1524,26 @@ const wouldYouLikeSomeHandler: PatternHandler = ({ words }) => {
     bakeryDrinkWords.length > 0
       ? selectRandom(bakeryDrinkWords)
       : pickAnyNoun(words);
-  const item = picked ? picked.english_singular : "tea";
+
+  // 確保 picked 不為空，從傳入的單字中選擇
+  if (!picked) {
+    const allWords = words.filter(
+      (word) => word && word.part_of_speech === "noun"
+    );
+    if (allWords.length === 0) {
+      throw new Error("No words available for pattern");
+    }
+    const selectedWord = selectRandom(allWords);
+    const item = selectedWord.english_singular;
+    const question = `Would you like some ${item}?`;
+    const answer = selectRandom(["Yes, please.", "No, thanks."]);
+    return { question, answer, selectedWord };
+  }
+
+  const item = picked.english_singular;
   const question = `Would you like some ${item}?`;
   const answer = selectRandom(["Yes, please.", "No, thanks."]);
-  return { question, answer, selectedWord: picked || undefined };
+  return { question, answer, selectedWord: picked };
 };
 
 export const patternHandlers: Record<string, PatternHandler> = {
@@ -1292,7 +1576,7 @@ export const patternHandlers: Record<string, PatternHandler> = {
     ];
     const s = selectRandom(subjects);
 
-    // 從傳入的 words 中選擇飲料單字
+    // 優先從傳入的 words 中選擇飲料單字，如果沒有則選擇任何名詞
     const drinkWords = words.filter(
       (word) =>
         word.part_of_speech === "noun" &&
@@ -1301,9 +1585,15 @@ export const patternHandlers: Record<string, PatternHandler> = {
         )
     );
 
-    const picked =
+    // 如果沒有飲料單字，則使用任何可用的名詞
+    const availableWords =
       drinkWords.length > 0
-        ? selectRandom(drinkWords)
+        ? drinkWords
+        : words.filter((word) => word.part_of_speech === "noun");
+
+    const picked =
+      availableWords.length > 0
+        ? selectRandom(availableWords)
         : ({
             id: -4,
             english_singular: "tea",
@@ -1311,36 +1601,38 @@ export const patternHandlers: Record<string, PatternHandler> = {
             part_of_speech: "noun",
           } as GameWord);
 
-    const drink = picked.english_singular;
-    const question = `${s.qAux} ${s.who} like ${drink}?`;
+    const item = picked.english_singular;
+    const question = `${s.qAux} ${s.who} like ${item}?`;
     const isYes = Math.random() < 0.5;
 
     if (isYes) {
-      // Yes 回答：選中的單字是原本問句中的飲料，答案句子是 "Yes, he does like tea."
+      // Yes 回答：選中的單字是原本問句中的物品，答案句子是 "Yes, he does like apple."
       if (s.who === "you") {
-        const answer = `Yes, I do like ${drink}.`;
+        const answer = `Yes, I do like ${item}.`;
         return { question, answer, selectedWord: picked };
       } else {
-        const answer = `Yes, ${s.who} does like ${drink}.`;
+        // 根據主詞選擇正確的助動詞：he/she 用 does，they 用 do
+        const auxVerb = s.who === "they" ? "do" : "does";
+        const answer = `Yes, ${s.who} ${auxVerb} like ${item}.`;
         return { question, answer, selectedWord: picked };
       }
     } else {
-      // No 回答：選中的單字是隨機的其他飲料，答案句子是 "No, he doesn't. He likes coffee."
-      // 從傳入的 words 中選擇其他飲料單字
-      const otherDrinkWords = drinkWords.filter(
-        (word) => word.id !== picked.id
-      );
-      const randomDrink =
-        otherDrinkWords.length > 0 ? selectRandom(otherDrinkWords) : picked;
+      // No 回答：選中的單字是隨機的其他物品，答案句子是 "No, he doesn't. He likes banana."
+      // 從傳入的 words 中選擇其他物品單字
+      const otherWords = availableWords.filter((word) => word.id !== picked.id);
+      const randomItem =
+        otherWords.length > 0 ? selectRandom(otherWords) : picked;
 
       if (s.who === "you") {
-        const answer = `No, I don't. I like ${randomDrink.english_singular}.`;
-        return { question, answer, selectedWord: randomDrink };
+        const answer = `No, I don't. I like ${randomItem.english_singular}.`;
+        return { question, answer, selectedWord: randomItem };
       } else {
         const answer = `No, ${s.who} doesn't. ${
           s.who.charAt(0).toUpperCase() + s.who.slice(1)
-        } likes ${randomDrink.english_singular}.`;
-        return { question, answer, selectedWord: randomDrink };
+        } ${s.who === "they" ? "like" : "likes"} ${
+          randomItem.english_singular
+        }.`;
+        return { question, answer, selectedWord: randomItem };
       }
     }
   },
@@ -1389,7 +1681,9 @@ export const patternHandlers: Record<string, PatternHandler> = {
 
     if (isYes) {
       // Yes 回答：選中的單字是原本問句中的症狀，答案句子是 "Yes, he does have a fever."
-      const answer = `Yes, ${s.who} does have a ${ailment}.`;
+      // 根據主詞選擇正確的助動詞：he/she 用 does，they 用 do
+      const auxVerb = s.who === "they" ? "do" : "does";
+      const answer = `Yes, ${s.who} ${auxVerb} have a ${ailment}.`;
       return { question, answer, selectedWord: picked || undefined };
     } else {
       // No 回答：選中的單字是隨機的其他症狀，答案句子是 "No, he doesn't. He has a headache."

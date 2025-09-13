@@ -124,36 +124,9 @@ GET /api/learning-content?action=words_by_part_of_speech&part_of_speech={part_of
 GET /api/learning-content?action=random_words&count={count}&theme_id={theme_id}
 ```
 
-## D1 Database Integration
+## Database Integration
 
-### Production API Route
-For production use with Cloudflare D1, use:
-```
-/api/learning-content-d1
-```
-
-This route provides the same functionality but integrates directly with D1 database.
-
-### Deployment
-
-1. **Install Wrangler CLI**:
-   ```bash
-   npm install -g wrangler
-   ```
-
-2. **Run Deployment Script**:
-   ```bash
-   chmod +x scripts/deploy-d1-schema.sh
-   ./scripts/deploy-d1-schema.sh
-   ```
-
-3. **Update wrangler.toml**:
-   ```toml
-   [[d1_databases]]
-   binding = "DB"
-   database_name = "learning-content"
-   database_id = "your-database-id"
-   ```
+The learning content system uses a virtual database approach with mock data stored directly in the API route file. This provides fast access and eliminates the need for external database dependencies.
 
 ## Component Integration
 

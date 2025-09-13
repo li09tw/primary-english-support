@@ -24,7 +24,7 @@ import { getCloudflareConfig } from "@/lib/env-config";
 export async function POST(request: NextRequest) {
   try {
     // 檢查會話是否有效
-    const sessionToken = SessionManager.getSessionToken();
+    const sessionToken = await SessionManager.getSessionToken();
     if (!sessionToken) {
       return NextResponse.json(
         { success: false, message: "會話無效，請重新登入" },
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       sessionToken
     );
     if (!sessionValidation.valid) {
-      SessionManager.clearSessionCookie();
+      await SessionManager.clearSessionCookie();
       return NextResponse.json(
         { success: false, message: sessionValidation.error || "會話已過期" },
         { status: 401 }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     const accountId = sessionValidation.accountId!;
-    const clientIP = getClientIP();
+    const clientIP = await getClientIP();
 
     // 檢查驗證碼請求限制
     const rateLimitCheck = await RateLimiter.checkCodeRequestLimit(
@@ -193,7 +193,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // 檢查會話是否有效
-    const sessionToken = SessionManager.getSessionToken();
+    const sessionToken = await SessionManager.getSessionToken();
     if (!sessionToken) {
       return NextResponse.json(
         { success: false, message: "會話無效，請重新登入" },
@@ -205,7 +205,7 @@ export async function PUT(request: NextRequest) {
       sessionToken
     );
     if (!sessionValidation.valid) {
-      SessionManager.clearSessionCookie();
+      await SessionManager.clearSessionCookie();
       return NextResponse.json(
         { success: false, message: sessionValidation.error || "會話已過期" },
         { status: 401 }

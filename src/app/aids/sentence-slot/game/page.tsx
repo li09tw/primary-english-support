@@ -88,14 +88,32 @@ function SentenceSlotGameContent() {
     let completedSentence = "";
     let selectedWord: Word | undefined = undefined;
     if (handler) {
-      // 傳入 API 已經過濾好的單字（主題 + 詞性）
-      const res = handler({
-        patternText: randomPattern.pattern_text,
-        words: compatibleWords as any, // ✅ API 已過濾主題和詞性
-      });
-      questionText = res.question;
-      completedSentence = res.answer;
-      if (res.selectedWord) selectedWord = res.selectedWord as any;
+      try {
+        // 傳入 API 已經過濾好的單字（主題 + 詞性）
+        const res = handler({
+          patternText: randomPattern.pattern_text,
+          words: compatibleWords as any, // ✅ API 已過濾主題和詞性
+        });
+        questionText = res.question;
+        completedSentence = res.answer;
+        if (res.selectedWord) selectedWord = res.selectedWord as any;
+      } catch (error) {
+        console.error("處理器執行錯誤:", error);
+        // 如果處理器失敗，使用 fallback 邏輯
+        if (compatibleWords.length > 0) {
+          const fallbackWord =
+            compatibleWords[Math.floor(Math.random() * compatibleWords.length)];
+          questionText = randomPattern.pattern_text;
+          completedSentence = randomPattern.pattern_text.replace(
+            "____",
+            fallbackWord.english_singular
+          );
+          selectedWord = fallbackWord;
+        } else {
+          setError("沒有找到適合的單字");
+          return;
+        }
+      }
     } else {
       completedSentence = randomPattern.answer_pattern
         ? randomPattern.answer_pattern.pattern_text.replace(
@@ -147,7 +165,7 @@ function SentenceSlotGameContent() {
 
         // 構建請求資料
         const requestData = {
-          grade_id: parseInt(grade),
+          grade_id: grade, // 直接使用字串格式的 grade_id (G3, G5, G6)
           pattern_ids: patterns.split(",").map((id) => parseInt(id)),
           theme_ids: themes.split(",").map((themeParam) => {
             // 檢查是否已經是數字 ID
@@ -276,13 +294,31 @@ function SentenceSlotGameContent() {
     let completedSentence = "";
     let selectedWord: Word | undefined = randomWord;
     if (handler) {
-      const res = handler({
-        patternText: randomPattern.pattern_text,
-        words: gameData.words as any,
-      });
-      questionText = res.question;
-      completedSentence = res.answer;
-      if (res.selectedWord) selectedWord = res.selectedWord as any;
+      try {
+        const res = handler({
+          patternText: randomPattern.pattern_text,
+          words: gameData.words as any,
+        });
+        questionText = res.question;
+        completedSentence = res.answer;
+        if (res.selectedWord) selectedWord = res.selectedWord as any;
+      } catch (error) {
+        console.error("處理器執行錯誤:", error);
+        // 如果處理器失敗，使用 fallback 邏輯
+        if (gameData.words.length > 0) {
+          const fallbackWord =
+            gameData.words[Math.floor(Math.random() * gameData.words.length)];
+          questionText = randomPattern.pattern_text;
+          completedSentence = randomPattern.pattern_text.replace(
+            "____",
+            fallbackWord.english_singular
+          );
+          selectedWord = fallbackWord;
+        } else {
+          setError("沒有找到適合的單字");
+          return;
+        }
+      }
     } else {
       completedSentence = randomPattern.answer_pattern
         ? randomPattern.answer_pattern.pattern_text.replace(
@@ -345,14 +381,32 @@ function SentenceSlotGameContent() {
     let completedSentence = "";
     let selectedWord: Word | undefined = randomWord;
     if (handler) {
-      // 傳入 API 已經過濾好的單字（主題 + 詞性）
-      const res = handler({
-        patternText: randomPattern.pattern_text,
-        words: compatibleWords as any, // ✅ API 已過濾主題和詞性
-      });
-      questionText = res.question;
-      completedSentence = res.answer;
-      if (res.selectedWord) selectedWord = res.selectedWord as any;
+      try {
+        // 傳入 API 已經過濾好的單字（主題 + 詞性）
+        const res = handler({
+          patternText: randomPattern.pattern_text,
+          words: compatibleWords as any, // ✅ API 已過濾主題和詞性
+        });
+        questionText = res.question;
+        completedSentence = res.answer;
+        if (res.selectedWord) selectedWord = res.selectedWord as any;
+      } catch (error) {
+        console.error("處理器執行錯誤:", error);
+        // 如果處理器失敗，使用 fallback 邏輯
+        if (compatibleWords.length > 0) {
+          const fallbackWord =
+            compatibleWords[Math.floor(Math.random() * compatibleWords.length)];
+          questionText = randomPattern.pattern_text;
+          completedSentence = randomPattern.pattern_text.replace(
+            "____",
+            fallbackWord.english_singular
+          );
+          selectedWord = fallbackWord;
+        } else {
+          setError("沒有找到適合的單字");
+          return;
+        }
+      }
     } else {
       completedSentence = randomPattern.answer_pattern
         ? randomPattern.answer_pattern.pattern_text.replace(

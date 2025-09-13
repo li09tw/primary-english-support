@@ -1,0 +1,2699 @@
+import { NextRequest, NextResponse } from "next/server";
+import {
+  LearningContentResponse,
+  WordsByThemeResponse,
+  SentencePatternsResponse,
+  ThemesResponse,
+  QuestionAnswerPairsResponse,
+  WordTheme,
+  Word,
+} from "@/types/learning-content";
+import {
+  mockGrades,
+  mockThemes,
+  mockWords,
+  mockSentencePatterns,
+  mockQuestionAnswerPairs,
+  wordThemeMap,
+} from "../game-data/route";
+
+// 使用從 game-data 導入的共享資料
+
+// 轉換函數：將 game-data 的單字格式轉換為 learning-content 格式
+function convertGameDataWords(gameWords: any[]): Word[] {
+  return gameWords.map((word) => ({
+    id: typeof word.id === 'string' ? parseInt(word.id.replace(/\D/g, '')) || 0 : word.id,
+    english_singular: word.english_singular,
+    english_plural: word.english_plural,
+    chinese_meaning: word.chinese_meaning,
+    part_of_speech: word.part_of_speech,
+    has_plural: word.has_plural,
+  }));
+}
+
+// 轉換後的單字資料
+const convertedWords: Word[] = convertGameDataWords(mockWords);
+  {
+    id: 4,
+    english_singular: "excited",
+    english_plural: undefined,
+    chinese_meaning: "興奮",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 5,
+    english_singular: "tired",
+    english_plural: undefined,
+    chinese_meaning: "疲憊",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 6,
+    english_singular: "scared",
+    english_plural: undefined,
+    chinese_meaning: "害怕",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 7,
+    english_singular: "bored",
+    english_plural: undefined,
+    chinese_meaning: "無聊",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+
+  // Colors (theme_id: 2)
+  {
+    id: 8,
+    english_singular: "red",
+    english_plural: undefined,
+    chinese_meaning: "紅色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 9,
+    english_singular: "blue",
+    english_plural: undefined,
+    chinese_meaning: "藍色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 10,
+    english_singular: "green",
+    english_plural: undefined,
+    chinese_meaning: "綠色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 11,
+    english_singular: "yellow",
+    english_plural: undefined,
+    chinese_meaning: "黃色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 12,
+    english_singular: "black",
+    english_plural: undefined,
+    chinese_meaning: "黑色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 13,
+    english_singular: "white",
+    english_plural: undefined,
+    chinese_meaning: "白色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 14,
+    english_singular: "pink",
+    english_plural: undefined,
+    chinese_meaning: "粉色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 15,
+    english_singular: "purple",
+    english_plural: undefined,
+    chinese_meaning: "紫色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 16,
+    english_singular: "orange",
+    english_plural: undefined,
+    chinese_meaning: "橘色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+  {
+    id: 17,
+    english_singular: "brown",
+    english_plural: undefined,
+    chinese_meaning: "棕色",
+    part_of_speech: "adjective",
+    has_plural: false,
+  },
+
+  // Sports (theme_id: 3)
+  {
+    id: 18,
+    english_singular: "basketball",
+    english_plural: "basketballs",
+    chinese_meaning: "籃球",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 19,
+    english_singular: "soccer",
+    english_plural: undefined,
+    chinese_meaning: "足球",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 20,
+    english_singular: "baseball",
+    english_plural: "baseballs",
+    chinese_meaning: "棒球",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 21,
+    english_singular: "tennis",
+    english_plural: undefined,
+    chinese_meaning: "網球",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 22,
+    english_singular: "swimming",
+    english_plural: undefined,
+    chinese_meaning: "游泳",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 23,
+    english_singular: "running",
+    english_plural: undefined,
+    chinese_meaning: "跑步",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+
+  // Stationery (theme_id: 4)
+  {
+    id: 24,
+    english_singular: "pen",
+    english_plural: "pens",
+    chinese_meaning: "筆",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 25,
+    english_singular: "pencil",
+    english_plural: "pencils",
+    chinese_meaning: "鉛筆",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 26,
+    english_singular: "eraser",
+    english_plural: "erasers",
+    chinese_meaning: "橡皮擦",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 27,
+    english_singular: "ruler",
+    english_plural: "rulers",
+    chinese_meaning: "尺",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 28,
+    english_singular: "marker",
+    english_plural: "markers",
+    chinese_meaning: "麥克筆",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 29,
+    english_singular: "notebook",
+    english_plural: "notebooks",
+    chinese_meaning: "筆記本",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 30,
+    english_singular: "book",
+    english_plural: "books",
+    chinese_meaning: "書",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+
+  // Fruits (theme_id: 5)
+  {
+    id: 31,
+    english_singular: "apple",
+    english_plural: "apples",
+    chinese_meaning: "蘋果",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 32,
+    english_singular: "banana",
+    english_plural: "bananas",
+    chinese_meaning: "香蕉",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 33,
+    english_singular: "orange",
+    english_plural: "oranges",
+    chinese_meaning: "橘子",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 34,
+    english_singular: "grape",
+    english_plural: "grapes",
+    chinese_meaning: "葡萄",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 35,
+    english_singular: "pear",
+    english_plural: "pears",
+    chinese_meaning: "梨子",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 36,
+    english_singular: "peach",
+    english_plural: "peaches",
+    chinese_meaning: "桃子",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 37,
+    english_singular: "mango",
+    english_plural: "mangoes",
+    chinese_meaning: "芒果",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 38,
+    english_singular: "pineapple",
+    english_plural: "pineapples",
+    chinese_meaning: "鳳梨",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 39,
+    english_singular: "strawberry",
+    english_plural: "strawberries",
+    chinese_meaning: "草莓",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 40,
+    english_singular: "watermelon",
+    english_plural: "watermelons",
+    chinese_meaning: "西瓜",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+
+  // Fast Food (theme_id: 6)
+  {
+    id: 41,
+    english_singular: "hamburger",
+    english_plural: "hamburgers",
+    chinese_meaning: "漢堡",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 42,
+    english_singular: "pizza",
+    english_plural: "pizzas",
+    chinese_meaning: "披薩",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 43,
+    english_singular: "hotdog",
+    english_plural: "hotdogs",
+    chinese_meaning: "熱狗",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 44,
+    english_singular: "fries",
+    english_plural: undefined,
+    chinese_meaning: "薯條",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 45,
+    english_singular: "chicken",
+    english_plural: undefined,
+    chinese_meaning: "雞肉",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 46,
+    english_singular: "sandwich",
+    english_plural: "sandwiches",
+    chinese_meaning: "三明治",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+
+  // School Subjects (theme_id: 10)
+  {
+    id: 47,
+    english_singular: "math",
+    english_plural: undefined,
+    chinese_meaning: "數學",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 48,
+    english_singular: "science",
+    english_plural: undefined,
+    chinese_meaning: "科學",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 49,
+    english_singular: "english",
+    english_plural: undefined,
+    chinese_meaning: "英文",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 50,
+    english_singular: "history",
+    english_plural: undefined,
+    chinese_meaning: "歷史",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 51,
+    english_singular: "art",
+    english_plural: undefined,
+    chinese_meaning: "美術",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 52,
+    english_singular: "music",
+    english_plural: undefined,
+    chinese_meaning: "音樂",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+
+  // Countries (theme_id: 12)
+  {
+    id: 53,
+    english_singular: "taiwan",
+    english_plural: undefined,
+    chinese_meaning: "台灣",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 54,
+    english_singular: "japan",
+    english_plural: undefined,
+    chinese_meaning: "日本",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 55,
+    english_singular: "korea",
+    english_plural: undefined,
+    chinese_meaning: "韓國",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 56,
+    english_singular: "usa",
+    english_plural: undefined,
+    chinese_meaning: "美國",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 57,
+    english_singular: "canada",
+    english_plural: undefined,
+    chinese_meaning: "加拿大",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 59,
+    english_singular: "china",
+    english_plural: undefined,
+    chinese_meaning: "中國",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+
+  // Toys (theme_id: 14)
+  {
+    id: 60,
+    english_singular: "doll",
+    english_plural: "dolls",
+    chinese_meaning: "娃娃",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 59,
+    english_singular: "car",
+    english_plural: "cars",
+    chinese_meaning: "車子",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 60,
+    english_singular: "ball",
+    english_plural: "balls",
+    chinese_meaning: "球",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 61,
+    english_singular: "teddy",
+    english_plural: "teddies",
+    chinese_meaning: "泰迪熊",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 62,
+    english_singular: "robot",
+    english_plural: "robots",
+    chinese_meaning: "機器人",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 63,
+    english_singular: "puzzle",
+    english_plural: "puzzles",
+    chinese_meaning: "拼圖",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 64,
+    english_singular: "blocks",
+    english_plural: undefined,
+    chinese_meaning: "積木",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+
+  // Drinks (theme_id: 15)
+  {
+    id: 65,
+    english_singular: "water",
+    english_plural: undefined,
+    chinese_meaning: "水",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 66,
+    english_singular: "milk",
+    english_plural: undefined,
+    chinese_meaning: "牛奶",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 67,
+    english_singular: "juice",
+    english_plural: undefined,
+    chinese_meaning: "果汁",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 68,
+    english_singular: "tea",
+    english_plural: undefined,
+    chinese_meaning: "茶",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 69,
+    english_singular: "coffee",
+    english_plural: undefined,
+    chinese_meaning: "咖啡",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 70,
+    english_singular: "soda",
+    english_plural: undefined,
+    chinese_meaning: "汽水",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+
+  // Professions (theme_id: 19)
+  {
+    id: 71,
+    english_singular: "student",
+    english_plural: "students",
+    chinese_meaning: "學生",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 72,
+    english_singular: "teacher",
+    english_plural: "teachers",
+    chinese_meaning: "老師",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 73,
+    english_singular: "doctor",
+    english_plural: "doctors",
+    chinese_meaning: "醫生",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 74,
+    english_singular: "nurse",
+    english_plural: "nurses",
+    chinese_meaning: "護士",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 75,
+    english_singular: "engineer",
+    english_plural: "engineers",
+    chinese_meaning: "工程師",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 76,
+    english_singular: "artist",
+    english_plural: "artists",
+    chinese_meaning: "藝術家",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 77,
+    english_singular: "farmer",
+    english_plural: "farmers",
+    chinese_meaning: "農夫",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 78,
+    english_singular: "worker",
+    english_plural: "workers",
+    chinese_meaning: "工人",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+
+  // Daily Actions (theme_id: 20)
+  {
+    id: 79,
+    english_singular: "get up",
+    english_plural: undefined,
+    chinese_meaning: "起床",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+  {
+    id: 80,
+    english_singular: "wake up",
+    english_plural: undefined,
+    chinese_meaning: "醒來",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+  {
+    id: 81,
+    english_singular: "eat breakfast",
+    english_plural: undefined,
+    chinese_meaning: "吃早餐",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+  {
+    id: 82,
+    english_singular: "go to school",
+    english_plural: undefined,
+    chinese_meaning: "去學校",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+  {
+    id: 83,
+    english_singular: "study",
+    english_plural: undefined,
+    chinese_meaning: "讀書",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+  {
+    id: 84,
+    english_singular: "read",
+    english_plural: undefined,
+    chinese_meaning: "閱讀",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+  {
+    id: 85,
+    english_singular: "sleep",
+    english_plural: undefined,
+    chinese_meaning: "睡覺",
+    part_of_speech: "verb",
+    has_plural: false,
+  },
+
+  // Buildings & Places (theme_id: 22)
+  {
+    id: 86,
+    english_singular: "school",
+    english_plural: "schools",
+    chinese_meaning: "學校",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 87,
+    english_singular: "home",
+    english_plural: undefined,
+    chinese_meaning: "家",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 88,
+    english_singular: "hospital",
+    english_plural: "hospitals",
+    chinese_meaning: "醫院",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 89,
+    english_singular: "library",
+    english_plural: "libraries",
+    chinese_meaning: "圖書館",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 90,
+    english_singular: "park",
+    english_plural: "parks",
+    chinese_meaning: "公園",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 91,
+    english_singular: "restaurant",
+    english_plural: "restaurants",
+    chinese_meaning: "餐廳",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+
+  // Numbers (theme_id: 23)
+  {
+    id: 92,
+    english_singular: "one",
+    english_plural: undefined,
+    chinese_meaning: "1",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 93,
+    english_singular: "two",
+    english_plural: undefined,
+    chinese_meaning: "2",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 94,
+    english_singular: "three",
+    english_plural: undefined,
+    chinese_meaning: "3",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 95,
+    english_singular: "four",
+    english_plural: undefined,
+    chinese_meaning: "4",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 96,
+    english_singular: "five",
+    english_plural: undefined,
+    chinese_meaning: "5",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 97,
+    english_singular: "six",
+    english_plural: undefined,
+    chinese_meaning: "6",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 98,
+    english_singular: "seven",
+    english_plural: undefined,
+    chinese_meaning: "7",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 99,
+    english_singular: "eight",
+    english_plural: undefined,
+    chinese_meaning: "8",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 100,
+    english_singular: "nine",
+    english_plural: undefined,
+    chinese_meaning: "9",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 101,
+    english_singular: "ten",
+    english_plural: undefined,
+    chinese_meaning: "10",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 102,
+    english_singular: "eleven",
+    english_plural: undefined,
+    chinese_meaning: "11",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 103,
+    english_singular: "twelve",
+    english_plural: undefined,
+    chinese_meaning: "12",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 104,
+    english_singular: "thirteen",
+    english_plural: undefined,
+    chinese_meaning: "13",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 105,
+    english_singular: "fourteen",
+    english_plural: undefined,
+    chinese_meaning: "14",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 106,
+    english_singular: "fifteen",
+    english_plural: undefined,
+    chinese_meaning: "15",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 107,
+    english_singular: "sixteen",
+    english_plural: undefined,
+    chinese_meaning: "16",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 108,
+    english_singular: "seventeen",
+    english_plural: undefined,
+    chinese_meaning: "17",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 109,
+    english_singular: "eighteen",
+    english_plural: undefined,
+    chinese_meaning: "18",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 110,
+    english_singular: "nineteen",
+    english_plural: undefined,
+    chinese_meaning: "19",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 111,
+    english_singular: "twenty",
+    english_plural: undefined,
+    chinese_meaning: "20",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 112,
+    english_singular: "twenty one",
+    english_plural: undefined,
+    chinese_meaning: "21",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 113,
+    english_singular: "twenty two",
+    english_plural: undefined,
+    chinese_meaning: "22",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 114,
+    english_singular: "twenty three",
+    english_plural: undefined,
+    chinese_meaning: "23",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 115,
+    english_singular: "twenty four",
+    english_plural: undefined,
+    chinese_meaning: "24",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 116,
+    english_singular: "twenty five",
+    english_plural: undefined,
+    chinese_meaning: "25",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 117,
+    english_singular: "twenty six",
+    english_plural: undefined,
+    chinese_meaning: "26",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 118,
+    english_singular: "twenty seven",
+    english_plural: undefined,
+    chinese_meaning: "27",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 119,
+    english_singular: "twenty eight",
+    english_plural: undefined,
+    chinese_meaning: "28",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 120,
+    english_singular: "twenty nine",
+    english_plural: undefined,
+    chinese_meaning: "29",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 121,
+    english_singular: "thirty",
+    english_plural: undefined,
+    chinese_meaning: "30",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 122,
+    english_singular: "thirty one",
+    english_plural: undefined,
+    chinese_meaning: "31",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 123,
+    english_singular: "thirty two",
+    english_plural: undefined,
+    chinese_meaning: "32",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 124,
+    english_singular: "thirty three",
+    english_plural: undefined,
+    chinese_meaning: "33",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 125,
+    english_singular: "thirty four",
+    english_plural: undefined,
+    chinese_meaning: "34",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 126,
+    english_singular: "thirty five",
+    english_plural: undefined,
+    chinese_meaning: "35",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 127,
+    english_singular: "thirty six",
+    english_plural: undefined,
+    chinese_meaning: "36",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 128,
+    english_singular: "thirty seven",
+    english_plural: undefined,
+    chinese_meaning: "37",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 129,
+    english_singular: "thirty eight",
+    english_plural: undefined,
+    chinese_meaning: "38",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 130,
+    english_singular: "thirty nine",
+    english_plural: undefined,
+    chinese_meaning: "39",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 131,
+    english_singular: "forty",
+    english_plural: undefined,
+    chinese_meaning: "40",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 132,
+    english_singular: "forty one",
+    english_plural: undefined,
+    chinese_meaning: "41",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 133,
+    english_singular: "forty two",
+    english_plural: undefined,
+    chinese_meaning: "42",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 134,
+    english_singular: "forty three",
+    english_plural: undefined,
+    chinese_meaning: "43",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 135,
+    english_singular: "forty four",
+    english_plural: undefined,
+    chinese_meaning: "44",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 136,
+    english_singular: "forty five",
+    english_plural: undefined,
+    chinese_meaning: "45",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 137,
+    english_singular: "forty six",
+    english_plural: undefined,
+    chinese_meaning: "46",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 138,
+    english_singular: "forty seven",
+    english_plural: undefined,
+    chinese_meaning: "47",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 139,
+    english_singular: "forty eight",
+    english_plural: undefined,
+    chinese_meaning: "48",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 140,
+    english_singular: "forty nine",
+    english_plural: undefined,
+    chinese_meaning: "49",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 141,
+    english_singular: "fifty",
+    english_plural: undefined,
+    chinese_meaning: "50",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 142,
+    english_singular: "fifty one",
+    english_plural: undefined,
+    chinese_meaning: "51",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 143,
+    english_singular: "fifty two",
+    english_plural: undefined,
+    chinese_meaning: "52",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 144,
+    english_singular: "fifty three",
+    english_plural: undefined,
+    chinese_meaning: "53",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 145,
+    english_singular: "fifty four",
+    english_plural: undefined,
+    chinese_meaning: "54",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 146,
+    english_singular: "fifty five",
+    english_plural: undefined,
+    chinese_meaning: "55",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 147,
+    english_singular: "fifty six",
+    english_plural: undefined,
+    chinese_meaning: "56",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 148,
+    english_singular: "fifty seven",
+    english_plural: undefined,
+    chinese_meaning: "57",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 149,
+    english_singular: "fifty eight",
+    english_plural: undefined,
+    chinese_meaning: "58",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 150,
+    english_singular: "fifty nine",
+    english_plural: undefined,
+    chinese_meaning: "59",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 151,
+    english_singular: "sixty",
+    english_plural: undefined,
+    chinese_meaning: "60",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 152,
+    english_singular: "sixty one",
+    english_plural: undefined,
+    chinese_meaning: "61",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 153,
+    english_singular: "sixty two",
+    english_plural: undefined,
+    chinese_meaning: "62",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 154,
+    english_singular: "sixty three",
+    english_plural: undefined,
+    chinese_meaning: "63",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 155,
+    english_singular: "sixty four",
+    english_plural: undefined,
+    chinese_meaning: "64",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 156,
+    english_singular: "sixty five",
+    english_plural: undefined,
+    chinese_meaning: "65",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 157,
+    english_singular: "sixty six",
+    english_plural: undefined,
+    chinese_meaning: "66",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 158,
+    english_singular: "sixty seven",
+    english_plural: undefined,
+    chinese_meaning: "67",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 159,
+    english_singular: "sixty eight",
+    english_plural: undefined,
+    chinese_meaning: "68",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 160,
+    english_singular: "sixty nine",
+    english_plural: undefined,
+    chinese_meaning: "69",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 161,
+    english_singular: "seventy",
+    english_plural: undefined,
+    chinese_meaning: "70",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 162,
+    english_singular: "seventy one",
+    english_plural: undefined,
+    chinese_meaning: "71",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 163,
+    english_singular: "seventy two",
+    english_plural: undefined,
+    chinese_meaning: "72",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 164,
+    english_singular: "seventy three",
+    english_plural: undefined,
+    chinese_meaning: "73",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 165,
+    english_singular: "seventy four",
+    english_plural: undefined,
+    chinese_meaning: "74",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 166,
+    english_singular: "seventy five",
+    english_plural: undefined,
+    chinese_meaning: "75",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 167,
+    english_singular: "seventy six",
+    english_plural: undefined,
+    chinese_meaning: "76",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 168,
+    english_singular: "seventy seven",
+    english_plural: undefined,
+    chinese_meaning: "77",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 169,
+    english_singular: "seventy eight",
+    english_plural: undefined,
+    chinese_meaning: "78",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 170,
+    english_singular: "seventy nine",
+    english_plural: undefined,
+    chinese_meaning: "79",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 171,
+    english_singular: "eighty",
+    english_plural: undefined,
+    chinese_meaning: "80",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 172,
+    english_singular: "eighty one",
+    english_plural: undefined,
+    chinese_meaning: "81",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 173,
+    english_singular: "eighty two",
+    english_plural: undefined,
+    chinese_meaning: "82",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 174,
+    english_singular: "eighty three",
+    english_plural: undefined,
+    chinese_meaning: "83",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 175,
+    english_singular: "eighty four",
+    english_plural: undefined,
+    chinese_meaning: "84",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 176,
+    english_singular: "eighty five",
+    english_plural: undefined,
+    chinese_meaning: "85",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 177,
+    english_singular: "eighty six",
+    english_plural: undefined,
+    chinese_meaning: "86",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 178,
+    english_singular: "eighty seven",
+    english_plural: undefined,
+    chinese_meaning: "87",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 179,
+    english_singular: "eighty eight",
+    english_plural: undefined,
+    chinese_meaning: "88",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 180,
+    english_singular: "eighty nine",
+    english_plural: undefined,
+    chinese_meaning: "89",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 181,
+    english_singular: "ninety",
+    english_plural: undefined,
+    chinese_meaning: "90",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 182,
+    english_singular: "ninety one",
+    english_plural: undefined,
+    chinese_meaning: "91",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 183,
+    english_singular: "ninety two",
+    english_plural: undefined,
+    chinese_meaning: "92",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 184,
+    english_singular: "ninety three",
+    english_plural: undefined,
+    chinese_meaning: "93",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 185,
+    english_singular: "ninety four",
+    english_plural: undefined,
+    chinese_meaning: "94",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 186,
+    english_singular: "ninety five",
+    english_plural: undefined,
+    chinese_meaning: "95",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 187,
+    english_singular: "ninety six",
+    english_plural: undefined,
+    chinese_meaning: "96",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 188,
+    english_singular: "ninety seven",
+    english_plural: undefined,
+    chinese_meaning: "97",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 189,
+    english_singular: "ninety eight",
+    english_plural: undefined,
+    chinese_meaning: "98",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 190,
+    english_singular: "ninety nine",
+    english_plural: undefined,
+    chinese_meaning: "99",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 191,
+    english_singular: "one hundred",
+    english_plural: undefined,
+    chinese_meaning: "100",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+
+  // Time Expressions (theme_id: 24)
+  {
+    id: 192,
+    english_singular: "one o'clock",
+    english_plural: undefined,
+    chinese_meaning: "一點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 193,
+    english_singular: "two o'clock",
+    english_plural: undefined,
+    chinese_meaning: "兩點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 194,
+    english_singular: "three o'clock",
+    english_plural: undefined,
+    chinese_meaning: "三點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 195,
+    english_singular: "four o'clock",
+    english_plural: undefined,
+    chinese_meaning: "四點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 196,
+    english_singular: "five o'clock",
+    english_plural: undefined,
+    chinese_meaning: "五點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 197,
+    english_singular: "six o'clock",
+    english_plural: undefined,
+    chinese_meaning: "六點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 198,
+    english_singular: "seven o'clock",
+    english_plural: undefined,
+    chinese_meaning: "七點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 199,
+    english_singular: "eight o'clock",
+    english_plural: undefined,
+    chinese_meaning: "八點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 200,
+    english_singular: "nine o'clock",
+    english_plural: undefined,
+    chinese_meaning: "九點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 201,
+    english_singular: "ten o'clock",
+    english_plural: undefined,
+    chinese_meaning: "十點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 202,
+    english_singular: "eleven o'clock",
+    english_plural: undefined,
+    chinese_meaning: "十一點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 203,
+    english_singular: "twelve o'clock",
+    english_plural: undefined,
+    chinese_meaning: "十二點鐘",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 204,
+    english_singular: "half past one",
+    english_plural: undefined,
+    chinese_meaning: "一點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 205,
+    english_singular: "half past two",
+    english_plural: undefined,
+    chinese_meaning: "兩點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 206,
+    english_singular: "half past three",
+    english_plural: undefined,
+    chinese_meaning: "三點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 207,
+    english_singular: "half past four",
+    english_plural: undefined,
+    chinese_meaning: "四點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 208,
+    english_singular: "half past five",
+    english_plural: undefined,
+    chinese_meaning: "五點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 209,
+    english_singular: "half past six",
+    english_plural: undefined,
+    chinese_meaning: "六點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 210,
+    english_singular: "half past seven",
+    english_plural: undefined,
+    chinese_meaning: "七點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 211,
+    english_singular: "half past eight",
+    english_plural: undefined,
+    chinese_meaning: "八點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 212,
+    english_singular: "half past nine",
+    english_plural: undefined,
+    chinese_meaning: "九點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 213,
+    english_singular: "half past ten",
+    english_plural: undefined,
+    chinese_meaning: "十點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 214,
+    english_singular: "half past eleven",
+    english_plural: undefined,
+    chinese_meaning: "十一點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 215,
+    english_singular: "half past twelve",
+    english_plural: undefined,
+    chinese_meaning: "十二點半",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 216,
+    english_singular: "quarter past one",
+    english_plural: undefined,
+    chinese_meaning: "一點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 217,
+    english_singular: "quarter past two",
+    english_plural: undefined,
+    chinese_meaning: "兩點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 218,
+    english_singular: "quarter past three",
+    english_plural: undefined,
+    chinese_meaning: "三點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 219,
+    english_singular: "quarter past four",
+    english_plural: undefined,
+    chinese_meaning: "四點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 220,
+    english_singular: "quarter past five",
+    english_plural: undefined,
+    chinese_meaning: "五點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 221,
+    english_singular: "quarter past six",
+    english_plural: undefined,
+    chinese_meaning: "六點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 222,
+    english_singular: "quarter past seven",
+    english_plural: undefined,
+    chinese_meaning: "七點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 223,
+    english_singular: "quarter past eight",
+    english_plural: undefined,
+    chinese_meaning: "八點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 224,
+    english_singular: "quarter past nine",
+    english_plural: undefined,
+    chinese_meaning: "九點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 225,
+    english_singular: "quarter past ten",
+    english_plural: undefined,
+    chinese_meaning: "十點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 226,
+    english_singular: "quarter past eleven",
+    english_plural: undefined,
+    chinese_meaning: "十一點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 227,
+    english_singular: "quarter past twelve",
+    english_plural: undefined,
+    chinese_meaning: "十二點十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 228,
+    english_singular: "quarter to one",
+    english_plural: undefined,
+    chinese_meaning: "十二點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 229,
+    english_singular: "quarter to two",
+    english_plural: undefined,
+    chinese_meaning: "一點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 230,
+    english_singular: "quarter to three",
+    english_plural: undefined,
+    chinese_meaning: "兩點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 231,
+    english_singular: "quarter to four",
+    english_plural: undefined,
+    chinese_meaning: "三點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 232,
+    english_singular: "quarter to five",
+    english_plural: undefined,
+    chinese_meaning: "四點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 233,
+    english_singular: "quarter to six",
+    english_plural: undefined,
+    chinese_meaning: "五點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 234,
+    english_singular: "quarter to seven",
+    english_plural: undefined,
+    chinese_meaning: "六點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 235,
+    english_singular: "quarter to eight",
+    english_plural: undefined,
+    chinese_meaning: "七點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 236,
+    english_singular: "quarter to nine",
+    english_plural: undefined,
+    chinese_meaning: "八點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 237,
+    english_singular: "quarter to ten",
+    english_plural: undefined,
+    chinese_meaning: "九點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 238,
+    english_singular: "quarter to eleven",
+    english_plural: undefined,
+    chinese_meaning: "十點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 239,
+    english_singular: "quarter to twelve",
+    english_plural: undefined,
+    chinese_meaning: "十一點四十五分",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 240,
+    english_singular: "morning",
+    english_plural: undefined,
+    chinese_meaning: "早上",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 241,
+    english_singular: "afternoon",
+    english_plural: undefined,
+    chinese_meaning: "下午",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 242,
+    english_singular: "evening",
+    english_plural: undefined,
+    chinese_meaning: "傍晚",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 243,
+    english_singular: "night",
+    english_plural: undefined,
+    chinese_meaning: "晚上",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 244,
+    english_singular: "midnight",
+    english_plural: undefined,
+    chinese_meaning: "午夜",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 245,
+    english_singular: "noon",
+    english_plural: undefined,
+    chinese_meaning: "中午",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 246,
+    english_singular: "dawn",
+    english_plural: undefined,
+    chinese_meaning: "黎明",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+  {
+    id: 247,
+    english_singular: "dusk",
+    english_plural: undefined,
+    chinese_meaning: "黃昏",
+    part_of_speech: "noun",
+    has_plural: false,
+  },
+];
+
+// Mock sentence patterns that match the D1 database schema exactly
+// IMPORTANT: Only questions are displayed in the UI, answers are linked via question_answer_pairs
+const mockSentencePatterns = [
+  // Grade 3 patterns (grade_id: 1) - Only Questions and Statements
+  {
+    id: 1,
+    grade_id: 1, // Grade 3
+    pattern_text: "How old _____?",
+    pattern_type: "Question" as const,
+    notes: "Age question pattern",
+  },
+  {
+    id: 3,
+    grade_id: 1, // Grade 3
+    pattern_text: "Are you a student?",
+    pattern_type: "Question" as const,
+    notes: "Yes/No question with be verb",
+  },
+  {
+    id: 6,
+    grade_id: 1, // Grade 3
+    pattern_text: "Is he/she a teacher?",
+    pattern_type: "Question" as const,
+    notes: "Yes/No question with be verb for third person",
+  },
+  {
+    id: 9,
+    grade_id: 1, // Grade 3
+    pattern_text: "Are you happy?",
+    pattern_type: "Question" as const,
+    notes: "Yes/No question with adjective",
+  },
+  {
+    id: 12,
+    grade_id: 1, // Grade 3
+    pattern_text: "What's this/that?",
+    pattern_type: "Question" as const,
+    notes: "Identification question",
+  },
+  {
+    id: 14,
+    grade_id: 1, // Grade 3
+    pattern_text: "What are these/those?",
+    pattern_type: "Question" as const,
+    notes: "Plural identification question",
+  },
+  {
+    id: 16,
+    grade_id: 1, // Grade 3
+    pattern_text: "What color is it?",
+    pattern_type: "Question" as const,
+    notes: "Color question",
+  },
+  {
+    id: 18,
+    grade_id: 1, // Grade 3
+    pattern_text: "Who is he/she?",
+    pattern_type: "Question" as const,
+    notes: "Person identification question",
+  },
+  {
+    id: 20,
+    grade_id: 1, // Grade 3
+    pattern_text: "I have a _____.",
+    pattern_type: "Statement" as const,
+    notes: "Possession pattern",
+  },
+  {
+    id: 21,
+    grade_id: 1, // Grade 3
+    pattern_text: "Do you have a pen/an eraser?",
+    pattern_type: "Question" as const,
+    notes: "Possession question",
+  },
+  {
+    id: 24,
+    grade_id: 1, // Grade 3
+    pattern_text: "What does he/she like?",
+    pattern_type: "Question" as const,
+    notes: "Preference question for third person",
+  },
+  {
+    id: 25,
+    grade_id: 1, // Grade 3
+    pattern_text: "Removed pattern",
+    pattern_type: "Question" as const,
+    notes: "Removed - no fill-in-blank slot",
+  },
+  {
+    id: 28,
+    grade_id: 1, // Grade 3
+    pattern_text: "How much is it?",
+    pattern_type: "Question" as const,
+    notes: "Price question",
+  },
+  {
+    id: 30,
+    grade_id: 1, // Grade 3
+    pattern_text: "Where's _____?",
+    pattern_type: "Question" as const,
+    notes: "Location question",
+  },
+
+  // Grade 5 patterns (grade_id: 2) - Only Questions
+  {
+    id: 32,
+    grade_id: 2, // Grade 5
+    pattern_text: "Do you like sports?",
+    pattern_type: "Question" as const,
+    notes: "Sports preference question",
+  },
+  {
+    id: 34,
+    grade_id: 2, // Grade 5
+    pattern_text: "Does he/she like tea?",
+    pattern_type: "Question" as const,
+    notes: "Third person preference question",
+  },
+  {
+    id: 37,
+    grade_id: 2, // Grade 5
+    pattern_text: "How many _____ do you need?",
+    pattern_type: "Question" as const,
+    notes: "Quantity question for second person",
+  },
+  {
+    id: 41,
+    grade_id: 2, // Grade 5
+    pattern_text: "What day is today?",
+    pattern_type: "Question" as const,
+    notes: "Day question",
+  },
+  {
+    id: 43,
+    grade_id: 2, // Grade 5
+    pattern_text: "What's your/his/her favorite subject?",
+    pattern_type: "Question" as const,
+    notes: "Favorite subject question",
+  },
+
+  // Grade 6 patterns (grade_id: 3) - Only Questions
+  {
+    id: 45,
+    grade_id: 3, // Grade 6
+    pattern_text: "Where are you from?",
+    pattern_type: "Question" as const,
+    notes: "Origin question for second person",
+  },
+  {
+    id: 47,
+    grade_id: 3, // Grade 6
+    pattern_text: "Is he/she from _____?",
+    pattern_type: "Question" as const,
+    notes: "Origin question for third person",
+  },
+  {
+    id: 51,
+    grade_id: 3, // Grade 6
+    pattern_text: "What would you like to eat?",
+    pattern_type: "Question" as const,
+    notes: "Food preference question",
+  },
+  {
+    id: 53,
+    grade_id: 3, // Grade 6
+    pattern_text: "Would you like some _____?",
+    pattern_type: "Question" as const,
+    notes: "Food offer question",
+  },
+  {
+    id: 56,
+    grade_id: 3, // Grade 6
+    pattern_text: "What time do you _____?",
+    pattern_type: "Question" as const,
+    notes: "Time question for routine",
+  },
+  {
+    id: 58,
+    grade_id: 3, // Grade 6
+    pattern_text: "Do you have lunch at _____?",
+    pattern_type: "Question" as const,
+    notes: "Lunch time question",
+  },
+
+  {
+    id: 63,
+    grade_id: 3, // Grade 6
+    pattern_text: "Does he/she have a fever?",
+    pattern_type: "Question" as const,
+    notes: "Health question for third person",
+  },
+];
+
+// Mock question-answer pairs (simplified for development)
+const mockQuestionAnswerPairs = [
+  // Grade 3 pairs
+  { id: 1, question_pattern_id: 1, answer_pattern_id: 2 }, // How old _____? -> I'm _____ years old.
+  { id: 2, question_pattern_id: 3, answer_pattern_id: 4 }, // Are you a student? -> Yes, I am.
+  { id: 3, question_pattern_id: 3, answer_pattern_id: 5 }, // Are you a student? -> No, I'm not.
+  { id: 4, question_pattern_id: 6, answer_pattern_id: 7 }, // Is he/she a teacher? -> Yes, he/she is.
+  { id: 5, question_pattern_id: 6, answer_pattern_id: 8 }, // Is he/she a teacher? -> No, he/she isn't.
+  { id: 6, question_pattern_id: 9, answer_pattern_id: 10 }, // Are you happy? -> Yes, I am.
+  { id: 7, question_pattern_id: 9, answer_pattern_id: 11 }, // Are you happy? -> No, I'm not.
+  { id: 8, question_pattern_id: 12, answer_pattern_id: 13 }, // What's this/that? -> This/It is _____.
+  { id: 9, question_pattern_id: 14, answer_pattern_id: 15 }, // What are these/those? -> They are _____.
+  { id: 10, question_pattern_id: 16, answer_pattern_id: 17 }, // What color is it? -> It is ____.
+  { id: 11, question_pattern_id: 18, answer_pattern_id: 19 }, // Who is he/she? -> He/She is my _____.
+  { id: 12, question_pattern_id: 21, answer_pattern_id: 22 }, // Do you have a pen/an eraser? -> Yes, I do.
+  { id: 13, question_pattern_id: 21, answer_pattern_id: 23 }, // Do you have a pen/an eraser? -> No, I don't.
+
+  { id: 16, question_pattern_id: 28, answer_pattern_id: 29 }, // How much is it? -> It's _____ dollars.
+  { id: 17, question_pattern_id: 30, answer_pattern_id: 17 }, // Where's _____? -> It is ____. (shared answer)
+
+  // Grade 5 pairs
+  { id: 18, question_pattern_id: 32, answer_pattern_id: 33 }, // Do you like sports? -> I like _____.
+  { id: 19, question_pattern_id: 34, answer_pattern_id: 35 }, // Does he/she like tea? -> Yes, she/he does.
+  { id: 20, question_pattern_id: 34, answer_pattern_id: 36 }, // Does he/she like tea? -> No, she/he doesn't
+  { id: 21, question_pattern_id: 37, answer_pattern_id: 38 }, // How many _____ do you need? -> I need _____ _____.
+  { id: 23, question_pattern_id: 41, answer_pattern_id: 42 }, // What day is today? -> It's _____.
+  { id: 24, question_pattern_id: 43, answer_pattern_id: 44 }, // What's your/his/her favorite subject? -> My/she/he favorite subject is _____.
+
+  // Grade 6 pairs
+  { id: 25, question_pattern_id: 45, answer_pattern_id: 46 }, // Where are you from? -> I'm from _____.
+  { id: 26, question_pattern_id: 47, answer_pattern_id: 48 }, // Is he/she from _____? -> Yes, _____ is.
+  { id: 27, question_pattern_id: 47, answer_pattern_id: 49 }, // Is he/she from _____? -> No, _____ isn't.
+  { id: 28, question_pattern_id: 51, answer_pattern_id: 52 }, // What would you like to eat? -> I would like some _____, please.
+  { id: 29, question_pattern_id: 53, answer_pattern_id: 54 }, // Would you like some _____? -> Yes, please
+  { id: 30, question_pattern_id: 53, answer_pattern_id: 55 }, // Would you like some _____? -> No, thank you.
+  { id: 31, question_pattern_id: 56, answer_pattern_id: 57 }, // What time do you _____? -> I _____ at _____.
+  { id: 32, question_pattern_id: 58, answer_pattern_id: 59 }, // Do you have lunch at _____? -> Yes, I do.
+  { id: 33, question_pattern_id: 58, answer_pattern_id: 60 }, // Do you have lunch at _____? -> No, I don't.
+
+  { id: 35, question_pattern_id: 63, answer_pattern_id: 64 }, // Does he/she have a fever? -> Yes, he/she does.
+  { id: 36, question_pattern_id: 63, answer_pattern_id: 65 }, // Does he/she have a fever? -> No, he/she doesn't
+];
+
+// Word theme associations (simplified for mock)
+const wordThemeMap = new Map<number, number[]>();
+wordThemeMap.set(1, [1]);
+wordThemeMap.set(2, [1]);
+wordThemeMap.set(3, [1]);
+wordThemeMap.set(4, [1]);
+wordThemeMap.set(5, [1]);
+wordThemeMap.set(6, [1]);
+wordThemeMap.set(7, [1]);
+wordThemeMap.set(8, [1]);
+wordThemeMap.set(9, [2]);
+wordThemeMap.set(10, [2]);
+// ... 暫時簡化以修復編譯錯誤
+const wordThemeMapOriginal = [
+  // Emotions (theme_id: 1) - words 1-8
+  [1, [1]],
+  [2, [1]],
+  [3, [1]],
+  [4, [1]],
+  [5, [1]],
+  [6, [1]],
+  [7, [1]],
+  [8, [1]],
+
+  // Colors (theme_id: 2) - words 9-19
+  [9, [2]],
+  [10, [2]],
+  [11, [2]],
+  [12, [2]],
+  [13, [2]],
+  [14, [2]],
+  [15, [2]],
+  [16, [2]],
+  [17, [2]],
+  [18, [2]],
+  [19, [2]],
+  // Additional color words as nouns
+  [200, [2]],
+  [201, [2]],
+
+  // Sports (theme_id: 3) - words 20-27
+  [20, [3]],
+  [21, [3]],
+  [22, [3]],
+  [23, [3]],
+  [24, [3]],
+  [25, [3]],
+  [26, [3]],
+  [27, [3]],
+
+  // Stationery (theme_id: 4) - words 28-34
+  [28, [4]],
+  [29, [4]],
+  [30, [4]],
+  [31, [4]],
+  [32, [4]],
+  [33, [4]],
+  [34, [4]],
+
+  // Fruits (theme_id: 5) - words 35-41
+  [35, [5]],
+  [36, [5]],
+  [37, [5]],
+  [38, [5]],
+  [39, [5]],
+  [40, [5]],
+  [41, [5]],
+
+  // Fast Food (theme_id: 6) - words 41-46
+  [41, [6]], // hamburger
+  [42, [6]], // pizza
+  [43, [6]], // fries
+  [44, [6]], // hot dog
+  [45, [6]], // sandwich
+  [46, [6]], // nuggets
+
+  // Bakery & Snacks (theme_id: 7) - words 60-65
+  [60, [7]],
+  [61, [7]],
+  [62, [7]],
+  [63, [7]],
+  [64, [7]],
+  [65, [7]],
+
+  // Days of Week (theme_id: 8) - words 66-72
+  [66, [8]],
+  [67, [8]],
+  [68, [8]],
+  [69, [8]],
+  [70, [8]],
+  [71, [8]],
+  [72, [8]],
+
+  // Months (theme_id: 9) - words 73-84
+  [73, [9]],
+  [74, [9]],
+  [75, [9]],
+  [76, [9]],
+  [77, [9]],
+  [78, [9]],
+  [79, [9]],
+  [80, [9]],
+  [81, [9]],
+  [82, [9]],
+  [83, [9]],
+  [84, [9]],
+
+  // School Subjects (theme_id: 10) - words 85-95
+  [85, [10]],
+  [86, [10]],
+  [87, [10]],
+  [88, [10]],
+  [89, [10]],
+  [90, [10]],
+  [91, [10]],
+  [92, [10]],
+  [93, [10]],
+  [94, [10]],
+  [95, [10]],
+
+  // Ailments (theme_id: 11) - words 96-99, 111
+  [96, [11]],
+  [97, [11]],
+  [98, [11]],
+  [99, [11]],
+  [502, [11]], // wrong -> Ailments
+  [503, [1]], // favorite -> Emotions
+
+  // Countries (theme_id: 12) - words 53-59
+  [53, [12]], // taiwan
+  [54, [12]], // japan
+  [55, [12]], // korea
+  [56, [12]], // usa
+  [57, [12]], // canada
+  [59, [12]], // china
+
+  // Identity (theme_id: 18) - words 102-106
+  [102, [18]], // student
+  [103, [18]], // teacher
+  [104, [18]], // doctor
+  [105, [18]], // nurse
+  [106, [18]], // worker
+
+  // Numbers (theme_id: 23) - words 92-106
+  [92, [23]], // one
+  [93, [23]], // two
+  [94, [23]], // three
+  [95, [23]], // four
+  [96, [23]], // five
+  [97, [23]], // six
+  [98, [23]], // seven
+  [99, [23]], // eight
+  [100, [23]], // nine
+  [101, [23]], // ten
+  [102, [23]], // eleven
+  [103, [23]], // twelve
+  [104, [23]], // thirteen
+  [105, [23]], // fourteen
+  [106, [23]], // fifteen
+
+  // Furniture (theme_id: 13) - words 42, 504-506
+  [42, [13]], // 保留原始的 hamburger (Fast Food)
+  // chair
+  [505, [13]], // table
+  [506, [13]], // bed
+
+  [45, [13]],
+  [46, [13]],
+  [47, [13]],
+
+  // Toys (theme_id: 14) - words 300-305
+  [300, [14]],
+  [301, [14]],
+  [302, [14]],
+  [303, [14]],
+  [304, [14]],
+  [305, [14]],
+
+  // Drinks (theme_id: 15) - words 48-53
+  [48, [15]],
+  [49, [15]],
+  [50, [15]],
+  [51, [15]],
+  [52, [15]],
+  [53, [15]],
+
+  // Main Dishes (theme_id: 16) - words 140-141
+  [140, [16]],
+  [141, [16]],
+
+  // Bubble Tea Toppings (theme_id: 17) - words 142-143
+  [142, [17]],
+  [143, [17]],
+
+  // Identity (theme_id: 18)
+  {
+    id: 102,
+    english_singular: "student",
+    english_plural: "students",
+    chinese_meaning: "學生",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 103,
+    english_singular: "teacher",
+    english_plural: "teachers",
+    chinese_meaning: "老師",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 104,
+    english_singular: "doctor",
+    english_plural: "doctors",
+    chinese_meaning: "醫生",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 105,
+    english_singular: "nurse",
+    english_plural: "nurses",
+    chinese_meaning: "護士",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 106,
+    english_singular: "worker",
+    english_plural: "workers",
+    chinese_meaning: "工人",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 103,
+    english_singular: "teacher",
+    english_plural: "teachers",
+    chinese_meaning: "老師",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 104,
+    english_singular: "doctor",
+    english_plural: "doctors",
+    chinese_meaning: "醫生",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 105,
+    english_singular: "nurse",
+    english_plural: "nurses",
+    chinese_meaning: "護士",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+  {
+    id: 106,
+    english_singular: "worker",
+    english_plural: "workers",
+    chinese_meaning: "工人",
+    part_of_speech: "noun",
+    has_plural: true,
+  },
+
+  // Professions (theme_id: 19) - words 122-137
+
+  // Daily Actions (theme_id: 20) - words 144-159
+
+  // Clothing (theme_id: 21) - words 160-175
+
+  // Buildings & Places (theme_id: 22) - words 176-195
+
+  [2001, [22]],
+  [2003, [22]],
+  [2004, [22]],
+  [2006, [22]],
+  [2008, [22]],
+  [2079, [22]],
+  [2080, [22]],
+  [2081, [22]],
+  [2082, [22]],
+  [2083, [22]],
+  [2084, [22]],
+  [2085, [22]],
+  [2086, [22]],
+  [2088, [22]],
+  [2089, [22]],
+  [2091, [22]],
+  [2097, [22]],
+  [2098, [22]],
+  [2099, [22]],
+  [2100, [22]],
+  [2101, [22]],
+];
+
+// 現在從原始數據填充 Map
+wordThemeMapOriginal.forEach((item) => {
+  if (Array.isArray(item) && item.length === 2) {
+    const [key, value] = item as [number, number[]];
+    wordThemeMap.set(key, value);
+  }
+});
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get("action");
+    const themeId = searchParams.get("theme_id");
+    const gradeId = searchParams.get("grade_id");
+    const partOfSpeech = searchParams.get("part_of_speech");
+
+    switch (action) {
+      case "themes":
+        return getThemes();
+
+      case "words_by_theme":
+        if (!themeId) {
+          return NextResponse.json(
+            { success: false, error: "theme_id is required" },
+            { status: 400 }
+          );
+        }
+        return getWordsByTheme(parseInt(themeId), partOfSpeech);
+
+      case "sentence_patterns":
+        return getSentencePatterns(gradeId ? parseInt(gradeId) : undefined);
+
+      case "question_answer_pairs":
+        return getQuestionAnswerPairs(gradeId ? parseInt(gradeId) : undefined);
+
+      case "grades":
+        return getGrades();
+
+      default:
+        return NextResponse.json(
+          { success: false, error: "Invalid action" },
+          { status: 400 }
+        );
+    }
+  } catch (error) {
+    console.error("Learning content API error:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+function getThemes(): NextResponse<ThemesResponse> {
+  return NextResponse.json({
+    success: true,
+    data: mockThemes,
+  });
+}
+
+function getWordsByTheme(
+  themeId: number,
+  partOfSpeech?: string | null
+): NextResponse<WordsByThemeResponse> {
+  // In real implementation, this would query the D1 database
+  // For now, return mock data based on theme
+  let filteredWords = mockWords;
+
+  if (partOfSpeech) {
+    filteredWords = filteredWords.filter(
+      (word) => word.part_of_speech === partOfSpeech
+    );
+  }
+
+  // Filter by theme (simplified mock logic)
+  const themeWords = filteredWords.filter((word) => {
+    const wordThemes = wordThemeMap.get(word.id);
+    return wordThemes && wordThemes.includes(themeId);
+  });
+
+  return NextResponse.json({
+    success: true,
+    data: themeWords,
+  });
+}
+
+function getSentencePatterns(
+  gradeId?: number
+): NextResponse<SentencePatternsResponse> {
+  let patterns = mockSentencePatterns;
+
+  if (gradeId) {
+    patterns = patterns.filter((pattern) => pattern.grade_id === gradeId);
+  }
+
+  // Only return questions and statements (no answers)
+  patterns = patterns.filter(
+    (pattern) =>
+      pattern.pattern_type === "Question" ||
+      pattern.pattern_type === "Statement"
+  );
+
+  return NextResponse.json({
+    success: true,
+    data: patterns,
+  });
+}
+
+function getQuestionAnswerPairs(
+  gradeId?: number
+): NextResponse<QuestionAnswerPairsResponse> {
+  let pairs = mockQuestionAnswerPairs;
+
+  if (gradeId) {
+    // Filter pairs based on questions that belong to the specified grade
+    const gradeQuestions = mockSentencePatterns
+      .filter(
+        (pattern) =>
+          pattern.grade_id === gradeId && pattern.pattern_type === "Question"
+      )
+      .map((pattern) => pattern.id);
+
+    pairs = pairs.filter((pair) =>
+      gradeQuestions.includes(pair.question_pattern_id)
+    );
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: pairs,
+  });
+}
+
+function getGrades(): NextResponse<LearningContentResponse<typeof mockGrades>> {
+  return NextResponse.json({
+    success: true,
+    data: mockGrades,
+  });
+}

@@ -51,8 +51,8 @@ export class SessionManager {
   /**
    * 設定會話 Cookie
    */
-  static setSessionCookie(sessionToken: string, expiresAt: Date) {
-    const cookieStore = cookies();
+  static async setSessionCookie(sessionToken: string, expiresAt: Date) {
+    const cookieStore = await cookies();
     cookieStore.set("garden_session", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -65,16 +65,16 @@ export class SessionManager {
   /**
    * 獲取會話令牌
    */
-  static getSessionToken(): string | null {
-    const cookieStore = cookies();
+  static async getSessionToken(): Promise<string | null> {
+    const cookieStore = await cookies();
     return cookieStore.get("garden_session")?.value || null;
   }
 
   /**
    * 清除會話 Cookie
    */
-  static clearSessionCookie() {
-    const cookieStore = cookies();
+  static async clearSessionCookie() {
+    const cookieStore = await cookies();
     cookieStore.delete("garden_session");
   }
 
@@ -416,8 +416,8 @@ export function getSecurityHeaders(): Record<string, string> {
 }
 
 // 獲取客戶端 IP 地址
-export function getClientIP(): string {
-  const headersList = headers();
+export async function getClientIP(): Promise<string> {
+  const headersList = await headers();
   const forwarded = headersList.get("x-forwarded-for");
   const realIP = headersList.get("x-real-ip");
 

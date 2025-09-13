@@ -28,7 +28,7 @@ export default function GameSetupSelector({
     []
   );
   const [themes, setThemes] = useState<WordTheme[]>([]);
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [selectedPatternIds, setSelectedPatternIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [words, setWords] = useState<Word[]>([]);
@@ -45,10 +45,10 @@ export default function GameSetupSelector({
   // Define topics to be excluded from noun calculations
   const nounCalculationExclusions = ["Daily Actions", "Emotions", "Numbers"];
 
-  // Mock wordThemeMap for local development
+  // Mock wordThemeMap for local development - 使用字串 ID 映射
   const wordThemeMap = React.useMemo(
     () =>
-      new Map<number, number[]>([
+      new Map<string | number, number[]>([
         // Emotions (theme_id: 1) - words 1-8
         [1, [1]],
         [2, [1]],
@@ -366,7 +366,7 @@ export default function GameSetupSelector({
   // 使用 useCallback 來穩定函數引用
   const fetchGrades = useCallback(async () => {
     try {
-      const response = await fetch("/api/learning-content?action=grades");
+      const response = await fetch("/api/learning-content/?action=grades");
       const data = await response.json();
       if (data.success) {
         setGrades(data.data);
@@ -379,7 +379,7 @@ export default function GameSetupSelector({
   const fetchThemes = useCallback(async () => {
     try {
       console.log("🎯 Fetching themes..."); // Debug log
-      const response = await fetch("/api/learning-content?action=themes");
+      const response = await fetch("/api/learning-content/?action=themes");
       const data = await response.json();
       console.log("📡 API response:", data); // Debug log
 
@@ -387,21 +387,16 @@ export default function GameSetupSelector({
         // 直接使用 API 返回的主題資料，不需要手動添加
         setThemes(data.data);
         console.log("✅ setThemes called with:", data.data.length, "themes"); // Debug log
-
-        // 驗證狀態是否更新
-        setTimeout(() => {
-          console.log("🔍 Current themes state:", themes); // Debug log
-        }, 100);
       }
     } catch (error) {
       console.error("❌ Error fetching themes:", error);
     }
   }, []);
 
-  const fetchSentencePatterns = useCallback(async (gradeId: number) => {
+  const fetchSentencePatterns = useCallback(async (gradeId: string) => {
     try {
       const response = await fetch(
-        `/api/learning-content?action=sentence_patterns&grade_id=${gradeId}`
+        `/api/learning-content/?action=sentence_patterns&grade_id=${gradeId}`
       );
       const data = await response.json();
       if (data.success) {
@@ -464,7 +459,7 @@ export default function GameSetupSelector({
   useEffect(() => {
     fetchGrades();
     fetchThemes();
-  }, []); // 移除依賴項，避免無限迴圈
+  }, [fetchGrades, fetchThemes]); // 添加正確的依賴項
 
   // Fetch words when selected themes change
   useEffect(() => {
@@ -484,7 +479,7 @@ export default function GameSetupSelector({
 
       if (selectedPatterns.length > 0) {
         const recommendations = getRecommendedThemesForGrade(
-          selectedGrade || 1,
+          selectedGrade ? parseInt(selectedGrade.replace("G", "")) : 1,
           selectedPatterns
         );
 
@@ -495,7 +490,7 @@ export default function GameSetupSelector({
       // 當沒有選擇句型時，清空推薦主題
       setRecommendedThemes([]);
     }
-  }, [selectedPatternIds, sentencePatterns, selectedGrade, themes]);
+  }, [selectedPatternIds, sentencePatterns, selectedGrade]);
 
   // Handle grade change
   useEffect(() => {
@@ -781,7 +776,7 @@ export default function GameSetupSelector({
   }, [themes, selectedTopics]);
 
   // Handle grade change
-  const handleGradeChange = (gradeId: number) => {
+  const handleGradeChange = (gradeId: string) => {
     setSelectedGrade(gradeId);
   };
 
@@ -838,7 +833,7 @@ export default function GameSetupSelector({
 
       // 直接調用 onGameDataReady，傳遞遊戲設定資料
       onGameDataReady({
-        grade_id: selectedGrade,
+        grade_id: selectedGrade || "G3",
         pattern_ids: selectedPatternIds,
         theme_ids: themeIds, // 現在傳遞數字陣列
         noun_selection: nounSelection,

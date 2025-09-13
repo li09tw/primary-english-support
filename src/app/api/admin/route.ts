@@ -1,85 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  createCloudflareClient,
-  isCloudflareSupported,
-} from "@/lib/cloudflare-client";
-import {
-  createLocalCloudflareClient,
-  isLocalDevelopment,
-} from "@/lib/cloudflare-client-local";
+  readAdminMessages,
+  addAdminMessage,
+  updateAdminMessage,
+  deleteAdminMessage,
+  togglePublishStatus,
+  togglePinStatus,
+} from "@/lib/json-storage";
+import { AdminMessage } from "@/types";
 
 // 強制動態路由，避免靜態生成問題
 export const dynamic = "force-dynamic";
 
-// D1 資料庫中的管理員消息類型
-interface D1AdminMessage {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// 從 D1 讀取管理員消息
-async function getAdminMessagesFromD1(): Promise<D1AdminMessage[]> {
+// 從 JSON 檔案讀取管理員消息
+async function getAdminMessagesFromJSON(): Promise<AdminMessage[]> {
   try {
-    let client;
-    
-    if (isLocalDevelopment()) {
-      // 本地開發環境使用本地客戶端
-      client = createLocalCloudflareClient();
-    } else if (isCloudflareSupported()) {
-      // 生產環境使用 Cloudflare 客戶端
-      client = createCloudflareClient();
-    } else {
-      throw new Error("Cloudflare services not configured");
-    }
-    const query = "SELECT * FROM admin_messages ORDER BY created_at DESC";
-    const result = await client.query(query);
-
-    return (result?.results as D1AdminMessage[]) || [];
+    return readAdminMessages();
   } catch (error) {
-    console.error("Error reading from D1:", error);
+    console.error("Error reading from JSON file:", error);
     throw error;
   }
 }
 
-// 創建新的管理員消息到 D1
-async function createAdminMessageInD1(
+// 創建新的管理員消息到 JSON 檔案
+async function createAdminMessageInJSON(
   title: string,
-  content: string
-): Promise<D1AdminMessage> {
+  content: string,
+  is_published: boolean = true,
+  is_pinned: boolean = false
+): Promise<AdminMessage> {
   try {
-    let client;
-    
-    if (isLocalDevelopment()) {
-      // 本地開發環境使用本地客戶端
-      client = createLocalCloudflareClient();
-    } else if (isCloudflareSupported()) {
-      // 生產環境使用 Cloudflare 客戶端
-      client = createCloudflareClient();
-    } else {
-      throw new Error("Cloudflare services not configured");
-    }
-    const id = Date.now().toString();
-    const now = new Date().toISOString();
-
-    const insertQuery = `
-      INSERT INTO admin_messages (id, title, content, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?)
-    `;
-
-    await client.execute(insertQuery, [id, title, content, now, now]);
-
-    return {
-      id,
+    return addAdminMessage({
       title,
       content,
-      created_at: now,
-      updated_at: now,
-    };
+      is_published,
+      is_pinned,
+    });
   } catch (error) {
-    console.error("Error creating admin message in D1:", error);
+    console.error("Error creating admin message in JSON file:", error);
     throw error;
   }
 }
@@ -87,28 +45,14 @@ async function createAdminMessageInD1(
 // GET /api/admin - 獲取管理員消息
 export async function GET() {
   try {
-    let adminMessages: D1AdminMessage[] = [];
+    let adminMessages: AdminMessage[] = [];
 
-    // 嘗試從 D1 資料庫讀取數據
+    // 從 JSON 檔案讀取數據
     try {
-      adminMessages = await getAdminMessagesFromD1();
-    } catch (d1Error) {
-      console.log("D1 database access failed:", d1Error);
-
-      // 在生產環境中，如果 Cloudflare 服務不可用，返回錯誤
-      if (process.env.NODE_ENV === "production") {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Cloudflare services unavailable",
-            message:
-              "Unable to retrieve admin messages. Please try again later.",
-          },
-          { status: 500 }
-        );
-      }
-
-      // 開發環境返回空結果
+      adminMessages = await getAdminMessagesFromJSON();
+    } catch (jsonError) {
+      console.log("JSON file access failed:", jsonError);
+      // 如果 JSON 檔案不可用，返回空結果
       adminMessages = [];
     }
 
@@ -133,7 +77,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, content } = body;
+    const { title, content, is_published = true, is_pinned = false } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -142,33 +86,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let newMessage: D1AdminMessage;
+    let newMessage: AdminMessage;
 
-    // 嘗試創建到 D1 資料庫
+    // 創建到 JSON 檔案
     try {
-      newMessage = await createAdminMessageInD1(title, content);
-    } catch (d1Error) {
-      console.log("D1 database access failed:", d1Error);
+      newMessage = await createAdminMessageInJSON(
+        title,
+        content,
+        is_published,
+        is_pinned
+      );
+    } catch (jsonError) {
+      console.log("JSON file access failed:", jsonError);
 
-      // 在生產環境中，如果 Cloudflare 服務不可用，返回錯誤
-      if (process.env.NODE_ENV === "production") {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Cloudflare services unavailable",
-            message: "Unable to create admin message. Please try again later.",
-          },
-          { status: 500 }
-        );
-      }
-
-      // 開發環境返回模擬結果
+      // 如果 JSON 檔案不可用，返回模擬結果
       newMessage = {
         id: Date.now().toString(),
         title,
         content,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        is_published,
+        is_pinned,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
     }
 
@@ -183,6 +122,157 @@ export async function POST(request: NextRequest) {
     console.error("Error creating admin message:", error);
     return NextResponse.json(
       { success: false, error: "創建管理員消息失敗" },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/admin - 更新管理員消息
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, title, content, is_published, is_pinned } = body;
+
+    if (!id || !title || !content) {
+      return NextResponse.json(
+        { success: false, error: "ID、標題和內容為必填欄位" },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const updatedMessage = updateAdminMessage(id, {
+        title,
+        content,
+        is_published,
+        is_pinned,
+      });
+
+      if (updatedMessage) {
+        return NextResponse.json({
+          success: true,
+          message: "管理員消息更新成功",
+          data: updatedMessage,
+        });
+      } else {
+        return NextResponse.json(
+          { success: false, error: "找不到指定的管理員消息" },
+          { status: 404 }
+        );
+      }
+    } catch (jsonError) {
+      console.log("JSON file access failed:", jsonError);
+      return NextResponse.json(
+        { success: false, error: "JSON 檔案不可用" },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error("Error updating admin message:", error);
+    return NextResponse.json(
+      { success: false, error: "更新管理員消息失敗" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/admin - 刪除管理員消息
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "ID 為必填欄位" },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const success = deleteAdminMessage(id);
+
+      if (success) {
+        return NextResponse.json({
+          success: true,
+          message: "管理員消息刪除成功",
+        });
+      } else {
+        return NextResponse.json(
+          { success: false, error: "找不到指定的管理員消息" },
+          { status: 404 }
+        );
+      }
+    } catch (jsonError) {
+      console.log("JSON file access failed:", jsonError);
+      return NextResponse.json(
+        { success: false, error: "JSON 檔案不可用" },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error("Error deleting admin message:", error);
+    return NextResponse.json(
+      { success: false, error: "刪除管理員消息失敗" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/admin - 切換管理員消息狀態
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, type } = body; // type: 'publish' 或 'pin'
+
+    if (!id || !type) {
+      return NextResponse.json(
+        { success: false, error: "ID 和類型為必填欄位" },
+        { status: 400 }
+      );
+    }
+
+    if (!["publish", "pin"].includes(type)) {
+      return NextResponse.json(
+        { success: false, error: "類型必須是 'publish' 或 'pin'" },
+        { status: 400 }
+      );
+    }
+
+    try {
+      let updatedMessage: AdminMessage | null;
+
+      if (type === "publish") {
+        updatedMessage = togglePublishStatus(id);
+      } else {
+        updatedMessage = togglePinStatus(id);
+      }
+
+      if (updatedMessage) {
+        return NextResponse.json({
+          success: true,
+          message: `管理員消息${
+            type === "publish" ? "發布" : "釘選"
+          }狀態切換成功`,
+          data: updatedMessage,
+        });
+      } else {
+        return NextResponse.json(
+          { success: false, error: "找不到指定的管理員消息" },
+          { status: 404 }
+        );
+      }
+    } catch (jsonError) {
+      console.log("JSON file access failed:", jsonError);
+      return NextResponse.json(
+        { success: false, error: "JSON 檔案不可用" },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error("Error toggling admin message status:", error);
+    return NextResponse.json(
+      { success: false, error: "切換管理員消息狀態失敗" },
       { status: 500 }
     );
   }

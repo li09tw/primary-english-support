@@ -32,7 +32,7 @@ export default function TermsPage() {
                 一、服務說明
               </h2>
               <p>
-                本網站是一個提供英語教學輔具、遊戲方法和教學資源的平台，專為國小英語教學設計。所有內容僅供教學參考使用，不構成任何專業教學建議或保證。使用者應根據實際教學需求和學生程度進行適當調整。
+                本網站是一個提供英語遊戲方法和教學資源的平台，專為國小英語教學設計。所有內容僅供教學參考使用，不構成任何專業教學建議或保證。使用者應根據實際教學需求和學生程度進行適當調整。
               </p>
             </section>
 
@@ -154,7 +154,7 @@ export default function TermsPage() {
 
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-black text-center">
-                最後更新時間：2024年12月20日
+                最後更新時間：2025年8月1日
               </p>
             </div>
           </div>

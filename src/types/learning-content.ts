@@ -13,13 +13,13 @@
 // Updated to support Question-Answer relationships
 
 export interface Grade {
-  id: number;
+  id: string; // 改為字串以支援 G3, G5, G6 格式
   name: string;
 }
 
 export interface SentencePattern {
   id: number;
-  grade_id: number;
+  grade_id: string; // 改為字串以支援 G3, G5, G6 格式
   pattern_text: string;
   pattern_type: "Question" | "Answer" | "Statement";
   notes?: string;
@@ -48,8 +48,6 @@ export interface Word {
   chinese_meaning: string;
   part_of_speech: "noun" | "verb" | "adjective" | "adverb" | "preposition";
   has_plural: boolean;
-  image_url?: string;
-  audio_url?: string;
 }
 
 export interface PatternSlot {
@@ -82,7 +80,7 @@ export interface QuestionAnswerPairsResponse
 export type PluralFormOption = "singular_only" | "plural_only" | "both_forms";
 
 export interface GameDataRequest {
-  grade_id: number;
+  grade_id: string; // 改為字串以支援 G3, G5, G6 格式
   pattern_ids: number[];
   theme_ids: number[];
   plural_form_option: PluralFormOption;
@@ -90,7 +88,7 @@ export interface GameDataRequest {
 
 export interface GameData {
   sentence_patterns: any;
-  grade_id: number;
+  grade_id: string; // 改為字串以支援 G3, G5, G6 格式
   patterns: SentencePatternWithAnswer[]; // 改為支援答案句型的類型
   words: Word[];
   plural_form_option: PluralFormOption;
@@ -115,7 +113,7 @@ export interface GradePatternsWithAnswers {
 
 // 新增：遊戲設定資料類型
 export interface GameSetupData {
-  grade_id: number;
+  grade_id: string; // 改為字串以支援 G3, G5, G6 格式
   pattern_ids: number[];
   theme_ids: number[]; // 改為數字陣列，符合 API 需求
   noun_selection: string;

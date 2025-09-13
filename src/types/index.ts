@@ -41,6 +41,7 @@ export interface AdminMessage {
   is_published: boolean; // 發布狀態
   is_pinned: boolean; // 釘選狀態
   createdAt: Date;
+  updatedAt?: Date; // 更新時間（可選）
 }
 
 // 電子教具類型定義

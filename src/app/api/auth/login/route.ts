@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const cleanPassword = password.trim();
 
     // 獲取客戶端 IP
-    const clientIP = getClientIP();
+    const clientIP = await getClientIP();
 
     // 檢查速率限制和帳戶鎖定
     const rateLimitCheck = await RateLimiter.checkLoginAttempts(

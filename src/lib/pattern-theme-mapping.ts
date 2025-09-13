@@ -838,8 +838,10 @@ export function getRecommendedThemesForGrade(
   gradeId: number,
   patterns: SentencePattern[]
 ): ThemeRecommendation[] {
+  // 將數字年級 ID 轉換為字串格式進行比較
+  const gradeString = `G${gradeId}`;
   const gradePatterns = patterns.filter(
-    (pattern) => pattern.grade_id === gradeId
+    (pattern) => pattern.grade_id === gradeString
   );
   return analyzePatternsForThemes(gradePatterns);
 }
@@ -849,8 +851,9 @@ export function testLunchPattern() {
   console.log("=== Testing Lunch Pattern ===");
 
   const testPattern = {
+    id: 99999,
     pattern_text: "Do you have lunch at _____?",
-    grade_id: 3,
+    grade_id: "G3",
     pattern_type: "Question",
     notes: "Lunch time question",
   } as SentencePattern;

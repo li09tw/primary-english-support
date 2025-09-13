@@ -252,9 +252,9 @@ export const gameAPI = {
   },
 };
 
-// 教學輔具相關 API
+// 學習輔助相關 API
 export const teachingAidAPI = {
-  // 獲取所有教學輔具
+  // 獲取所有學習輔助
   async getAllTeachingAids(): Promise<any[]> {
     try {
       const result = await getClient().query(
@@ -267,7 +267,7 @@ export const teachingAidAPI = {
     }
   },
 
-  // 獲取已發布的教學輔具
+  // 獲取已發布的學習輔助
   async getPublishedTeachingAids(): Promise<any[]> {
     try {
       const result = await getClient().query(
@@ -280,7 +280,7 @@ export const teachingAidAPI = {
     }
   },
 
-  // 新增教學輔具
+  // 新增學習輔助
   async createTeachingAid(aidData: any): Promise<boolean> {
     try {
       const result = await getClient().execute(
@@ -302,7 +302,7 @@ export const teachingAidAPI = {
     }
   },
 
-  // 更新教學輔具
+  // 更新學習輔助
   async updateTeachingAid(id: string, aidData: any): Promise<boolean> {
     try {
       const result = await getClient().execute(
@@ -326,7 +326,7 @@ export const teachingAidAPI = {
     }
   },
 
-  // 刪除教學輔具
+  // 刪除學習輔助
   async deleteTeachingAid(id: string): Promise<boolean> {
     try {
       const result = await getClient().execute(
@@ -341,15 +341,14 @@ export const teachingAidAPI = {
   },
 };
 
-// 站長消息相關 API
+// 站長消息相關 API - 使用 JSON 檔案
 export const adminMessageAPI = {
   // 獲取所有站長消息
   async getAllMessages(): Promise<AdminMessage[]> {
     try {
-      const result = await getClient().query(
-        "SELECT * FROM admin_messages ORDER BY is_pinned DESC, created_at DESC"
-      );
-      return result.results || [];
+      const response = await fetch("/api/admin");
+      const data = await response.json();
+      return data.success ? data.data : [];
     } catch (error) {
       console.error("Failed to fetch admin messages:", error);
       return [];
@@ -359,10 +358,12 @@ export const adminMessageAPI = {
   // 獲取已發布的站長消息
   async getPublishedMessages(): Promise<AdminMessage[]> {
     try {
-      const result = await getClient().query(
-        "SELECT * FROM admin_messages WHERE is_published = 1 ORDER BY is_pinned DESC, created_at DESC"
-      );
-      return result.results || [];
+      const response = await fetch("/api/admin");
+      const data = await response.json();
+      if (data.success && data.data) {
+        return data.data.filter((msg: AdminMessage) => msg.is_published);
+      }
+      return [];
     } catch (error) {
       console.error("Failed to fetch published admin messages:", error);
       return [];
@@ -372,21 +373,13 @@ export const adminMessageAPI = {
   // 新增站長消息
   async createMessage(messageData: Partial<AdminMessage>): Promise<boolean> {
     try {
-      const client = getClient();
-
-      const result = await client.execute(
-        `INSERT INTO admin_messages (
-          title, content, is_published, is_pinned, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [
-          messageData.title || "",
-          messageData.content || "",
-          messageData.is_published || 1,
-          messageData.is_pinned || 0,
-        ]
-      );
-
-      return result.success;
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(messageData),
+      });
+      const data = await response.json();
+      return data.success;
     } catch (error) {
       console.error("Failed to create admin message:", error);
       return false;
@@ -399,19 +392,13 @@ export const adminMessageAPI = {
     messageData: Partial<AdminMessage>
   ): Promise<boolean> {
     try {
-      const result = await getClient().execute(
-        `UPDATE admin_messages SET
-          title = ?, content = ?, is_published = ?, is_pinned = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?`,
-        [
-          messageData.title || "",
-          messageData.content || "",
-          messageData.is_published || 1,
-          messageData.is_pinned || 0,
-          id,
-        ]
-      );
-      return result.success;
+      const response = await fetch("/api/admin", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...messageData }),
+      });
+      const data = await response.json();
+      return data.success;
     } catch (error) {
       console.error("Failed to update admin message:", error);
       return false;
@@ -421,11 +408,11 @@ export const adminMessageAPI = {
   // 刪除站長消息
   async deleteMessage(id: string): Promise<boolean> {
     try {
-      const result = await getClient().execute(
-        "DELETE FROM admin_messages WHERE id = ?",
-        [id]
-      );
-      return result.success;
+      const response = await fetch(`/api/admin?id=${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      return data.success;
     } catch (error) {
       console.error("Failed to delete admin message:", error);
       return false;
@@ -435,11 +422,13 @@ export const adminMessageAPI = {
   // 切換站長消息的發布狀態
   async toggleMessagePublishStatus(id: string): Promise<boolean> {
     try {
-      const result = await getClient().execute(
-        "UPDATE admin_messages SET is_published = NOT is_published, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        [id]
-      );
-      return result.success;
+      const response = await fetch("/api/admin", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, type: "publish" }),
+      });
+      const data = await response.json();
+      return data.success;
     } catch (error) {
       console.error("Failed to toggle message publish status:", error);
       return false;
@@ -449,11 +438,13 @@ export const adminMessageAPI = {
   // 切換站長消息的釘選狀態
   async toggleMessagePinStatus(id: string): Promise<boolean> {
     try {
-      const result = await getClient().execute(
-        "UPDATE admin_messages SET is_pinned = NOT is_pinned, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        [id]
-      );
-      return result.success;
+      const response = await fetch("/api/admin", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, type: "pin" }),
+      });
+      const data = await response.json();
+      return data.success;
     } catch (error) {
       console.error("Failed to toggle message pin status:", error);
       return false;

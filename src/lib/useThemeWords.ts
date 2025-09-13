@@ -8,8 +8,6 @@ export interface ThemeWord {
   english_plural?: string;
   chinese_meaning: string;
   part_of_speech: string;
-  image_url?: string;
-  audio_url?: string;
 }
 
 const fetcher = async (url: string): Promise<ThemeWord[]> => {
@@ -21,7 +19,7 @@ const fetcher = async (url: string): Promise<ThemeWord[]> => {
 
 export function useThemeWords(themeIds: number[], partOfSpeech?: string) {
   const key = themeIds.length
-    ? `/api/learning-content-d1?action=words_by_theme&theme_id=${themeIds.join(
+    ? `/api/learning-content?action=words_by_theme&theme_id=${themeIds.join(
         ","
       )}${partOfSpeech ? `&part_of_speech=${partOfSpeech}` : ""}`
     : null;
@@ -32,7 +30,7 @@ export function useThemeWords(themeIds: number[], partOfSpeech?: string) {
     async () => {
       const results: ThemeWord[] = [];
       for (const id of themeIds) {
-        const url = `/api/learning-content-d1?action=words_by_theme&theme_id=${id}$${
+        const url = `/api/learning-content?action=words_by_theme&theme_id=${id}${
           partOfSpeech ? `&part_of_speech=${partOfSpeech}` : ""
         }`;
         const words = await fetcher(url.replace("$", ""));

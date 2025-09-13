@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS admin_messages (
 
 -- 插入範例資料
 INSERT INTO admin_messages (id, title, content, is_published, created_at) VALUES
-('msg_001', '歡迎使用國小英語支援！', '我們很高興為您提供這個英語數位化教具。這裡有豐富的遊戲方法和教學輔具，希望能幫助您創造更好的英語學習環境。
+('msg_001', '歡迎使用國小英語支援！', '我們很高興為您提供這個英語數位化教具。這裡有豐富的遊戲方法，希望能幫助您創造更好的英語學習環境。
 
 如果您有任何建議或需要特定的輔具，歡迎透過聯絡表單與我們聯繫。', TRUE, '2024-01-15T10:00:00Z'),
 

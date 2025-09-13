@@ -10,7 +10,7 @@ export default function PrivacyPage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-black mb-4">隱私權政策</h1>
-          <p className="text-lg text-black">生效日期：2024年12月20日</p>
+          <p className="text-lg text-black">生效日期：2025年8月1日</p>
         </div>
 
         {/* Content */}

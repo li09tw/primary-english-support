@@ -19,7 +19,6 @@ export default function SEOHead({
   description = "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
   keywords = [
     "英語教學",
-    "教學輔具",
     "英語遊戲",
     "小學英語",
     "數位教學",

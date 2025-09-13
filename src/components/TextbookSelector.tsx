@@ -33,12 +33,12 @@ export default function TextbookSelector({
     if (selectedThemes.length === 2 && words.length > 0) {
       onVocabularySelected(words, selectedThemes);
     }
-  }, [selectedThemes, words, onVocabularySelected]);
+  }, [selectedThemes, words]);
 
   const fetchThemes = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/learning-content?action=themes");
+      const response = await fetch("/api/learning-content/?action=themes");
       const data = await response.json();
 
       if (data.success) {
@@ -62,7 +62,7 @@ export default function TextbookSelector({
       // 並行獲取所有主題的單字
       const promises = themeIds.map((themeId) =>
         fetch(
-          `/api/learning-content?action=words_by_theme&theme_id=${themeId}`
+          `/api/learning-content/?action=words_by_theme&theme_id=${themeId}`
         ).then((response) => response.json())
       );
 
@@ -80,6 +80,10 @@ export default function TextbookSelector({
         (word, index, self) => index === self.findIndex((w) => w.id === word.id)
       );
 
+      console.log("fetchWordsByThemes completed:", {
+        uniqueWords: uniqueWords.length,
+        themeIds,
+      });
       setWords(uniqueWords);
     } catch (err) {
       setError("Failed to fetch words");
@@ -90,17 +94,30 @@ export default function TextbookSelector({
   };
 
   const handleThemeChange = (theme: WordTheme) => {
+    console.log("handleThemeChange called with:", theme);
     setSelectedThemes((prev) => {
       const isSelected = prev.some((t) => t.id === theme.id);
+      console.log(
+        "Current selectedThemes:",
+        prev.length,
+        "isSelected:",
+        isSelected
+      );
       if (isSelected) {
         // 如果已選擇，則移除
-        return prev.filter((t) => t.id !== theme.id);
+        const newThemes = prev.filter((t) => t.id !== theme.id);
+        console.log("Removing theme, new length:", newThemes.length);
+        return newThemes;
       } else if (prev.length < 2) {
         // 如果未選擇且未達到上限，則添加
-        return [...prev, theme];
+        const newThemes = [...prev, theme];
+        console.log("Adding theme, new length:", newThemes.length);
+        return newThemes;
       } else {
         // 如果已達到上限，則替換第一個
-        return [prev[1], theme];
+        const newThemes = [prev[1], theme];
+        console.log("Replacing theme, new length:", newThemes.length);
+        return newThemes;
       }
     });
   };

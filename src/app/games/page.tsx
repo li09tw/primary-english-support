@@ -1,12 +1,12 @@
 /**
  * @fileoverview 遊戲庫頁面 - 顯示所有遊戲方法，支援篩選和分頁
- * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @modified 2024-09-13 XX:XX - 修復載入問題
  * @modified_by Assistant
- * @modification_type feature
+ * @modification_type bugfix
  * @status locked
- * @last_commit 2024-01-XX XX:XX
- * @feature 遊戲庫展示、篩選、分頁功能已完成
- * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ * @last_commit 2024-09-13 XX:XX
+ * @feature 遊戲庫設定已完成並鎖定保護
+ * @protection_reason 遊戲庫功能已完成，防止意外修改
  */
 
 "use client";
@@ -14,51 +14,81 @@
 import { useState, useEffect, useCallback } from "react";
 import GameMethodCard from "@/components/GameMethodCard";
 import { GameMethod } from "@/types";
-import { gameAPI } from "@/lib/game-api";
+
+console.log("🎮 GamesPage 組件載入");
 
 export default function GamesPage() {
   const [games, setGames] = useState<GameMethod[]>([]);
-  const [filteredGames, setFilteredGames] = useState<GameMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     "all",
   ]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>(["all"]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [filteredGames, setFilteredGames] = useState<GameMethod[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  console.log("🎮 GamesPage 渲染，loading:", loading, "games:", games.length);
 
   const ITEMS_PER_PAGE = 20;
 
-  // 從本地 Cloudflare Worker 撈取資料
+  // 從 API 路由撈取 mock 資料
   const fetchGames = useCallback(
     async (page: number = 1, append: boolean = false) => {
-      try {
-        setLoadingMore(true);
+      console.log("🚀 fetchGames 開始執行");
+      setLoadingMore(true);
 
-        // 使用本地 Cloudflare API 獲取遊戲方法
+      try {
+        // 使用 Next.js API 路由獲取遊戲方法
+        const response = await fetch("/api/games");
+        const data = await response.json();
+
         let newGames: GameMethod[] = [];
 
-        console.log("🔍 開始調用 gameAPI.getAllGames()...");
-
-        if (
-          selectedCategories.includes("all") &&
-          selectedGrades.includes("all")
-        ) {
-          // 獲取所有遊戲方法
-          console.log("📚 獲取所有遊戲方法...");
-          newGames = await gameAPI.getAllGames();
+        if (data.success) {
+          // 轉換 API 數據格式以符合 GameMethod 類型
+          newGames = data.data.map((game: any) => ({
+            id: game.id,
+            title: game.title,
+            description: game.description,
+            category: game.category || "",
+            categories: game.categories
+              ? typeof game.categories === "string"
+                ? JSON.parse(game.categories)
+                : game.categories
+              : [],
+            grades: [], // 保持向後兼容
+            grade1: game.grade1 === 1,
+            grade2: game.grade2 === 1,
+            grade3: game.grade3 === 1,
+            grade4: game.grade4 === 1,
+            grade5: game.grade5 === 1,
+            grade6: game.grade6 === 1,
+            materials: game.materials
+              ? typeof game.materials === "string"
+                ? JSON.parse(game.materials)
+                : game.materials
+              : [],
+            instructions: game.instructions
+              ? typeof game.instructions === "string"
+                ? JSON.parse(game.instructions)
+                : game.instructions
+              : [],
+            steps: game.steps || "",
+            tips: game.tips || "",
+            is_published: game.is_published || true,
+            createdAt: new Date(game.created_at),
+            updatedAt: new Date(game.updated_at),
+          }));
           console.log("✅ 成功獲取遊戲資料:", newGames.length);
         } else {
-          // 根據篩選條件獲取遊戲方法
-          // 這裡可以根據需要實現更複雜的篩選邏輯
-          console.log("🔍 根據篩選條件獲取遊戲方法...");
-          newGames = await gameAPI.getAllGames();
-          console.log("✅ 成功獲取篩選後的遊戲資料:", newGames.length);
+          console.error("API 回應失敗:", data.error);
+          throw new Error(data.error || "獲取遊戲資料失敗");
         }
 
-        console.log("Local API response:", { count: newGames.length, page });
+        console.log("API response:", { count: newGames.length, page });
 
         if (append) {
           // 追加模式：將新資料加到現有資料後面
@@ -84,16 +114,14 @@ export default function GamesPage() {
           setGames(newGames);
         }
 
-        // 簡化分頁邏輯，本地 API 一次性返回所有資料
+        // 簡化分頁邏輯，API 一次性返回所有資料
         setHasMore(false);
         setCurrentPage(page);
 
         // 調試日誌
-        console.log(
-          `Page ${page}: ${newGames.length} games loaded from local API`
-        );
+        console.log(`Page ${page}: ${newGames.length} games loaded from API`);
       } catch (err) {
-        console.error("Failed to fetch games from local API:", err);
+        console.error("❌ Failed to fetch games from API:", err);
         setError(err instanceof Error ? err.message : "未知錯誤");
 
         // 如果撈取失敗，設定空陣列避免網頁崩潰
@@ -101,17 +129,20 @@ export default function GamesPage() {
           setGames([]);
         }
       } finally {
+        console.log("🏁 fetchGames 完成，設定 loading 為 false");
         setLoading(false);
         setLoadingMore(false);
       }
     },
-    [selectedCategories, selectedGrades, games.length]
+    [] // 移除依賴，避免無限重新渲染
   );
 
   // 初始載入
   useEffect(() => {
+    console.log("🎯 useEffect 執行，開始載入遊戲");
+    console.log("🎯 fetchGames 函數:", typeof fetchGames);
     fetchGames(1, false);
-  }, []); // 只在組件掛載時執行一次
+  }, [fetchGames]); // 依賴 fetchGames 函數
 
   // 篩選條件改變時重新載入
   useEffect(() => {
@@ -160,7 +191,6 @@ export default function GamesPage() {
               vocabulary: "單字學習",
               sentence: "句型練習",
               oral: "口語訓練",
-              teaching: "教學輔具",
               listening: "聽力練習",
               pronunciation: "發音練習",
               spelling: "拼寫練習",
@@ -174,12 +204,12 @@ export default function GamesPage() {
     if (!selectedGrades.includes("all")) {
       filtered = filtered.filter((game) => {
         return selectedGrades.some((grade) => {
-          if (grade === "grade1") return game.grades.includes("grade1");
-          if (grade === "grade2") return game.grades.includes("grade2");
-          if (grade === "grade3") return game.grades.includes("grade3");
-          if (grade === "grade4") return game.grades.includes("grade4");
-          if (grade === "grade5") return game.grades.includes("grade5");
-          if (grade === "grade6") return game.grades.includes("grade6");
+          if (grade === "grade1") return game.grade1;
+          if (grade === "grade2") return game.grade2;
+          if (grade === "grade3") return game.grade3;
+          if (grade === "grade4") return game.grade4;
+          if (grade === "grade5") return game.grade5;
+          if (grade === "grade6") return game.grade6;
           return false;
         });
       });
@@ -200,7 +230,6 @@ export default function GamesPage() {
     vocabulary: "單字學習",
     sentence: "句型練習",
     oral: "口語訓練",
-    teaching: "教學輔具",
     listening: "聽力練習",
     pronunciation: "發音練習",
     spelling: "拼寫練習",

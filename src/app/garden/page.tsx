@@ -386,7 +386,6 @@ export default function GardenPage() {
     "寫作練習",
     "發音練習",
     "拼寫練習",
-    "教學輔具",
   ];
 
   const gradeOptions = [
@@ -458,7 +457,7 @@ export default function GardenPage() {
         {/* 頁面標題 */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-black mb-4">管理介面</h1>
-          <p className="text-xl text-black">管理遊戲方法、教學輔具和站長消息</p>
+          <p className="text-xl text-black">管理遊戲方法和站長消息</p>
         </div>
 
         {/* 統計資訊 */}

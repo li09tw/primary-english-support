@@ -22,7 +22,7 @@ export default function MemoryMatchPage() {
   const [moves, setMoves] = useState(0);
 
   // 處理單字選擇
-  const handleVocabularySelected = (words: Word[], theme: WordTheme) => {
+  const handleVocabularySelected = (words: Word[], themes: WordTheme[]) => {
     // 將 Word[] 轉換為 Vocabulary[] 格式
     const convertedVocabulary: Vocabulary[] = words.map((word) => ({
       id: word.id.toString(),
@@ -30,7 +30,7 @@ export default function MemoryMatchPage() {
       chinese: word.chinese_meaning,
       phonetic: "", // Word 類型沒有 phonetic 欄位，設為空字串
       example: "", // Word 類型沒有 example 欄位，設為空字串
-      image: word.image_url,
+      image: undefined,
     }));
     setVocabulary(convertedVocabulary);
   };

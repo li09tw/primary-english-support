@@ -14,7 +14,7 @@ import { getCloudflareConfig } from "@/lib/env-config";
 // GET: 檢查會話狀態
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = SessionManager.getSessionToken();
+    const sessionToken = await SessionManager.getSessionToken();
 
     if (!sessionToken) {
       return NextResponse.json({
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     if (!sessionValidation.valid) {
       // 會話無效，清除 Cookie
-      SessionManager.clearSessionCookie();
+      await SessionManager.clearSessionCookie();
 
       return NextResponse.json({
         valid: false,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 // DELETE: 登出（清除會話）
 export async function DELETE(request: NextRequest) {
   try {
-    const sessionToken = SessionManager.getSessionToken();
+    const sessionToken = await SessionManager.getSessionToken();
 
     if (sessionToken) {
       // 從資料庫中刪除會話
@@ -80,7 +80,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 清除 Cookie
-    SessionManager.clearSessionCookie();
+    await SessionManager.clearSessionCookie();
 
     const response = NextResponse.json({
       success: true,

@@ -52,12 +52,8 @@ export async function middleware(request: NextRequest) {
     // 檢查會話 Cookie
     const sessionToken = request.cookies.get("garden_session")?.value;
 
-    console.log("🔍 中間件檢查受保護路徑:", pathname);
-    console.log("🔍 會話 Token:", sessionToken ? "存在" : "不存在");
-
     if (!sessionToken) {
       // 沒有會話，重定向到登入頁面
-      console.log("❌ 沒有會話，重定向到登入頁面");
       return NextResponse.redirect(new URL("/garden/login", request.url));
     }
 
@@ -69,7 +65,6 @@ export async function middleware(request: NextRequest) {
 
       if (!sessionValidation.valid) {
         // 會話無效，清除 Cookie 並重定向
-        console.log("❌ 會話無效:", sessionValidation.error);
         const redirectResponse = NextResponse.redirect(
           new URL("/garden/login", request.url)
         );
@@ -78,7 +73,6 @@ export async function middleware(request: NextRequest) {
       }
 
       // 會話有效，繼續處理請求
-      console.log("✅ 會話有效，允許訪問:", pathname);
       return response;
     } catch (error) {
       console.error("會話驗證失敗:", error);

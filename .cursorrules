@@ -1,12 +1,183 @@
+# Cursor Rules for Primary English Support Project
 
+## 1. Hero Section Guidelines
+- **永遠不要在 hero section 放按鈕**
+- Hero section 應該專注於展示主要訊息和視覺效果
+- 避免在 hero section 中使用任何形式的按鈕元素
 
-## 20. Environment Files Policy
+## 2. Typography and Color Guidelines
+- **使用 `#2b6b7a` 作為副標或 H3 的文字顏色**
+- 當一個 section 已經有黑色文字的 H1 或 H2 時，使用此顏色作為副標
+- 此顏色適用於 H3 標題和副標題文字
+- **一個頁面中至少要有1個H1，其餘最多是 H2 或 p、span**
+- **所有 hover 狀態統一使用白底 (`bg-white`) 和 `#2b6b7a` 字體顏色**
+- hover 樣式應保持一致的視覺效果，提升用戶體驗
+- **絕對禁止擅自更改用戶已設定好的顏色，除非用戶明確同意或要求**
+- 用戶的顏色設計選擇必須得到尊重和保護
+
+### 2.1 Font Size Requirements
+- **最小字體大小為 14px**
+- 使用 Tailwind CSS 的 `text-xs` 類別（14px）作為最小字體
+- 字體大小對照表：
+  - `text-xs`: 14px
+  - `text-sm`: 15px (最小字體)
+  - `text-base`: 16px (預設)
+  - `text-lg`: 18px
+  - `text-xl`: 20px
+  - `text-2xl`: 24px
+  - 等等...
+
+### 2.2 Text Color Requirements
+- **敘述性文字、列點文字必須使用黑色 (`text-black`)**
+- **禁止在以下元素使用任何 gray 顏色**：
+  - 頁面標題 (H1, H2, H3)
+  - 敘述性文字段落
+  - 列點文字 (ul, li)
+  - 標籤文字
+  - 統計資訊文字
+  - **允許使用 gray 顏色的情況**：
+    - 按鈕和互動元素的 hover 效果
+    - 特殊設計的顏色 (如 `text-gray-400` 用於提示)
+    - 品牌色彩和強調色
+    - 邊框和背景色
+
+### 2.3 Background and Text Contrast Guidelines
+- **淺色背景必須配黑色文字以確保可讀性**
+- **禁止在淺色背景（如 `bg-primary-blue/90`、`bg-white`、`bg-gray-100` 等）上使用白色文字**
+- 淺色背景配白色文字會大幅降低對比度和可讀性
+- **正確做法**：淺色背景配黑色文字 (`text-black`)
+- **錯誤做法**：淺色背景配白色文字 (`text-white`)
+- 此規則適用於所有導航選單、卡片、按鈕等 UI 元素
+
+- 使用 TypeScript 進行類型安全開發
+- 遵循 Next.js 13+ App Router 的最佳實踐
+- 使用 Tailwind CSS 進行樣式設計
+- 保持組件結構清晰和可重用性
+
+## 3. Component Structure
+- 每個組件應該有明確的職責
+- 使用適當的 TypeScript 類型定義
+- 保持組件的可測試性和可維護性
+
+## 4. File Organization
+- 遵循 Next.js 的檔案結構慣例
+- 將共用組件放在 `src/components` 目錄
+- 將工具函數放在 `src/lib` 目錄
+- 將類型定義放在 `src/types` 目錄
+
+## 5. Client Component Guidelines
+- **每次更動檔案時，如果發現沒有 `"use client"`，請思考是否需要**
+- 使用 `"use client"` 來標記需要客戶端互動的組件
+- 只有當組件需要 useState、useEffect、事件處理器等客戶端功能時才添加
+- 保持伺服器組件的優勢，避免不必要的客戶端渲染
+
+## 6. Navigation Document Reference
+- **當我說「導覽文件」時，就是指 `doc/Guide.md`**
+- 這個文件包含項目的導覽和指引資訊
+
+## 7. Rules File Reference
+- **當我說「規則」時，就是指 `.cursorrules ` 文件**
+- 這個文件用於新增、修改和管理項目的規則設定
+
+## 8. Garden Management Interface
+- **管理介面路徑為 `/garden`，不是 `/admin`**
+- 此路徑提供遊戲方法、教學輔具和站長消息的管理功能
+- 檔案位置：`src/app/garden/`
+- 功能包括：新增、編輯、刪除各類內容，發布狀態管理
+- 此路徑替代了原本的 `/admin` 路徑，使用更友善的名稱
+
+## 9. Code Selection Scope Guidelines
+- **當用戶圈選程式碼、指定頁面、或透過 cmd+L 選取檔案/片段時，只更動與選取內容直接相關的部分**
+- **禁止擅自更改設計、顏色、優化其他不相關的 component、更改排版等**
+- 保持修改範圍的精確性，避免影響未選取的程式碼
+- 確保所有更改都與用戶明確選取的內容有直接關聯
+- **適用範圍包括：手動圈選程式碼、指定頁面路徑、使用 cmd+L 選取檔案或程式碼片段**
+
+## 10. File Naming Convention
+- **所有 `.md` 文件名必須使用蛇形命名且字首大寫的命名方式（Snake_Case）**
+- 例如：`Game_Pages_Guide.md`、`Cloudflare_Integration.md`、`Seo_Optimization.md`
+- 禁止使用全大寫（如 `GAME_PAGES_GUIDE.md`）或小寫蛇形命名（如 `game_pages_guide.md`）
+- 此規則適用於所有新創建和重命名的 `.md` 文件
+- 保持項目 `.md` 文件命名的一致性和可讀性
+
+## 11. Documentation File Location
+- **所有 `.md` 文件必須放在 `doc/` 資料夾中**
+- **絕對禁止在專案根目錄或其他位置創建 `.md` 文件**
+- 如果發現根目錄有 `.md` 文件，必須立即移動到 `doc/` 資料夾
+- 保持專案結構的整潔和一致性
+- 所有文檔都應該集中在 `doc/` 資料夾中管理
+
+## 13. Decision Making Guidelines
+- **每次 chat 都要先告訴用戶問題，提供解決方法，得到用戶許可之後才可以修改程式碼**
+- **不要連貫性地發現問題之後，直接修正程式碼，請先取得用戶的許可才能修改程式碼**
+- **當面對多個解決方案時，必須提供所有選項並詢問用戶選擇**
+- **禁止擅自決定執行哪個方案**
+- 必須清楚列出所有可能的解決方案
+- 讓用戶明確選擇要執行的方案
+- 避免過於急躁地做決定和執行動作
+- 確保用戶對每個步驟都有控制權
+- **執行條件：只有在用戶明確回應「執行」、「Y」、「Ｙ」或提供新的具體要求時才執行**
+- **執行前確認：每次執行前必須先說明對用戶要求的理解，讓用戶確認是否正確**
+- **禁止迴圈式執行：避免重複執行相同操作或陷入無限迴圈**
+- **問題重複檢查：如果同樣問題一再出現，必須檢查是否實際修改了程式碼，避免只做表面調整**
+
+## 14. Reinstallation Procedure
+- **當用戶說「重新安裝」時，必須執行以下程序：**
+  1. `rm -rf .next node_modules package-lock.json` - 清理損壞的建置快取和依賴
+  2. `npm install` - 重新安裝所有依賴套件
+  3. `npm run build` - 重新建置專案
+- 這個程序專門用來解決：
+  - webpack 模組解析錯誤（如 `Cannot find module './948.js'`）
+  - 依賴衝突或安裝不完整
+  - 建置快取損壞
+  - 其他與依賴或建置相關的問題
+- 執行此程序前應先停止開發伺服器，完成後可重新啟動
+
+## 15. Pattern ↔ Default Theme Mapping
+- 除非另有指定，以下句型預設綁定字彙主題（用於自動選字與處理器）：
+  - `How old _____?` → `Numbers`
+  - `Are you a student?` → `Professions`（職業）
+  - `What’s your/his/her favorite subject?` → `School Subjects`
+  - `Where are you from?` → `Countries`
+  - `Do you like sports?` → `Sports`
+- 實作原則：
+  - 前端處理器須優先使用對應主題中的字彙；若無可用字彙，才可使用安全的預設值。
+  - 若需新增/變更句型與主題的對應，必須先取得站長明確許可。
+
+## 16. Projection Q&A Fallback Rule
+- 生成 Projection Q&A 題目時，必須同時存在至少一個 `Question` 與一個 `Statement` 句型。
+- 若任一類型數量為 0，必須回退（fallback）到「填空題」（fill-in-the-blank）產生題目。
+- 依據位置：`src/lib/game-logic.ts` 的判斷邏輯（`if (questionPatterns.length === 0 || statementPatterns.length === 0) { return createFillBlankQuestion(...) }`）。                                                      
+
+## 17. 文件修改協作管理規則（防止多 Chat Tab 衝突）
+
+### 17.1 修改前檢查
+- **檢查文件是否正在被其他 tab 修改**
+- **修改前先檢查文件是否正在被其他程序使用**
+- **重要文件修改前先備份或提交現有更改**
+
+### 17.2 修改中保護
+- **一次只修改一個文件，避免同時修改多個相關文件**
+- **修改完成後立即測試功能是否正常**
+- **重要修改完成後立即提交到 git**
+
+### 17.3 衝突處理
+- **如果發現文件被覆蓋，立即檢查 git 歷史**
+- **從最近的提交恢復文件**
+- **重新進行必要的修改**
+
+### 17.4 最佳實踐
+- **修改前先說明要修改的內容和原因**
+- **保持修改範圍的精確性，避免影響其他功能**
+- **修改完成後確認功能正常運作**
+
+## 18. Environment Files Policy
 - 僅使用 `.env.local`（開發者本機）與部署平台的環境變數（例如 Vercel 專案設定）。
 - 永遠不要新增任何示例環境檔案，如：`env.example`、`*.env.example`、`vercel.env.example` 等。
 - 需要示例或說明時，更新 `doc/EnvironmentVariables.md` 文件，而不是建立示例環境檔案。
 - 專案根目錄禁止新增任何以 `.env` 為範本的示例檔案；如發現，應移除並改為文件化。
 
-## 21. Scripts Security Policy
+## 19. Scripts Security Policy
 - 永遠不要在 scripts 中硬編碼密碼、API 金鑰或其他敏感資訊。
 - 所有敏感資訊必須使用環境變數或互動式輸入。
 - 包含硬編碼憑證的腳本必須加入 `.gitignore`，不得上傳到版本控制系統。

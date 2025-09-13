@@ -182,13 +182,13 @@ export const localGameAPI = {
   },
 };
 
-// 站長消息相關 API
+// 站長消息相關 API - 使用本地虛擬資料庫
 export const localMessageAPI = {
   // 獲取所有站長消息
   async getAllMessages(): Promise<AdminMessage[]> {
     try {
       const result = await getClient().query(
-        "SELECT * FROM admin_messages ORDER BY created_at DESC"
+        "SELECT * FROM admin_messages ORDER BY is_pinned DESC, created_at DESC"
       );
       return result.results || [];
     } catch (error) {
@@ -201,8 +201,7 @@ export const localMessageAPI = {
   async getPublishedMessages(): Promise<AdminMessage[]> {
     try {
       const result = await getClient().query(
-        "SELECT * FROM admin_messages WHERE status = ? ORDER BY created_at DESC",
-        ["published"]
+        "SELECT * FROM admin_messages WHERE is_published = 1 ORDER BY is_pinned DESC, created_at DESC"
       );
       return result.results || [];
     } catch (error) {
