@@ -93,7 +93,6 @@ export default function GamesPage() {
         if (append) {
           // 追加模式：將新資料加到現有資料後面
           console.log("Appending mode:", {
-            currentGamesCount: games.length,
             newGamesCount: newGames.length,
             page,
           });
@@ -150,7 +149,7 @@ export default function GamesPage() {
       setCurrentPage(1);
       fetchGames(1, false);
     }
-  }, [selectedCategories, selectedGrades, fetchGames]); // 添加 fetchGames 依賴
+  }, [selectedCategories, selectedGrades, games.length, fetchGames]); // 添加 fetchGames 依賴
 
   // 載入更多資料
   const loadMore = () => {

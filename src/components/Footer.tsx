@@ -22,6 +22,12 @@ export default function Footer() {
             服務條款
           </a>
           <a
+            href="/licenses"
+            className="text-black hover:text-primary-blue transition-colors duration-200 font-medium"
+          >
+            版權聲明
+          </a>
+          <a
             href="https://portaly.cc/zoralitw009/support"
             target="_blank"
             rel="noopener noreferrer"

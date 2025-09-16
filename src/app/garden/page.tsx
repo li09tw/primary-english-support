@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GameMethod, AdminMessage } from "@/types";
 import { generateId, saveGameMethods, saveAdminMessages } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -99,7 +99,7 @@ export default function GardenPage() {
   });
 
   // 載入遊戲方法數據
-  const loadGames = async () => {
+  const loadGames = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -170,10 +170,10 @@ export default function GardenPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // 載入管理員消息數據
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       // 使用 Cloudflare Worker API 獲取管理員消息
       const fetchedMessages = await adminMessageAPI.getAllMessages();
@@ -202,13 +202,13 @@ export default function GardenPage() {
         setMessages([]);
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     // 載入數據
     loadGames();
     loadMessages();
-  }, []);
+  }, [loadGames, loadMessages]);
 
   // 遊戲方法相關函數
   const addGame = async () => {

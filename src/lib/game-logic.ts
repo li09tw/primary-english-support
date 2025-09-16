@@ -1083,7 +1083,17 @@ const howManyNeedHandler: PatternHandler = ({ words }) => {
     const question = `How many ${plural} ${s.aux} ${s.who} need?`;
     const nounForAnswer = n === 1 ? singular : plural;
     const answer = `${s.ansSubj} ${s.verb} ${n} ${nounForAnswer}.`;
-    return { question, answer, selectedWord: selectedWord };
+    // Always use the number word as the selectedWord (Numbers theme)
+    const numberSelectedWord = numberPicked
+      ? numberPicked
+      : ({
+          id: -1,
+          english_singular: toNumberWord(n),
+          english_plural: undefined,
+          chinese_meaning: String(n),
+          part_of_speech: "noun",
+        } as GameWord);
+    return { question, answer, selectedWord: numberSelectedWord };
   }
 
   const singular = picked.english_singular;
@@ -1149,7 +1159,17 @@ const howManyNeedHandler: PatternHandler = ({ words }) => {
   const question = `How many ${plural} ${s.aux} ${s.who} need?`;
   const nounForAnswer = n === 1 ? singular : plural;
   const answer = `${s.ansSubj} ${s.verb} ${n} ${nounForAnswer}.`;
-  return { question, answer, selectedWord: picked };
+  // Always use the number word as the selectedWord (Numbers theme)
+  const numberSelectedWord = numberPicked
+    ? numberPicked
+    : ({
+        id: -1,
+        english_singular: toNumberWord(n),
+        english_plural: undefined,
+        chinese_meaning: String(n),
+        part_of_speech: "noun",
+      } as GameWord);
+  return { question, answer, selectedWord: numberSelectedWord };
 };
 
 // Handler: Do you have lunch at _____? -> Supports both locations and time (Enhanced for Yes/No Q&A)

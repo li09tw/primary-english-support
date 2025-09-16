@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@source "./src/**/*.{ts,tsx,js,jsx,mdx}";
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -31,50 +30,93 @@ body {
   line-height: 1.5;
 }
 
-/* Ensure minimum font size for all text elements */
-* {
+/* Ensure minimum font size for textual elements (avoid affecting SVG/layout sizing) */
+body,
+p,
+span,
+a,
+li,
+label,
+input,
+button,
+textarea,
+th,
+td,
+small {
   font-size: clamp(14px, 1rem, 100%);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.text-balance {
+  text-wrap: balance;
+}
 
-  /* Custom color utilities */
-  .bg-primary-blue {
-    background-color: #bde6f4;
+/* Heading typography - establish clear hierarchy and larger sizes */
+h1 {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 48px;
   }
-  .bg-secondary-pink {
-    background-color: #fee1e8;
-  }
-  .bg-accent-green {
-    background-color: #b5d8a1;
-  }
+}
 
-  .text-primary-blue {
-    color: #2b6b7a;
+h2 {
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+@media (min-width: 1024px) {
+  h2 {
+    font-size: 32px;
   }
-  .text-secondary-pink {
-    color: #b76b7a;
-  }
-  .text-accent-green {
-    color: #4a6b3a;
-  }
+}
 
-  .border-primary-blue {
-    border-color: #bde6f4;
+h3 {
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+@media (min-width: 1024px) {
+  h3 {
+    font-size: 24px;
   }
-  .border-secondary-pink {
-    border-color: #fee1e8;
-  }
-  .border-accent-green {
-    border-color: #b5d8a1;
-  }
-  /* 強制 checkbox 顯示為原生樣式 */
-  input[type="checkbox"] {
-    appearance: auto !important;
-    -webkit-appearance: auto !important;
-    -moz-appearance: auto !important;
-  }
+}
+
+/* Custom color utilities */
+.bg-primary-blue {
+  background-color: #bde6f4;
+}
+.bg-secondary-pink {
+  background-color: #fee1e8;
+}
+.bg-accent-green {
+  background-color: #b5d8a1;
+}
+
+.text-primary-blue {
+  color: #2b6b7a;
+}
+.text-secondary-pink {
+  color: #b76b7a;
+}
+.text-accent-green {
+  color: #4a6b3a;
+}
+
+.border-primary-blue {
+  border-color: #bde6f4;
+}
+.border-secondary-pink {
+  border-color: #fee1e8;
+}
+.border-accent-green {
+  border-color: #b5d8a1;
+}
+/* 強制 checkbox 顯示為原生樣式 */
+input[type="checkbox"] {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
 }

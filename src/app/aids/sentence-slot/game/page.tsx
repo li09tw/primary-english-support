@@ -540,9 +540,9 @@ function SentenceSlotGameContent() {
             {/* 1. 選取的句子 */}
             <div className="bg-blue-50 rounded-lg p-6 mb-6">
               <p className="text-lg text-black mb-2">選取的句型：</p>
-              <p className="text-2xl font-bold text-blue-800">
+              <h2 className="text-2xl font-bold text-blue-800">
                 {currentGame?.questionText || currentGame?.pattern.pattern_text}
-              </p>
+              </h2>
             </div>
 
             {/* 2. 配對好的答案句子（可選擇顯示/隱藏） */}
@@ -558,9 +558,9 @@ function SentenceSlotGameContent() {
                 </button>
               </div>
               {showAnswer && (
-                <p className="text-2xl font-bold text-green-800">
+                <h2 className="text-2xl font-bold text-green-800">
                   {currentGame?.completedSentence}
-                </p>
+                </h2>
               )}
             </div>
 
@@ -568,12 +568,12 @@ function SentenceSlotGameContent() {
             {currentGame?.selectedWord && (
               <div className="bg-gray-100 rounded-lg p-6 mb-6">
                 <p className="text-lg text-black mb-2">選中的單字：</p>
-                <p className="text-3xl font-bold text-black mb-2">
+                <h2 className="text-3xl font-bold text-black mb-2">
                   {currentGame?.selectedWord?.english_singular}
-                </p>
-                <p className="text-lg text-black">
+                </h2>
+                <h3 className="text-xl text-black">
                   {currentGame?.selectedWord?.chinese_meaning}
-                </p>
+                </h3>
               </div>
             )}
 

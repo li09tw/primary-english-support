@@ -33,7 +33,7 @@ export default function TextbookSelector({
     if (selectedThemes.length === 2 && words.length > 0) {
       onVocabularySelected(words, selectedThemes);
     }
-  }, [selectedThemes, words]);
+  }, [selectedThemes, words, onVocabularySelected]);
 
   const fetchThemes = async () => {
     try {

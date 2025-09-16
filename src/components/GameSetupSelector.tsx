@@ -434,7 +434,7 @@ export default function GameSetupSelector({
           console.log("🔢 Numbers theme selected - using mock data from API");
 
           // 直接使用從 API 獲取的單字（包含數字單字）
-          setWords(words);
+          setWords((prev) => prev);
         } else {
           // 不包含數字主題時，使用基礎單字
           const filteredWords = baseWordsRef.current.filter((word: Word) => {
@@ -446,7 +446,7 @@ export default function GameSetupSelector({
               return theme && topicNames.includes(theme.name);
             });
           });
-          setWords(filteredWords);
+          setWords(() => filteredWords);
         }
       } catch (error) {
         console.error("❌ Error fetching words by themes:", error);
