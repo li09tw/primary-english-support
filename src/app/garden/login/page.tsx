@@ -347,11 +347,8 @@ export default function GardenLoginPage() {
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">
           <h3 className="text-sm font-medium text-blue-800 mb-2">安全提示</h3>
           <ul className="text-xs text-blue-700 space-y-1">
-            <li>• 驗證碼將在 30 分鐘後過期</li>
             <li>• 請勿將驗證碼分享給他人</li>
-            <li>• 驗證碼會發送到預設信箱</li>
             <li>• 每次登入都需要新的驗證碼</li>
-            <li>• 郵件由前端直接發送，速度較快</li>
             <li>• 如果未收到郵件，請檢查垃圾郵件夾</li>
             <li>• 可以點擊「重新發送驗證碼」重試</li>
           </ul>

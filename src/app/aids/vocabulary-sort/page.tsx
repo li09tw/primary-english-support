@@ -10,7 +10,6 @@ export default function VocabularySortPage() {
   const router = useRouter();
   const [vocabulary, setVocabulary] = useState<Vocabulary[]>([]);
   const [selectedThemes, setSelectedThemes] = useState<WordTheme[]>([]);
-  const [difficulty, setDifficulty] = useState<"simple" | "advanced">("simple");
 
   // 處理單字選擇
   const handleVocabularySelected = useCallback(
@@ -48,7 +47,7 @@ export default function VocabularySortPage() {
     const themesParam = encodeURIComponent(JSON.stringify(selectedThemes));
 
     router.push(
-      `/aids/vocabulary-sort/game/${difficulty}?vocabulary=${vocabularyParam}&themes=${themesParam}`
+      `/aids/vocabulary-sort/game?vocabulary=${vocabularyParam}&themes=${themesParam}`
     );
   };
 
@@ -64,46 +63,6 @@ export default function VocabularySortPage() {
 
           {/* 句型與單字主題選擇 */}
           <TextbookSelector onVocabularySelected={handleVocabularySelected} />
-
-          {/* 難度選擇 */}
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-bold text-black mb-4">選擇難度</h2>
-            <div className="flex space-x-6">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="difficulty"
-                  value="simple"
-                  checked={difficulty === "simple"}
-                  onChange={(e) =>
-                    setDifficulty(e.target.value as "simple" | "advanced")
-                  }
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                />
-                <span className="ml-2 text-lg text-black">簡單</span>
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="difficulty"
-                  value="advanced"
-                  checked={difficulty === "advanced"}
-                  onChange={(e) =>
-                    setDifficulty(e.target.value as "simple" | "advanced")
-                  }
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                />
-                <span className="ml-2 text-lg text-black">進階</span>
-              </label>
-            </div>
-            <div className="mt-3 text-sm text-gray-600">
-              {difficulty === "simple" ? (
-                <p>簡單模式：提供提示和引導，適合初學者</p>
-              ) : (
-                <p>進階模式：更具挑戰性，適合有經驗的學習者</p>
-              )}
-            </div>
-          </div>
 
           {/* 開始遊戲按鈕 */}
           {vocabulary.length >= 2 && selectedThemes.length === 2 && (

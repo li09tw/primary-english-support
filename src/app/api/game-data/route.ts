@@ -1340,11 +1340,27 @@ const mockWords = [
   },
   {
     id: "FastFood04",
-    english_singular: "noodles",
+    english_singular: "fries",
     english_plural: undefined,
-    chinese_meaning: "麵條",
+    chinese_meaning: "薯條",
     part_of_speech: "noun" as const,
     has_plural: false,
+  },
+  {
+    id: "FastFood05",
+    english_singular: "hot dog",
+    english_plural: "hot dogs",
+    chinese_meaning: "熱狗",
+    part_of_speech: "noun" as const,
+    has_plural: true,
+  },
+  {
+    id: "FastFood06",
+    english_singular: "chicken nugget",
+    english_plural: "chicken nuggets",
+    chinese_meaning: "雞塊",
+    part_of_speech: "noun" as const,
+    has_plural: true,
   },
   // 新增：更多文具單字 (STATIONERY - theme_id: 99312)
   {
@@ -2078,11 +2094,11 @@ const mockWords = [
   },
   {
     id: "MainDishes10",
-    english_singular: "sandwich",
-    english_plural: "sandwiches",
-    chinese_meaning: "三明治",
+    english_singular: "soup",
+    english_plural: undefined,
+    chinese_meaning: "湯",
     part_of_speech: "noun" as const,
-    has_plural: true,
+    has_plural: false,
   },
   // 新增：珍珠奶茶配料單字 (BUBBLE TEA TOPPINGS - theme_id: 99413)
   {

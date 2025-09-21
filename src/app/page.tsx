@@ -1,55 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import AdminMessageCard from "@/components/AdminMessageCard";
-import { AdminMessage } from "@/types";
-import { generateId } from "@/lib/utils";
+import { getPublishedMessages } from "@/data/admin-messages";
 
 export default function Home() {
-  const [messages, setMessages] = useState<AdminMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // 從 API 讀取已發布的站長消息
-    const loadMessages = async () => {
-      try {
-        const response = await fetch("/api/admin");
-        const data = await response.json();
-
-        if (data.success && data.data) {
-          // 只顯示已發布的消息
-          const publishedMessages = data.data.filter(
-            (msg: AdminMessage) => msg.is_published
-          );
-          setMessages(publishedMessages);
-
-          // 同時保存到 localStorage 作為備份
-          localStorage.setItem(
-            "adminMessages",
-            JSON.stringify(publishedMessages)
-          );
-        } else {
-          // 如果 API 失敗，嘗試從 localStorage 載入備份數據
-          const savedMessages = localStorage.getItem("adminMessages");
-          if (savedMessages) {
-            setMessages(JSON.parse(savedMessages));
-          }
-        }
-      } catch (error) {
-        console.error("載入站長消息失敗:", error);
-        // 如果 API 失敗，嘗試從 localStorage 載入備份數據
-        const savedMessages = localStorage.getItem("adminMessages");
-        if (savedMessages) {
-          setMessages(JSON.parse(savedMessages));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMessages();
-  }, []);
+  // 直接從常數檔案獲取已發布的消息，無需 API 調用
+  const messages = getPublishedMessages();
 
   // 結構化資料
   const structuredData = {
@@ -145,9 +102,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-black mb-4">站長消息</h2>
           </div>
 
-          {loading ? (
-            <div className="text-center text-black py-8">載入中...</div>
-          ) : messages.length > 0 ? (
+          {messages.length > 0 ? (
             <div className="space-y-6">
               {messages.slice(0, 6).map((message) => (
                 <AdminMessageCard key={message.id} message={message} />
