@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { sendNotificationEmail } from "@/lib/emailjs";
+import { sendNotificationEmail } from "@/lib/emailjs-server";
 import {
   SessionManager,
   RateLimiter,

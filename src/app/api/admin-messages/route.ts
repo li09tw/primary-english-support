@@ -31,7 +31,17 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await client.query(query);
-    const messages = (result?.results as LocalAdminMessage[]) || [];
+    const localMessages = (result?.results as LocalAdminMessage[]) || [];
+
+    // 轉換資料格式，將 created_at 轉換為 published_at
+    const messages = localMessages.map((msg) => ({
+      id: msg.id,
+      title: msg.title,
+      content: msg.content,
+      is_published: msg.is_published,
+      is_pinned: msg.is_pinned,
+      published_at: new Date(msg.created_at),
+    }));
 
     return NextResponse.json({
       success: true,
@@ -82,14 +92,13 @@ export async function POST(request: NextRequest) {
       now,
     ]);
 
-    const newMessage: LocalAdminMessage = {
+    const newMessage = {
       id,
       title,
       content,
       is_published,
       is_pinned,
-      created_at: now,
-      updated_at: now,
+      published_at: new Date(now),
     };
 
     return NextResponse.json(

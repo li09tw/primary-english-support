@@ -32,8 +32,6 @@ export function formatDate(date: Date | string | number): string {
     year: "numeric",
     month: "long",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   }).format(parsed);
 }
 

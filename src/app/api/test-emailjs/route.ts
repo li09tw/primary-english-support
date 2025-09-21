@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendNotificationEmail } from "@/lib/emailjs";
+import { sendNotificationEmail } from "@/lib/emailjs-server";
+import { getEmailJSConfig } from "@/lib/env-config";
 
 export async function GET(request: NextRequest) {
   try {
     // 檢查環境變數
-    const config = {
-      serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
-      templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
-      publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
-    };
+    const config = getEmailJSConfig();
 
     console.log("EmailJS Config:", {
       serviceId: config.serviceId ? "已設定" : "未設定",

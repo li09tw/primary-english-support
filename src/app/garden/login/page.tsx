@@ -11,10 +11,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  sendVerificationCodeEmail,
-  isEmailJSConfigured,
-} from "@/lib/emailjs-client";
 
 interface LoginState {
   step: "username" | "verification";
@@ -71,8 +67,8 @@ export default function GardenLoginPage() {
     setLoginState((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
-      // 1. 從後端獲取驗證碼
-      const response = await fetch("/api/auth", {
+      // 1. 先登入獲取會話
+      const loginResponse = await fetch("/api/auth", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,51 +78,44 @@ export default function GardenLoginPage() {
         }),
       });
 
-      const data = await response.json();
+      const loginData = await loginResponse.json();
 
-      if (data.success && data.verificationCode) {
-        // 2. 檢查 EmailJS 配置
-        if (!isEmailJSConfigured()) {
-          setLoginState((prev) => ({
-            ...prev,
-            loading: false,
-            error: "EmailJS 配置不完整，請檢查環境變數設定",
-          }));
-          return;
-        }
+      if (loginData.success) {
+        // 2. 使用會話發送驗證碼到後端
+        const codeResponse = await fetch("/api/auth/verification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
 
-        // 3. 使用前端 EmailJS 發送郵件
-        const emailResult = await sendVerificationCodeEmail(
-          data.email,
-          data.verificationCode,
-          data.expiresIn
-        );
+        const codeData = await codeResponse.json();
 
-        if (emailResult.success) {
+        if (codeData.success) {
           setLoginState((prev) => ({
             ...prev,
             step: "verification",
             loading: false,
-            success: "驗證碼已發送，請至信箱檢查",
+            success: codeData.message,
             error: "",
           }));
         } else {
           setLoginState((prev) => ({
             ...prev,
-            step: "verification",
             loading: false,
-            success: `驗證碼已生成：${data.verificationCode}\n\n郵件發送失敗：${emailResult.error}`,
-            error: "",
+            error: codeData.message || "發送驗證碼失敗",
           }));
         }
       } else {
         setLoginState((prev) => ({
           ...prev,
           loading: false,
-          error: data.message,
+          error: loginData.message || "登入失敗",
         }));
       }
     } catch (error) {
+      console.error("發送驗證碼失敗:", error);
       setLoginState((prev) => ({
         ...prev,
         loading: false,
@@ -147,13 +136,13 @@ export default function GardenLoginPage() {
     setLoginState((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
-      const response = await fetch("/api/auth", {
+      const response = await fetch("/api/auth/verification", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          username: loginState.username.trim(),
           code: loginState.code.trim(),
         }),
       });

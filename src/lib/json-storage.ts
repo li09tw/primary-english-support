@@ -1,6 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { AdminMessage } from "@/types";
+import {
+  getCachedMessages,
+  setCachedMessages,
+  clearCache,
+  updateCachedMessage,
+  removeCachedMessage,
+} from "./json-cache";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const MESSAGES_FILE = path.join(DATA_DIR, "admin-messages.json");
@@ -12,9 +19,15 @@ function ensureDataDir() {
   }
 }
 
-// 讀取站長消息
+// 讀取站長消息 - 使用快取優化
 export function readAdminMessages(): AdminMessage[] {
   try {
+    // 先檢查快取
+    const cachedMessages = getCachedMessages();
+    if (cachedMessages) {
+      return cachedMessages;
+    }
+
     ensureDataDir();
 
     if (!fs.existsSync(MESSAGES_FILE)) {
@@ -27,18 +40,23 @@ export function readAdminMessages(): AdminMessage[] {
     const messages = JSON.parse(data);
 
     // 轉換日期字串為 Date 物件
-    return messages.map((msg: any) => ({
+    const processedMessages = messages.map((msg: any) => ({
       ...msg,
       createdAt: new Date(msg.created_at),
       updatedAt: msg.updated_at ? new Date(msg.updated_at) : undefined,
     }));
+
+    // 設置快取
+    setCachedMessages(processedMessages);
+
+    return processedMessages;
   } catch (error) {
     console.error("讀取站長消息失敗:", error);
     return [];
   }
 }
 
-// 寫入站長消息
+// 寫入站長消息 - 使用快取優化
 export function writeAdminMessages(messages: AdminMessage[]): void {
   try {
     ensureDataDir();
@@ -55,13 +73,16 @@ export function writeAdminMessages(messages: AdminMessage[]): void {
     }));
 
     fs.writeFileSync(MESSAGES_FILE, JSON.stringify(data, null, 2), "utf8");
+
+    // 更新快取
+    setCachedMessages(messages);
   } catch (error) {
     console.error("寫入站長消息失敗:", error);
     throw error;
   }
 }
 
-// 添加站長消息
+// 添加站長消息 - 使用快取優化
 export function addAdminMessage(
   message: Omit<AdminMessage, "id" | "createdAt" | "updatedAt">
 ): AdminMessage {
@@ -76,10 +97,13 @@ export function addAdminMessage(
   messages.push(newMessage);
   writeAdminMessages(messages);
 
+  // 更新快取
+  updateCachedMessage(newMessage);
+
   return newMessage;
 }
 
-// 更新站長消息
+// 更新站長消息 - 使用快取優化
 export function updateAdminMessage(
   id: string,
   updates: Partial<AdminMessage>
@@ -100,10 +124,13 @@ export function updateAdminMessage(
   messages[index] = updatedMessage;
   writeAdminMessages(messages);
 
+  // 更新快取
+  updateCachedMessage(updatedMessage);
+
   return updatedMessage;
 }
 
-// 刪除站長消息
+// 刪除站長消息 - 使用快取優化
 export function deleteAdminMessage(id: string): boolean {
   const messages = readAdminMessages();
   const filteredMessages = messages.filter((msg) => msg.id !== id);
@@ -113,6 +140,10 @@ export function deleteAdminMessage(id: string): boolean {
   }
 
   writeAdminMessages(filteredMessages);
+
+  // 更新快取
+  removeCachedMessage(id);
+
   return true;
 }
 

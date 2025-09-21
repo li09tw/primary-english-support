@@ -4,25 +4,25 @@
  */
 
 export function getCloudflareConfig() {
-  // 統一使用 NEXT_PUBLIC_ 前綴的環境變數（Vercel 要求）
-  const workerUrl = process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
-  const apiSecret = process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET;
+  // 使用後端環境變數
+  const workerUrl = process.env.CLOUDFLARE_WORKER_URL;
+  const apiSecret = process.env.CLOUDFLARE_API_SECRET;
 
   if (!workerUrl || !apiSecret) {
     throw new Error(
       `Missing Cloudflare environment variables. Required:
-      - NEXT_PUBLIC_CLOUDFLARE_WORKER_URL
-      - NEXT_PUBLIC_CLOUDFLARE_API_SECRET
+      - CLOUDFLARE_WORKER_URL
+      - CLOUDFLARE_API_SECRET
       
       Current values:
-      - NEXT_PUBLIC_CLOUDFLARE_WORKER_URL: ${
-        process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ? "SET" : "NOT SET"
+      - CLOUDFLARE_WORKER_URL: ${
+        process.env.CLOUDFLARE_WORKER_URL ? "SET" : "NOT SET"
       }
-      - NEXT_PUBLIC_CLOUDFLARE_API_SECRET: ${
-        process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET ? "SET" : "NOT SET"
+      - CLOUDFLARE_API_SECRET: ${
+        process.env.CLOUDFLARE_API_SECRET ? "SET" : "NOT SET"
       }
       
-      Note: In Vercel, all environment variables should use NEXT_PUBLIC_ prefix
+      Note: These are server-side environment variables
       `
     );
   }
@@ -35,17 +35,8 @@ export function getCloudflareConfig() {
 
 export function getEmailJSConfig() {
   return {
-    serviceId:
-      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ||
-      process.env.EMAILJS_SERVICE_ID ||
-      "",
-    templateId:
-      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ||
-      process.env.EMAILJS_TEMPLATE_ID ||
-      "",
-    publicKey:
-      process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ||
-      process.env.EMAILJS_PUBLIC_KEY ||
-      "",
+    serviceId: process.env.EMAILJS_SERVICE_ID || "",
+    templateId: process.env.EMAILJS_TEMPLATE_ID || "",
+    publicKey: process.env.EMAILJS_PUBLIC_KEY || "",
   };
 }

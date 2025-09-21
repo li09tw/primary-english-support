@@ -43,6 +43,17 @@ Primary English Support 是一個專為國小英語學習設計的數位平台�
 - **Cloudflare D1**: SQLite 資料庫
 - **Cloudflare R2**: 物件存儲
 
+### 資料庫架構
+模擬資料庫系統 (Mock Database)
+├── 遊戲方法 (games API)
+├── 學習內容 (game-data API)
+├── 管理員消息 (admin-messages + json-storage)
+└── 學習內容 API (learning-content API - 從 game-data 導入)
+
+D1 資料庫系統 (僅管理員登入)
+├── 遠端 D1 (admin_accounts, admin_sessions, etc.)
+└── 本地 D1 (開發環境)
+
 ### 安全特性
 - **密碼雜湊**: 使用 bcrypt 進行安全雜湊
 - **會話管理**: 安全的 HTTP-only cookies

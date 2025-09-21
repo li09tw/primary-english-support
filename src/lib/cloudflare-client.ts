@@ -116,20 +116,24 @@ export class CloudflareClient {
 
 // 創建 Cloudflare 客戶端實例
 export function createCloudflareClient(): CloudflareClient {
-  // 使用 NEXT_PUBLIC_ 環境變數
-  const workerUrl = process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
-  const apiSecret = process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET;
+  // 使用後端環境變數
+  const workerUrl = process.env.CLOUDFLARE_WORKER_URL;
+  const apiSecret = process.env.CLOUDFLARE_API_SECRET;
 
   console.log("Cloudflare client environment check:", {
-    NEXT_PUBLIC_CLOUDFLARE_WORKER_URL: process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ? "SET" : "NOT SET",
-    NEXT_PUBLIC_CLOUDFLARE_API_SECRET: process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET ? "SET" : "NOT SET",
+    CLOUDFLARE_WORKER_URL: process.env.CLOUDFLARE_WORKER_URL
+      ? "SET"
+      : "NOT SET",
+    CLOUDFLARE_API_SECRET: process.env.CLOUDFLARE_API_SECRET
+      ? "SET"
+      : "NOT SET",
     workerUrl: workerUrl ? "RESOLVED" : "NOT RESOLVED",
-    apiSecret: apiSecret ? "RESOLVED" : "NOT RESOLVED"
+    apiSecret: apiSecret ? "RESOLVED" : "NOT RESOLVED",
   });
 
   if (!workerUrl || !apiSecret) {
     throw new Error(
-      "Missing Cloudflare environment variables: NEXT_PUBLIC_CLOUDFLARE_WORKER_URL or NEXT_PUBLIC_CLOUDFLARE_API_SECRET"
+      "Missing Cloudflare environment variables: CLOUDFLARE_WORKER_URL or CLOUDFLARE_API_SECRET"
     );
   }
 
@@ -142,6 +146,6 @@ export function createCloudflareClient(): CloudflareClient {
 // 檢查是否在支援 Cloudflare 的環境中
 export function isCloudflareSupported(): boolean {
   return !!(
-    process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL && process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET
+    process.env.CLOUDFLARE_WORKER_URL && process.env.CLOUDFLARE_API_SECRET
   );
 }

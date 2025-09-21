@@ -22,15 +22,12 @@ export default function AdminMessageCard({ message }: AdminMessageCardProps) {
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
           <h3 className="text-xl font-semibold text-black">{message.title}</h3>
-          {message.is_pinned && (
+          {message.is_pinned ? (
             <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
               釘選
             </span>
-          )}
-          {!message.is_published && (
-            <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-              未發布
-            </span>
+          ) : (
+            <span>&nbsp;</span>
           )}
         </div>
       </div>
@@ -39,13 +36,10 @@ export default function AdminMessageCard({ message }: AdminMessageCardProps) {
         <p className="whitespace-pre-wrap">{message.content}</p>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-black">
-        <span>發布時間：{formatDate(message.createdAt)}</span>
-        {message.updatedAt && message.updatedAt !== message.createdAt && (
-          <span className="text-gray-500">
-            更新時間：{formatDate(message.updatedAt)}
-          </span>
-        )}
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-black font-medium">
+          發布時間：{formatDate(message.published_at)}
+        </span>
       </div>
     </div>
   );

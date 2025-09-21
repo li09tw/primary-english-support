@@ -77,7 +77,9 @@ export default function GardenPage() {
           : true,
       is_pinned:
         message.is_pinned !== undefined ? Boolean(message.is_pinned) : false,
-      createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
+      published_at: message.published_at
+        ? new Date(message.published_at)
+        : new Date(),
     };
 
     return validatedMessage;
@@ -98,58 +100,36 @@ export default function GardenPage() {
     content: "",
   });
 
-  // 載入遊戲方法數據
+  // 編輯狀態
+  const [editingMessage, setEditingMessage] = useState<AdminMessage | null>(
+    null
+  );
+  const [editForm, setEditForm] = useState({
+    title: "",
+    content: "",
+  });
+
+  // 載入遊戲方法數據 - 使用 Mock 資料庫
   const loadGames = useCallback(async () => {
     try {
       setLoading(true);
 
-      let fetchedGames: GameMethod[] = [];
+      // 直接從 Mock API 獲取數據
+      const response = await fetch("/api/games");
+      if (response.ok) {
+        const data = await response.json();
+        const fetchedGames = data.data || [];
 
-      // 方法1：嘗試直接從 Cloudflare Worker 獲取數據（如果環境變數設置了）
-      if (process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL) {
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL}/query`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-API-Key":
-                  process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET || "",
-              },
-              body: JSON.stringify({
-                query: "SELECT * FROM game_methods ORDER BY created_at DESC",
-                params: [],
-              }),
-            }
-          );
+        // 驗證和轉換數據
+        const validatedGames = fetchedGames.map(validateGameData);
+        setGames(validatedGames);
 
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.results) {
-              fetchedGames = data.results;
-            }
-          }
-        } catch (directError) {
-          // 直接調用失敗，使用 API 路由
-        }
+        // 同時保存到 localStorage 作為備份
+        saveGameMethods(validatedGames);
+      } else {
+        console.error("Mock API 調用失敗:", response.status);
+        setGames([]);
       }
-
-      // 方法2：如果直接調用失敗，使用 gameAPI
-      if (fetchedGames.length === 0) {
-        try {
-          fetchedGames = await gameAPI.getAllGames();
-        } catch (apiError) {
-          console.error("gameAPI 調用失敗:", apiError);
-        }
-      }
-
-      // 驗證和轉換數據
-      const validatedGames = fetchedGames.map(validateGameData);
-      setGames(validatedGames);
-
-      // 同時保存到 localStorage 作為備份
-      saveGameMethods(validatedGames);
     } catch (error) {
       console.error("載入遊戲方法失敗:", error);
 
@@ -172,21 +152,42 @@ export default function GardenPage() {
     }
   }, []);
 
-  // 載入管理員消息數據
+  // 載入管理員消息數據 - 從 JSON API 載入
   const loadMessages = useCallback(async () => {
     try {
-      // 使用 Cloudflare Worker API 獲取管理員消息
-      const fetchedMessages = await adminMessageAPI.getAllMessages();
+      setLoading(true);
 
-      // 驗證數據
-      const validatedMessages = fetchedMessages.map(validateMessageData);
-      setMessages(validatedMessages);
+      // 從 JSON API 載入管理員消息
+      const response = await fetch("/api/admin");
+      if (response.ok) {
+        const data = await response.json();
+        const fetchedMessages = data.data || [];
 
-      // 同時保存到 localStorage 作為備份
-      saveAdminMessages(validatedMessages);
+        // 驗證和轉換數據
+        const validatedMessages = fetchedMessages.map(validateMessageData);
+        setMessages(validatedMessages);
+
+        // 同時保存到 localStorage 作為備份
+        saveAdminMessages(validatedMessages);
+      } else {
+        console.error("JSON API 調用失敗:", response.status);
+        // 如果 API 失敗，嘗試從 localStorage 載入備份數據
+        const savedMessages = localStorage.getItem("adminMessages");
+        if (savedMessages) {
+          try {
+            const parsedMessages = JSON.parse(savedMessages);
+            const validatedMessages = parsedMessages.map(validateMessageData);
+            setMessages(validatedMessages);
+          } catch (localError) {
+            console.error("localStorage 數據解析失敗:", localError);
+            setMessages([]);
+          }
+        } else {
+          setMessages([]);
+        }
+      }
     } catch (error) {
       console.error("❌ 載入管理員消息失敗:", error);
-
       // 如果 API 失敗，嘗試從 localStorage 載入備份數據
       const savedMessages = localStorage.getItem("adminMessages");
       if (savedMessages) {
@@ -195,12 +196,14 @@ export default function GardenPage() {
           const validatedMessages = parsedMessages.map(validateMessageData);
           setMessages(validatedMessages);
         } catch (localError) {
-          console.error("❌ localStorage 數據解析失敗:", localError);
+          console.error("localStorage 數據解析失敗:", localError);
           setMessages([]);
         }
       } else {
         setMessages([]);
       }
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -210,7 +213,7 @@ export default function GardenPage() {
     loadMessages();
   }, [loadGames, loadMessages]);
 
-  // 遊戲方法相關函數
+  // 遊戲方法相關函數 - 使用 Mock API
   const addGame = async () => {
     if (!gameForm.title.trim() || !gameForm.description.trim()) {
       alert("請填寫標題和描述");
@@ -218,33 +221,41 @@ export default function GardenPage() {
     }
 
     try {
-      const newGame: GameMethod = {
-        id: generateId(),
+      const newGameData = {
         title: gameForm.title.trim(),
         description: gameForm.description.trim(),
-        category: gameForm.categories.filter(Boolean)[0] || "",
         categories: gameForm.categories.filter(Boolean),
-        grades: gameForm.grades.filter(Boolean),
+        grade1: gameForm.grades.includes("grade1"),
+        grade2: gameForm.grades.includes("grade2"),
+        grade3: gameForm.grades.includes("grade3"),
+        grade4: gameForm.grades.includes("grade4"),
+        grade5: gameForm.grades.includes("grade5"),
+        grade6: gameForm.grades.includes("grade6"),
         materials: gameForm.materials.filter(Boolean),
         instructions: gameForm.instructions.filter(Boolean),
-        steps: gameForm.instructions.filter(Boolean).join("\n"),
-        tips: "",
-        is_published: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
-      // 調用 API 保存到遠端資料庫
-      const success = await gameAPI.createGame(newGame);
+      // 調用 Mock API 創建遊戲
+      const response = await fetch("/api/games", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newGameData),
+      });
 
-      if (success) {
-        // 成功推送到遠端後，重新載入遊戲列表以確保數據一致性
-        const updatedGames = await gameAPI.getAllGames();
-        const validatedGames = updatedGames.map(validateGameData);
-        setGames(validatedGames);
-        alert("遊戲方法新增成功！已推送到遠端資料庫");
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // 重新載入遊戲列表
+          await loadGames();
+          alert("遊戲方法新增成功！");
+        } else {
+          alert("新增失敗：" + result.error);
+          return;
+        }
       } else {
-        alert("新增失敗，無法推送到遠端資料庫");
+        alert("新增失敗，請重試");
         return;
       }
 
@@ -257,8 +268,6 @@ export default function GardenPage() {
         materials: [""],
         instructions: [""],
       });
-
-      alert("遊戲方法新增成功！");
     } catch (error) {
       console.error("新增遊戲方法失敗:", error);
       alert("新增失敗，請重試");
@@ -268,17 +277,23 @@ export default function GardenPage() {
   const deleteGame = async (id: string) => {
     if (confirm("確定要刪除這個遊戲方法嗎？")) {
       try {
-        // 調用 API 從遠端資料庫刪除
-        const success = await gameAPI.deleteGame(id);
+        // 調用 Mock API 刪除遊戲
+        const response = await fetch(`/api/games?id=${id}`, {
+          method: "DELETE",
+        });
 
-        if (success) {
-          // 成功從遠端刪除後，重新載入遊戲列表以確保數據一致性
-          const updatedGames = await gameAPI.getAllGames();
-          const validatedGames = updatedGames.map(validateGameData);
-          setGames(validatedGames);
-          alert("刪除成功！已從遠端資料庫移除");
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            // 重新載入遊戲列表
+            await loadGames();
+            alert("刪除成功！");
+          } else {
+            alert("刪除失敗：" + result.error);
+            return;
+          }
         } else {
-          alert("刪除失敗，無法從遠端資料庫移除");
+          alert("刪除失敗，請重試");
           return;
         }
       } catch (error) {
@@ -296,27 +311,32 @@ export default function GardenPage() {
     }
 
     try {
-      const newMessage: Omit<AdminMessage, "id"> = {
-        title: messageForm.title.trim(),
-        content: messageForm.content.trim(),
-        is_published: true,
-        is_pinned: false,
-        createdAt: new Date(),
-      };
+      // 調用 JSON API 創建消息
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: messageForm.title.trim(),
+          content: messageForm.content.trim(),
+          is_published: true,
+          is_pinned: false,
+        }),
+      });
 
-      // 調用 API 保存到遠端資料庫
-      const success = await adminMessageAPI.createMessage(newMessage);
-
-      if (success) {
-        // 成功推送到遠端後，重新載入消息列表
-        // 注意：由於 ID 是自動生成的，我們需要從資料庫重新獲取
-        const updatedMessages = await adminMessageAPI.getAllMessages();
-        // 驗證數據，確保 createdAt 是 Date 對象
-        const validatedMessages = updatedMessages.map(validateMessageData);
-        setMessages(validatedMessages);
-        alert("管理員消息新增成功！已推送到遠端資料庫");
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // 重新載入消息列表
+          await loadMessages();
+          alert("管理員消息新增成功！");
+        } else {
+          alert("新增失敗：" + result.error);
+          return;
+        }
       } else {
-        alert("新增失敗，無法推送到遠端資料庫。請重試。");
+        alert("新增失敗，請重試");
         return;
       }
 
@@ -325,8 +345,6 @@ export default function GardenPage() {
         title: "",
         content: "",
       });
-
-      alert("管理員消息新增成功！");
     } catch (error) {
       console.error("新增管理員消息失敗:", error);
       alert("新增失敗，請重試");
@@ -336,17 +354,23 @@ export default function GardenPage() {
   const deleteMessage = async (id: string) => {
     if (confirm("確定要刪除這個管理員消息嗎？")) {
       try {
-        // 調用 API 從遠端資料庫刪除
-        const success = await adminMessageAPI.deleteMessage(id);
+        // 調用 JSON API 刪除消息
+        const response = await fetch(`/api/admin?id=${id}`, {
+          method: "DELETE",
+        });
 
-        if (success) {
-          // 成功從遠端刪除後，重新載入消息列表以確保數據一致性
-          const updatedMessages = await adminMessageAPI.getAllMessages();
-          const validatedMessages = updatedMessages.map(validateMessageData);
-          setMessages(validatedMessages);
-          alert("刪除成功！已從遠端資料庫移除");
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            // 重新載入消息列表
+            await loadMessages();
+            alert("刪除成功！");
+          } else {
+            alert("刪除失敗：" + result.error);
+            return;
+          }
         } else {
-          alert("刪除失敗，無法從遠端資料庫移除");
+          alert("刪除失敗，請重試");
           return;
         }
       } catch (error) {
@@ -356,23 +380,100 @@ export default function GardenPage() {
     }
   };
 
-  // 切換消息釘選狀態
+  // 切換消息釘選狀態 - 使用 JSON API
   const toggleMessagePin = async (id: string) => {
     try {
-      const success = await adminMessageAPI.toggleMessagePinStatus(id);
+      // 調用 JSON API 切換釘選狀態
+      const response = await fetch("/api/admin", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          type: "pin",
+        }),
+      });
 
-      if (success) {
-        // 成功切換後，重新載入消息列表
-        const updatedMessages = await adminMessageAPI.getAllMessages();
-        const validatedMessages = updatedMessages.map(validateMessageData);
-        setMessages(validatedMessages);
-        alert("釘選狀態已更新！");
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // 重新載入消息列表
+          await loadMessages();
+          alert("釘選狀態已更新！");
+        } else {
+          alert("操作失敗：" + result.error);
+          return;
+        }
       } else {
-        alert("更新釘選狀態失敗，請重試");
+        alert("操作失敗，請重試");
+        return;
       }
     } catch (error) {
       console.error("切換釘選狀態失敗:", error);
       alert("操作失敗，請重試");
+    }
+  };
+
+  // 開始編輯消息
+  const startEditMessage = (message: AdminMessage) => {
+    setEditingMessage(message);
+    setEditForm({
+      title: message.title,
+      content: message.content,
+    });
+  };
+
+  // 取消編輯
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setEditForm({
+      title: "",
+      content: "",
+    });
+  };
+
+  // 保存編輯
+  const saveEdit = async () => {
+    if (!editingMessage || !editForm.title.trim() || !editForm.content.trim()) {
+      alert("請填寫標題和內容");
+      return;
+    }
+
+    try {
+      // 調用 JSON API 更新消息
+      const response = await fetch("/api/admin", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: editingMessage.id,
+          title: editForm.title.trim(),
+          content: editForm.content.trim(),
+          is_published: editingMessage.is_published,
+          is_pinned: editingMessage.is_pinned,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // 重新載入消息列表
+          await loadMessages();
+          alert("消息更新成功！");
+          cancelEdit();
+        } else {
+          alert("更新失敗：" + result.error);
+          return;
+        }
+      } else {
+        alert("更新失敗，請重試");
+        return;
+      }
+    } catch (error) {
+      console.error("更新消息失敗:", error);
+      alert("更新失敗，請重試");
     }
   };
 
@@ -458,26 +559,6 @@ export default function GardenPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-black mb-4">管理介面</h1>
           <p className="text-xl text-black">管理遊戲方法和站長消息</p>
-        </div>
-
-        {/* 統計資訊 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-black mb-2">遊戲方法</h3>
-            <p className="text-3xl font-bold text-secondary-pink">
-              {games.length}
-            </p>
-            <p className="text-sm text-gray-500">總數量</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-black mb-2">
-              管理員消息
-            </h3>
-            <p className="text-3xl font-bold text-secondary-pink">
-              {messages.length}
-            </p>
-            <p className="text-sm text-gray-500">總數量</p>
-          </div>
         </div>
 
         {/* 導航標籤 */}
@@ -811,13 +892,78 @@ export default function GardenPage() {
             {activeTab === "messages" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-xl font-semibold text-black mb-4">
-                  管理員消息列表
+                  管理員消息列表 ({messages.length})
                 </h3>
                 <div className="space-y-4">
                   {messages.length === 0 ? (
                     <p className="text-gray-500">暫無管理員消息</p>
                   ) : (
                     messages.map((message) => {
+                      // 如果是正在編輯的消息，顯示編輯表單
+                      if (editingMessage && editingMessage.id === message.id) {
+                        return (
+                          <div
+                            key={message.id}
+                            className="border-2 border-blue-400 bg-blue-50 rounded-lg p-4 space-y-4"
+                          >
+                            <h4 className="text-lg font-semibold text-black">
+                              編輯消息
+                            </h4>
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-black mb-1">
+                                  標題 *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editForm.title}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      title: e.target.value,
+                                    })
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="消息標題"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-black mb-1">
+                                  內容 *
+                                </label>
+                                <textarea
+                                  value={editForm.content}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      content: e.target.value,
+                                    })
+                                  }
+                                  rows={4}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+                                  placeholder="消息內容"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={saveEdit}
+                                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                                >
+                                  保存
+                                </button>
+                                <button
+                                  onClick={cancelEdit}
+                                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm"
+                                >
+                                  取消
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // 正常顯示消息
                       return (
                         <div
                           key={message.id}
@@ -840,6 +986,12 @@ export default function GardenPage() {
                             </div>
                             <div className="flex gap-2">
                               <button
+                                onClick={() => startEditMessage(message)}
+                                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                              >
+                                修改
+                              </button>
+                              <button
                                 onClick={() => toggleMessagePin(message.id)}
                                 className={`px-3 py-1 rounded-md text-sm transition-colors ${
                                   message.is_pinned
@@ -859,7 +1011,8 @@ export default function GardenPage() {
                           </div>
                           <p className="text-gray-600">{message.content}</p>
                           <div className="text-sm text-gray-500">
-                            創建時間: {message.createdAt.toLocaleDateString()}
+                            發布時間:{" "}
+                            {message.published_at.toLocaleDateString()}
                           </div>
                         </div>
                       );

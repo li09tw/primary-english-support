@@ -19,6 +19,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@emailjs/browser": "^4.4.1",
+    "@emailjs/nodejs": "^5.0.2",
     "bcryptjs": "^3.0.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.2",

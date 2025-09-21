@@ -30,13 +30,9 @@ export class SessionManagerLite {
     error?: string;
   }> {
     try {
-      // 使用 NEXT_PUBLIC_ 前綴的環境變數（Vercel 要求）
-      const workerUrl =
-        process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ||
-        process.env.CLOUDFLARE_WORKER_URL;
-      const apiSecret =
-        process.env.NEXT_PUBLIC_CLOUDFLARE_API_SECRET ||
-        process.env.CLOUDFLARE_API_SECRET;
+      // 使用後端環境變數
+      const workerUrl = process.env.CLOUDFLARE_WORKER_URL;
+      const apiSecret = process.env.CLOUDFLARE_API_SECRET;
 
       if (!workerUrl || !apiSecret) {
         console.error("Missing Cloudflare environment variables in middleware");

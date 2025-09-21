@@ -27,10 +27,7 @@ function getClient() {
       // 根據環境選擇客戶端
       if (typeof window !== "undefined") {
         // 在瀏覽器中，檢查是否有本地開發環境變數
-        if (
-          process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL ===
-          "http://localhost:8787"
-        ) {
+        if (process.env.CLOUDFLARE_WORKER_URL === "http://localhost:8787") {
           // 本地開發環境，使用本地客戶端
           client = createLocalCloudflareClient();
         } else {
@@ -346,7 +343,7 @@ export const adminMessageAPI = {
   // 獲取所有站長消息
   async getAllMessages(): Promise<AdminMessage[]> {
     try {
-      const response = await fetch("/api/admin");
+      const response = await fetch("/api/admin/");
       const data = await response.json();
       return data.success ? data.data : [];
     } catch (error) {
@@ -358,7 +355,7 @@ export const adminMessageAPI = {
   // 獲取已發布的站長消息
   async getPublishedMessages(): Promise<AdminMessage[]> {
     try {
-      const response = await fetch("/api/admin");
+      const response = await fetch("/api/admin/");
       const data = await response.json();
       if (data.success && data.data) {
         return data.data.filter((msg: AdminMessage) => msg.is_published);
@@ -373,7 +370,7 @@ export const adminMessageAPI = {
   // 新增站長消息
   async createMessage(messageData: Partial<AdminMessage>): Promise<boolean> {
     try {
-      const response = await fetch("/api/admin", {
+      const response = await fetch("/api/admin/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(messageData),
@@ -392,7 +389,7 @@ export const adminMessageAPI = {
     messageData: Partial<AdminMessage>
   ): Promise<boolean> {
     try {
-      const response = await fetch("/api/admin", {
+      const response = await fetch("/api/admin/", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, ...messageData }),
@@ -422,7 +419,7 @@ export const adminMessageAPI = {
   // 切換站長消息的發布狀態
   async toggleMessagePublishStatus(id: string): Promise<boolean> {
     try {
-      const response = await fetch("/api/admin", {
+      const response = await fetch("/api/admin/", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, type: "publish" }),
@@ -438,7 +435,7 @@ export const adminMessageAPI = {
   // 切換站長消息的釘選狀態
   async toggleMessagePinStatus(id: string): Promise<boolean> {
     try {
-      const response = await fetch("/api/admin", {
+      const response = await fetch("/api/admin/", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, type: "pin" }),

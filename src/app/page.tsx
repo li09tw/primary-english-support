@@ -2,11 +2,31 @@
 
 import Link from "next/link";
 import AdminMessageCard from "@/components/AdminMessageCard";
-import { getPublishedMessages } from "@/data/admin-messages";
+import { useState, useEffect } from "react";
+import { AdminMessage } from "@/types";
 
 export default function Home() {
-  // 直接從常數檔案獲取已發布的消息，無需 API 調用
-  const messages = getPublishedMessages();
+  const [messages, setMessages] = useState<AdminMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 從 JSON API 獲取已發布的消息
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch("/api/admin-messages?published=true");
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(data.data || []);
+        }
+      } catch (error) {
+        console.error("載入消息失敗:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, []);
 
   // 結構化資料
   const structuredData = {
@@ -102,7 +122,12 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-black mb-4">站長消息</h2>
           </div>
 
-          {messages.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-pink mx-auto mb-4"></div>
+              <p className="text-black">載入消息中...</p>
+            </div>
+          ) : messages.length > 0 ? (
             <div className="space-y-6">
               {messages.slice(0, 6).map((message) => (
                 <AdminMessageCard key={message.id} message={message} />

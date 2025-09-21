@@ -186,3 +186,27 @@
 - 所有腳本必須包含適當的錯誤處理和驗證機制。
 - 敏感腳本的臨時檔案（如 `temp_*_credentials.txt`、`*_insert.sql`）必須自動清理。
 - 腳本執行前必須檢查必要的環境變數和工具是否已安裝。
+
+## 20. Documentation Organization Rule
+- **當用戶說「doc整理」時，必須整理 `doc/` 資料夾中的 `.md` 檔案**
+- **目標：將 `doc/` 資料夾中的 `.md` 檔案數量控制在最多 10 個**
+- 整理策略：
+  - 優先合併相關主題的檔案（如資料庫相關、實作相關、整合相關）
+  - 移除重複或過時的檔案
+  - 保留核心重要檔案（README.md、INDEX.md、TechnicalGuide.md 等）
+  - 確保檔案命名符合 Snake_Case 規則
+- 整理前必須先分析現有檔案，提供整理方案供用戶選擇
+- 整理過程中保持檔案內容的完整性和可讀性
+- 整理完成後更新 `doc/INDEX.md` 以反映新的檔案結構
+
+## 21. Conditional Rendering Layout Consistency Rule
+- **條件渲染必須保持佈局一致性，避免元素位置跳動**
+- **當使用條件渲染時，必須確保無論條件為 true 或 false 都有內容渲染**
+- **正確做法**：使用三元運算子 `condition ? <ElementA /> : <ElementB />` 替代 `condition && <ElementA />`
+- **錯誤做法**：`{condition && <ElementA />}` 會導致 false 時不渲染任何內容
+- **替代方案**：
+  - 使用 `{condition ? <ElementA /> : <span>&nbsp;</span>}` 保持空格佔位
+  - 使用 `{condition ? <ElementA /> : <div></div>}` 保持容器佔位
+  - 使用 `{condition ? <ElementA /> : <span className="invisible">placeholder</span>}` 保持隱形佔位
+- **適用場景**：標籤、按鈕、圖標等可能影響佈局的 UI 元素
+- **目標**：確保用戶體驗一致，避免佈局因條件變化而跳動
