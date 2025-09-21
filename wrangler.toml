@@ -44,7 +44,7 @@ API_SECRET = "your-production-api-secret"
 
 [env.production.vars]
 ENVIRONMENT = "production"
-API_SECRET = "your-production-api-secret"
+API_SECRET = "prod-secret-2024-09-21"
 
 # 生產環境 D1 資料庫綁定
 [[env.production.d1_databases]]
