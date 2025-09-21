@@ -42,8 +42,7 @@ export function readAdminMessages(): AdminMessage[] {
     // 轉換日期字串為 Date 物件
     const processedMessages = messages.map((msg: any) => ({
       ...msg,
-      createdAt: new Date(msg.created_at),
-      updatedAt: msg.updated_at ? new Date(msg.updated_at) : undefined,
+      published_at: new Date(msg.published_at),
     }));
 
     // 設置快取
@@ -68,8 +67,7 @@ export function writeAdminMessages(messages: AdminMessage[]): void {
       content: msg.content,
       is_published: msg.is_published,
       is_pinned: msg.is_pinned,
-      created_at: msg.createdAt.toISOString(),
-      updated_at: msg.updatedAt?.toISOString() || msg.createdAt.toISOString(),
+      published_at: msg.published_at.toISOString(),
     }));
 
     fs.writeFileSync(MESSAGES_FILE, JSON.stringify(data, null, 2), "utf8");
@@ -84,14 +82,13 @@ export function writeAdminMessages(messages: AdminMessage[]): void {
 
 // 添加站長消息 - 使用快取優化
 export function addAdminMessage(
-  message: Omit<AdminMessage, "id" | "createdAt" | "updatedAt">
+  message: Omit<AdminMessage, "id" | "published_at">
 ): AdminMessage {
   const messages = readAdminMessages();
   const newMessage: AdminMessage = {
     ...message,
     id: Date.now().toString(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    published_at: new Date(),
   };
 
   messages.push(newMessage);
@@ -118,7 +115,7 @@ export function updateAdminMessage(
   const updatedMessage: AdminMessage = {
     ...messages[index],
     ...updates,
-    updatedAt: new Date(),
+    published_at: updates.published_at || messages[index].published_at,
   };
 
   messages[index] = updatedMessage;

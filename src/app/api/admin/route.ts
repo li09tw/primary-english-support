@@ -106,8 +106,7 @@ export async function POST(request: NextRequest) {
         content,
         is_published,
         is_pinned,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        published_at: new Date(),
       };
     }
 
