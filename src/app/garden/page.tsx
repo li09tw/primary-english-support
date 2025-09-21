@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { gameAPI, adminMessageAPI } from "@/lib/game-api";
 import AuthGuard from "@/components/AuthGuard";
 
-export default function GardenPage() {
+function GardenPageContent() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"games" | "messages">("games");
   const [games, setGames] = useState<GameMethod[]>([]);
@@ -1025,5 +1025,13 @@ export default function GardenPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GardenPage() {
+  return (
+    <AuthGuard>
+      <GardenPageContent />
+    </AuthGuard>
   );
 }

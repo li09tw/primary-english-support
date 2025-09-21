@@ -18,7 +18,7 @@ export const AUTH_CONFIG = {
   VERIFICATION_CODE_EXPIRY_MINUTES: 30,
 
   // 會話設定
-  SESSION_EXPIRY_HOURS: 24,
+  SESSION_EXPIRY_HOURS: 0.5, // 30分鐘 (0.5小時)
 
   // 速率限制設定
   RATE_LIMIT: {

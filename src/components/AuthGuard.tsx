@@ -36,12 +36,28 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
   );
 
-  // 檢查是否已經驗證過
+  // 檢查會話狀態
   useEffect(() => {
-    const isVerified = sessionStorage.getItem("garden_verified");
-    if (isVerified === "true") {
-      setVerificationState((prev) => ({ ...prev, step: "verified" }));
-    }
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/auth/session", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            setVerificationState((prev) => ({ ...prev, step: "verified" }));
+          }
+        }
+      } catch (error) {
+        // 會話無效，繼續顯示驗證頁面
+        console.log("會話檢查失敗，需要重新驗證");
+      }
+    };
+
+    checkSession();
   }, []);
 
   // 發送驗證碼
@@ -54,11 +70,12 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     setVerificationState((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
-      const response = await fetch("/api/auth", {
+      const response = await fetch("/api/auth/verification", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           username: verificationState.username.trim(),
         }),
@@ -100,13 +117,13 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     setVerificationState((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
-      const response = await fetch("/api/auth", {
+      const response = await fetch("/api/auth/verification", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          username: verificationState.username.trim(),
           code: verificationState.code.trim(),
         }),
       });
@@ -114,8 +131,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       const data = await response.json();
 
       if (data.success) {
-        // 驗證成功，儲存到 sessionStorage
-        sessionStorage.setItem("garden_verified", "true");
+        // 驗證成功，會話已由服務端設定
         setVerificationState((prev) => ({
           ...prev,
           step: "verified",
