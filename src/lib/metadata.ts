@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 
 // 基礎配置
 const BASE_URL = "https://zsprimaryenglishsupport.com";
-const SITE_NAME = "Z的國小英語支援(ZPES)";
+const SITE_NAME = "白板英語遊戲室";
 
 // 通用 metadata 配置
 export const metadata: Metadata = {
-  title: "Z的國小英語支援 - 遊戲庫",
+  title: "白板英語遊戲室 - 遊戲庫",
   description:
     "提供豐富的英語學習遊戲，適合全教材，讓國小英語課堂更加生動有趣，提升教學效果。",
   keywords: [
@@ -20,9 +20,9 @@ export const metadata: Metadata = {
     "遊戲庫",
     "全教材",
   ],
-  authors: [{ name: "Z的國小英語支援" }],
-  creator: "Z的國小英語支援",
-  publisher: "Z的國小英語支援",
+  authors: [{ name: "白板英語遊戲室" }],
+  creator: "白板英語遊戲室",
+  publisher: "白板英語遊戲室",
   formatDetection: {
     email: false,
     address: false,
@@ -33,17 +33,17 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Z的國小英語支援 - 遊戲庫",
+    title: "白板英語遊戲室 - 遊戲庫",
     description:
       "提供豐富的英語學習遊戲，適合全教材，讓國小英語課堂更加生動有趣，提升教學效果。",
     url: "https://primary-english-support.vercel.app",
-    siteName: "Z的國小英語支援",
+    siteName: "白板英語遊戲室",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Z的國小英語支援",
+        alt: "白板英語遊戲室",
       },
     ],
     locale: "zh_TW",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z的國小英語支援 - 遊戲庫",
+    title: "白板英語遊戲室 - 遊戲庫",
     description:
       "提供豐富的英語學習遊戲，適合全教材，讓國小英語課堂更加生動有趣，提升教學效果。",
     images: ["/og-image.jpg"],
@@ -75,12 +75,12 @@ export const metadata: Metadata = {
 // 各頁面的 metadata 配置
 export const pageMetadata = {
   home: {
-    title: "Z的國小英語支援 (ZPES)",
+    title: "白板英語遊戲室",
     description:
       "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
     keywords: ["英語教學", "英語遊戲", "小學英語", "數位教學", "英語學習"],
     openGraph: {
-      title: "Z的國小英語支援 (ZPES)",
+      title: "白板英語遊戲室",
       description:
         "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
       url: "/",
@@ -104,13 +104,38 @@ export const pageMetadata = {
       "全教材",
     ],
     openGraph: {
-      title: "遊戲庫 - Z的國小英語支援",
+      title: "遊戲庫 - 白板英語遊戲室",
       description:
         "探索豐富的英語學習遊戲方法，適合全教材，涵蓋單字學習、句型練習、口語訓練，讓英語課堂更加生動有趣。",
       url: "/games",
     },
     alternates: {
       canonical: "/games",
+    },
+  },
+
+  "public-games": {
+    title: "Wordwall/Kahoot",
+    description:
+      "精選的 Wordwall 和 Kahoot 學習資源，提供豐富的互動式英語學習體驗，讓學習更加有趣有效。",
+    keywords: [
+      "Wordwall",
+      "Kahoot",
+      "英語學習資源",
+      "互動學習",
+      "線上英語遊戲",
+      "英語測驗",
+      "學習平台",
+      "英語遊戲",
+    ],
+    openGraph: {
+      title: "Wordwall/Kahoot - 白板英語遊戲室",
+      description:
+        "精選的 Wordwall 和 Kahoot 學習資源，提供豐富的互動式英語學習體驗，讓學習更加有趣有效。",
+      url: "/public-games",
+    },
+    alternates: {
+      canonical: "/public-games",
     },
   },
 
@@ -212,7 +237,7 @@ export function generateMetadata(pageKey: keyof typeof pageMetadata): Metadata {
           url: "/og-image.jpg", // 請添加你的 OG 圖片
           width: 1200,
           height: 630,
-          alt: `${pageMeta.title} - Z的國小英語支援(ZPES) 英語數位化教具`,
+          alt: `${pageMeta.title} - 白板英語遊戲室`,
         },
       ],
     },

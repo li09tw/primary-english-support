@@ -5,31 +5,13 @@ export async function GET() {
     // 檢查環境變數
     const envVars = {
       NODE_ENV: process.env.NODE_ENV,
-      CLOUDFLARE_WORKER_URL: process.env.CLOUDFLARE_WORKER_URL
-        ? "已設定"
-        : "未設定",
-      CLOUDFLARE_API_SECRET: process.env.CLOUDFLARE_API_SECRET
-        ? "已設定"
-        : "未設定",
-      WORKER_URL_LENGTH: process.env.CLOUDFLARE_WORKER_URL?.length || 0,
-      API_SECRET_LENGTH: process.env.CLOUDFLARE_API_SECRET?.length || 0,
+      // 移除 Cloudflare 相關環境變數檢查
     };
-
-    // 檢查 Cloudflare 客戶端是否可用
-    let cloudflareStatus = "unknown";
-    try {
-      const { isCloudflareSupported } = await import("@/lib/cloudflare-client");
-      cloudflareStatus = isCloudflareSupported()
-        ? "available"
-        : "not_available";
-    } catch (error) {
-      cloudflareStatus = "error";
-    }
 
     return NextResponse.json({
       success: true,
       environment: envVars,
-      cloudflareStatus,
+      message: "D1 和 Cloudflare 功能已移除，現在是純靜態網站",
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

@@ -1,451 +1,224 @@
 /**
- * @fileoverview 遊戲 API 模組 - 處理遊戲方法的 CRUD 操作
- * @modified 2024-01-XX XX:XX - 已完成並鎖定保護
+ * @fileoverview 遊戲 API 模組 - 簡化版本，移除 D1 依賴
+ * @modified 2024-01-XX XX:XX - 移除 D1 和認證系統
  * @modified_by Assistant
- * @modification_type feature
- * @status locked
- * @last_commit 2024-01-XX XX:XX
- * @feature 遊戲方法 API 功能已完成
- * @protection 此檔案已完成開發，禁止修改。管理員介面可透過 /garden 路徑新增遊戲方法
+ * @modification_type refactor
+ * @status completed
+ * @feature 簡化為純靜態網站 API
  */
 
-// 統一的遊戲 API
-// 根據環境自動選擇正確的 Cloudflare 客戶端
-
-import { createCloudflareClient } from "./cloudflare-client";
-import { createLocalCloudflareClient } from "./cloudflare-client-local";
-import { createCloudflareClientBrowser } from "./cloudflare-client-browser";
 import type { GameMethod, AdminMessage } from "@/types";
-import { transformGameMethodsFromDB } from "./data-transform";
 
-// 延遲創建客戶端，避免在模組載入時就檢查環境變數
-let client: any = null;
+// 模擬遊戲方法資料
+const mockGameMethods: GameMethod[] = [
+  {
+    id: "1",
+    title: "單字記憶遊戲",
+    description: "透過配對遊戲學習單字",
+    category: "單字學習",
+    categories: ["單字學習"],
+    grades: ["1年級", "2年級", "3年級"],
+    grade1: true,
+    grade2: true,
+    grade3: true,
+    grade4: false,
+    grade5: false,
+    grade6: false,
+    materials: ["單字卡片"],
+    instructions: ["準備單字卡片", "讓學生配對", "檢查答案"],
+    steps: "1. 準備單字卡片\n2. 讓學生配對\n3. 檢查答案",
+    tips: "可以增加時間限制增加挑戰性",
+    is_published: true,
+    createdAt: new Date("2024-01-01T00:00:00Z"),
+    updatedAt: new Date("2024-01-01T00:00:00Z"),
+  },
+  {
+    id: "2",
+    title: "句型練習",
+    description: "透過角色扮演練習句型",
+    category: "句型練習",
+    categories: ["句型練習"],
+    grades: ["2年級", "3年級", "4年級"],
+    grade1: false,
+    grade2: true,
+    grade3: true,
+    grade4: true,
+    grade5: false,
+    grade6: false,
+    materials: ["情境卡片"],
+    instructions: ["設定情境", "分配角色", "練習對話"],
+    steps: "1. 設定情境\n2. 分配角色\n3. 練習對話",
+    tips: "鼓勵學生發揮創意",
+    is_published: true,
+    createdAt: new Date("2024-01-01T00:00:00Z"),
+    updatedAt: new Date("2024-01-01T00:00:00Z"),
+  },
+];
 
-function getClient() {
-  if (!client) {
-    try {
-      // 根據環境選擇客戶端
-      if (typeof window !== "undefined") {
-        // 在瀏覽器中，檢查是否有本地開發環境變數
-        if (process.env.CLOUDFLARE_WORKER_URL === "http://localhost:8787") {
-          // 本地開發環境，使用本地客戶端
-          client = createLocalCloudflareClient();
-        } else {
-          // 生產環境，使用瀏覽器端客戶端
-          client = createCloudflareClientBrowser();
-        }
-      } else if (process.env.NODE_ENV === "development") {
-        // 在伺服器端開發環境中，使用本地客戶端
-        client = createLocalCloudflareClient();
-      } else {
-        // 在伺服器端生產環境中，使用直接客戶端
-        client = createCloudflareClient();
-      }
-    } catch (error) {
-      console.warn("Failed to create Cloudflare client:", error);
-      // 返回一個模擬客戶端，避免錯誤
-      client = {
-        query: async () => ({ success: false, results: [] }),
-        execute: async () => ({ success: false }),
-      };
-    }
-  }
-  return client;
-}
+// 模擬管理員消息資料
+const mockAdminMessages: AdminMessage[] = [
+  {
+    id: "1",
+    title: "歡迎使用 Primary English Support",
+    content: "歡迎來到我們的英語學習平台！",
+    is_published: true,
+    is_pinned: false,
+    published_at: new Date("2024-01-01T00:00:00Z"),
+  },
+];
 
 // 遊戲方法相關 API
 export const gameAPI = {
   // 獲取所有遊戲方法
   async getAllGames(): Promise<GameMethod[]> {
-    try {
-      const result = await getClient().query(
-        "SELECT * FROM game_methods ORDER BY created_at DESC"
-      );
-
-      // 檢查回應格式
-      if (!result.success) {
-        console.error("Worker 回應失敗:", result.error);
-        return [];
-      }
-
-      if (!result.results || !Array.isArray(result.results)) {
-        console.error("Worker 回應格式錯誤:", result);
-        return [];
-      }
-
-      const transformedGames = transformGameMethodsFromDB(result.results);
-
-      return transformedGames;
-    } catch (error) {
-      console.error("Failed to fetch games:", error);
-      return [];
-    }
+    return mockGameMethods;
   },
 
   // 獲取所有已發布的遊戲方法
   async getPublishedGames(): Promise<GameMethod[]> {
-    try {
-      const result = await getClient().query(
-        "SELECT * FROM game_methods WHERE is_published = 1 ORDER BY created_at DESC"
-      );
-      return transformGameMethodsFromDB(result.results || []);
-    } catch (error) {
-      console.error("Failed to fetch published games:", error);
-      return [];
-    }
+    return mockGameMethods.filter((game) => game.is_published);
   },
 
   // 根據年級獲取遊戲方法
   async getGamesByGrade(grade: string): Promise<GameMethod[]> {
-    try {
-      const gradeColumn = `grade${grade.replace("grade", "")}`;
-      const result = await getClient().query(
-        `SELECT * FROM game_methods WHERE ${gradeColumn} = 1 ORDER BY created_at DESC`
-      );
-      return transformGameMethodsFromDB(result.results || []);
-    } catch (error) {
-      console.error(`Failed to fetch games for grade ${grade}:`, error);
-      return [];
-    }
+    const gradeNum = parseInt(grade.replace("grade", ""));
+    return mockGameMethods.filter((game) => {
+      switch (gradeNum) {
+        case 1:
+          return game.grade1;
+        case 2:
+          return game.grade2;
+        case 3:
+          return game.grade3;
+        case 4:
+          return game.grade4;
+        case 5:
+          return game.grade5;
+        case 6:
+          return game.grade6;
+        default:
+          return false;
+      }
+    });
   },
 
   // 搜尋遊戲方法
   async searchGames(query: string): Promise<GameMethod[]> {
-    try {
-      const searchTerm = `%${query}%`;
-      const result = await getClient().query(
-        "SELECT * FROM game_methods WHERE title LIKE ? OR description LIKE ? ORDER BY created_at DESC",
-        [searchTerm, searchTerm]
-      );
-      return transformGameMethodsFromDB(result.results || []);
-    } catch (error) {
-      console.error("Failed to search games:", error);
-      return [];
-    }
+    const searchTerm = query.toLowerCase();
+    return mockGameMethods.filter(
+      (game) =>
+        game.title.toLowerCase().includes(searchTerm) ||
+        game.description.toLowerCase().includes(searchTerm)
+    );
   },
 
   // 根據分類獲取遊戲方法
   async getGamesByCategory(category: string): Promise<GameMethod[]> {
-    try {
-      const result = await getClient().query(
-        "SELECT * FROM game_methods WHERE category = ? ORDER BY created_at DESC",
-        [category]
-      );
-      return transformGameMethodsFromDB(result.results || []);
-    } catch (error) {
-      console.error(`Failed to fetch games for category ${category}:`, error);
-      return [];
-    }
+    return mockGameMethods.filter((game) => game.category === category);
   },
 
   // 獲取單一遊戲方法
   async getGameById(id: string): Promise<GameMethod | null> {
-    try {
-      const result = await getClient().query(
-        "SELECT * FROM game_methods WHERE id = ?",
-        [id]
-      );
-      const games = transformGameMethodsFromDB(result.results || []);
-      return games.length > 0 ? games[0] : null;
-    } catch (error) {
-      console.error(`Failed to fetch game ${id}:`, error);
-      return null;
-    }
+    return mockGameMethods.find((game) => game.id === id) || null;
   },
 
-  // 新增遊戲方法
+  // 新增遊戲方法 (僅模擬，實際不保存)
   async createGame(gameData: Partial<GameMethod>): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        `INSERT INTO game_methods (
-          title, description, category, grade1, grade2, grade3, grade4, grade5, grade6,
-          materials, steps, tips, is_published, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [
-          gameData.title || "",
-          gameData.description || "",
-          gameData.category || "",
-          gameData.grade1 || 0,
-          gameData.grade2 || 0,
-          gameData.grade3 || 0,
-          gameData.grade4 || 0,
-          gameData.grade5 || 0,
-          gameData.grade6 || 0,
-          gameData.materials || "",
-          gameData.steps || "",
-          gameData.tips || "",
-          gameData.is_published || 1,
-        ]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to create game:", error);
-      return false;
-    }
+    console.log("模擬新增遊戲方法:", gameData);
+    return true;
   },
 
-  // 更新遊戲方法
+  // 更新遊戲方法 (僅模擬，實際不保存)
   async updateGame(
     id: string,
     gameData: Partial<GameMethod>
   ): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        `UPDATE game_methods SET
-          title = ?, description = ?, category = ?, grade1 = ?, grade2 = ?, grade3 = ?, 
-          grade4 = ?, grade5 = ?, grade6 = ?, materials = ?, steps = ?, tips = ?, 
-          is_published = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?`,
-        [
-          gameData.title || "",
-          gameData.description || "",
-          gameData.category || "",
-          gameData.grade1 || 0,
-          gameData.grade2 || 0,
-          gameData.grade3 || 0,
-          gameData.grade4 || 0,
-          gameData.grade5 || 0,
-          gameData.grade6 || 0,
-          gameData.materials || "",
-          gameData.steps || "",
-          gameData.tips || "",
-          gameData.is_published || 1,
-          id,
-        ]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to update game:", error);
-      return false;
-    }
+    console.log("模擬更新遊戲方法:", id, gameData);
+    return true;
   },
 
-  // 刪除遊戲方法
+  // 刪除遊戲方法 (僅模擬，實際不保存)
   async deleteGame(id: string): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        "DELETE FROM game_methods WHERE id = ?",
-        [id]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to delete game:", error);
-      return false;
-    }
+    console.log("模擬刪除遊戲方法:", id);
+    return true;
   },
 
-  // 切換遊戲方法的發布狀態
+  // 切換遊戲方法的發布狀態 (僅模擬，實際不保存)
   async toggleGamePublishStatus(id: string): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        "UPDATE game_methods SET is_published = NOT is_published, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        [id]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to toggle game publish status:", error);
-      return false;
-    }
+    console.log("模擬切換遊戲方法發布狀態:", id);
+    return true;
   },
 };
 
-// 學習輔助相關 API
+// 學習輔助相關 API (簡化版本)
 export const teachingAidAPI = {
-  // 獲取所有學習輔助
   async getAllTeachingAids(): Promise<any[]> {
-    try {
-      const result = await getClient().query(
-        "SELECT * FROM teaching_aids ORDER BY created_at DESC"
-      );
-      return result.results || [];
-    } catch (error) {
-      console.error("Failed to fetch teaching aids:", error);
-      return [];
-    }
+    return [];
   },
 
-  // 獲取已發布的學習輔助
   async getPublishedTeachingAids(): Promise<any[]> {
-    try {
-      const result = await getClient().query(
-        "SELECT * FROM teaching_aids WHERE is_published = 1 ORDER BY created_at DESC"
-      );
-      return result.results || [];
-    } catch (error) {
-      console.error("Failed to fetch published teaching aids:", error);
-      return [];
-    }
+    return [];
   },
 
-  // 新增學習輔助
   async createTeachingAid(aidData: any): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        `INSERT INTO teaching_aids (
-          title, description, category, file_url, is_published, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [
-          aidData.title || "",
-          aidData.description || "",
-          aidData.category || "",
-          aidData.file_url || "",
-          aidData.is_published || 1,
-        ]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to create teaching aid:", error);
-      return false;
-    }
+    console.log("模擬新增學習輔助:", aidData);
+    return true;
   },
 
-  // 更新學習輔助
   async updateTeachingAid(id: string, aidData: any): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        `UPDATE teaching_aids SET
-          title = ?, description = ?, category = ?, file_url = ?, 
-          is_published = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?`,
-        [
-          aidData.title || "",
-          aidData.description || "",
-          aidData.category || "",
-          aidData.file_url || "",
-          aidData.is_published || 1,
-          id,
-        ]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to update teaching aid:", error);
-      return false;
-    }
+    console.log("模擬更新學習輔助:", id, aidData);
+    return true;
   },
 
-  // 刪除學習輔助
   async deleteTeachingAid(id: string): Promise<boolean> {
-    try {
-      const result = await getClient().execute(
-        "DELETE FROM teaching_aids WHERE id = ?",
-        [id]
-      );
-      return result.success;
-    } catch (error) {
-      console.error("Failed to delete teaching aid:", error);
-      return false;
-    }
+    console.log("模擬刪除學習輔助:", id);
+    return true;
   },
 };
 
-// 站長消息相關 API - 使用 JSON 檔案
+// 站長消息相關 API (簡化版本)
 export const adminMessageAPI = {
   // 獲取所有站長消息
   async getAllMessages(): Promise<AdminMessage[]> {
-    try {
-      const response = await fetch("/api/admin/");
-      const data = await response.json();
-      return data.success ? data.data : [];
-    } catch (error) {
-      console.error("Failed to fetch admin messages:", error);
-      return [];
-    }
+    return mockAdminMessages;
   },
 
   // 獲取已發布的站長消息
   async getPublishedMessages(): Promise<AdminMessage[]> {
-    try {
-      const response = await fetch("/api/admin/");
-      const data = await response.json();
-      if (data.success && data.data) {
-        return data.data.filter((msg: AdminMessage) => msg.is_published);
-      }
-      return [];
-    } catch (error) {
-      console.error("Failed to fetch published admin messages:", error);
-      return [];
-    }
+    return mockAdminMessages.filter((msg) => msg.is_published);
   },
 
-  // 新增站長消息
+  // 新增站長消息 (僅模擬，實際不保存)
   async createMessage(messageData: Partial<AdminMessage>): Promise<boolean> {
-    try {
-      const response = await fetch("/api/admin/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(messageData),
-      });
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error("Failed to create admin message:", error);
-      return false;
-    }
+    console.log("模擬新增站長消息:", messageData);
+    return true;
   },
 
-  // 更新站長消息
+  // 更新站長消息 (僅模擬，實際不保存)
   async updateMessage(
     id: string,
     messageData: Partial<AdminMessage>
   ): Promise<boolean> {
-    try {
-      const response = await fetch("/api/admin/", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, ...messageData }),
-      });
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error("Failed to update admin message:", error);
-      return false;
-    }
+    console.log("模擬更新站長消息:", id, messageData);
+    return true;
   },
 
-  // 刪除站長消息
+  // 刪除站長消息 (僅模擬，實際不保存)
   async deleteMessage(id: string): Promise<boolean> {
-    try {
-      const response = await fetch(`/api/admin?id=${id}`, {
-        method: "DELETE",
-      });
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error("Failed to delete admin message:", error);
-      return false;
-    }
+    console.log("模擬刪除站長消息:", id);
+    return true;
   },
 
-  // 切換站長消息的發布狀態
+  // 切換站長消息的發布狀態 (僅模擬，實際不保存)
   async toggleMessagePublishStatus(id: string): Promise<boolean> {
-    try {
-      const response = await fetch("/api/admin/", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, type: "publish" }),
-      });
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error("Failed to toggle message publish status:", error);
-      return false;
-    }
+    console.log("模擬切換站長消息發布狀態:", id);
+    return true;
   },
 
-  // 切換站長消息的釘選狀態
+  // 切換站長消息的釘選狀態 (僅模擬，實際不保存)
   async toggleMessagePinStatus(id: string): Promise<boolean> {
-    try {
-      const response = await fetch("/api/admin/", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, type: "pin" }),
-      });
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error("Failed to toggle message pin status:", error);
-      return false;
-    }
+    console.log("模擬切換站長消息釘選狀態:", id);
+    return true;
   },
 };
 

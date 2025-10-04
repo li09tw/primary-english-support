@@ -28,9 +28,9 @@ export default function TextbookSelector({
     }
   }, [selectedThemes]);
 
-  // Auto-select vocabulary when 2 themes are selected and words are loaded
+  // Auto-select vocabulary when 1 theme is selected and words are loaded
   useEffect(() => {
-    if (selectedThemes.length === 2 && words.length > 0) {
+    if (selectedThemes.length === 1 && words.length > 0) {
       onVocabularySelected(words, selectedThemes);
     }
   }, [selectedThemes, words, onVocabularySelected]);
@@ -108,15 +108,10 @@ export default function TextbookSelector({
         const newThemes = prev.filter((t) => t.id !== theme.id);
         console.log("Removing theme, new length:", newThemes.length);
         return newThemes;
-      } else if (prev.length < 2) {
-        // 如果未選擇且未達到上限，則添加
-        const newThemes = [...prev, theme];
-        console.log("Adding theme, new length:", newThemes.length);
-        return newThemes;
       } else {
-        // 如果已達到上限，則替換第一個
-        const newThemes = [prev[1], theme];
-        console.log("Replacing theme, new length:", newThemes.length);
+        // 如果未選擇，則替換當前選擇（只能選擇一個主題）
+        const newThemes = [theme];
+        console.log("Selecting theme, new length:", newThemes.length);
         return newThemes;
       }
     });
@@ -149,12 +144,12 @@ export default function TextbookSelector({
       {/* Theme Selection */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-black mb-2">
-          單字主題 (請選擇2個主題)
+          單字主題 (請選擇1個主題)
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {themes.map((theme) => {
             const isSelected = selectedThemes.some((t) => t.id === theme.id);
-            const isDisabled = selectedThemes.length >= 2 && !isSelected;
+            const isDisabled = selectedThemes.length >= 1 && !isSelected;
             return (
               <button
                 key={theme.id}
@@ -178,8 +173,8 @@ export default function TextbookSelector({
         {selectedThemes.length > 0 && (
           <div className="mt-3 p-3 bg-blue-50 rounded-md">
             <p className="text-sm text-blue-800 mb-2">
-              已選擇的主題 ({selectedThemes.length}/2)
-              {selectedThemes.length === 2 && words.length > 0
+              已選擇的主題 ({selectedThemes.length}/1)
+              {selectedThemes.length === 1 && words.length > 0
                 ? `，共包含 ${words.length} 個單字`
                 : ""}
               :
@@ -204,8 +199,8 @@ export default function TextbookSelector({
         )}
       </div>
 
-      {/* Auto-select vocabulary when 2 themes are selected */}
-      {selectedThemes.length === 2 && words.length > 0 && (
+      {/* Auto-select vocabulary when 1 theme is selected */}
+      {selectedThemes.length === 1 && words.length > 0 && (
         <div className="text-center">
           <div className="text-sm text-green-600 font-medium">
             ✓ 已準備好開始遊戲

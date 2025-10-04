@@ -15,27 +15,21 @@ interface SEOHeadProps {
 }
 
 export default function SEOHead({
-  title = "Z的國小英語支援(ZPES) - 英語數位化教具",
-  description = "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
-  keywords = [
-    "英語教學",
-    "英語遊戲",
-    "小學英語",
-    "數位教學",
-    "英語學習",
-  ],
+  title = "白板英語遊戲室 - 英語學習遊戲平台",
+  description = "豐富的英語學習遊戲，讓國小英語課堂更加生動有趣，提升教學效果。",
+  keywords = ["英語教學", "英語遊戲", "小學英語", "數位教學", "英語學習"],
   image = "/og-image.jpg",
   url = "https://zsprimaryenglishsupport.com",
   type = "website",
   publishedTime,
   modifiedTime,
-  author = "Z的國小英語支援(ZPES) Team",
+  author = "白板英語遊戲室團隊",
   section,
   tags = [],
 }: SEOHeadProps) {
-  const fullTitle = title.includes("Z的國小英語支援(ZPES)")
+  const fullTitle = title.includes("白板英語遊戲室")
     ? title
-    : `${title} | Z的國小英語支援(ZPES)`;
+    : `${title} | 白板英語遊戲室`;
 
   return (
     <Head>
@@ -51,7 +45,7 @@ export default function SEOHead({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={image} />
-      <meta property="og:site_name" content="Z的國小英語支援(ZPES)" />
+      <meta property="og:site_name" content="白板英語遊戲室" />
       <meta property="og:locale" content="zh_TW" />
 
       {/* Twitter Card */}

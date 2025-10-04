@@ -11,6 +11,7 @@ export default function Header() {
     { name: "首頁", href: "/" },
     { name: "遊戲庫", href: "/games" },
     { name: "電子教具", href: "/aids" },
+    { name: "Wordwall/Kahoot", href: "/public-games", invisible: true },
     {
       name: "請我喝杯咖啡",
       href: "https://portaly.cc/zoralitw009/support",
@@ -26,34 +27,36 @@ export default function Header() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
               <span className="text-xl font-bold text-black">
-                Z的國小英語支援
+                白板英語遊戲室
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) =>
-              item.external ? (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-black hover:text-primary-blue hover:bg-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative z-10"
-                >
-                  {item.name}
-                </a>
-              ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-black hover:text-primary-blue hover:bg-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative z-10"
-                >
-                  {item.name}
-                </Link>
-              )
-            )}
+            {navigation
+              .filter((item) => !item.invisible)
+              .map((item) =>
+                item.external ? (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-black hover:text-primary-blue hover:bg-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative z-10"
+                  >
+                    {item.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="text-black hover:text-primary-blue hover:bg-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 relative z-10"
+                  >
+                    {item.name}
+                  </Link>
+                )
+              )}
           </nav>
 
           {/* Mobile menu button */}
@@ -92,29 +95,31 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3  space-y-1 sm:px-3 bg-white border border-gray-200 rounded-lg mt-2 mb-3 shadow-lg">
-              {navigation.map((item) =>
-                item.external ? (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-center text-black hover:text-black hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
-                ) : (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="text-center text-black hover:text-black hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              )}
+              {navigation
+                .filter((item) => !item.invisible)
+                .map((item) =>
+                  item.external ? (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-center text-black hover:text-black hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-center text-black hover:text-black hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  )
+                )}
             </div>
           </div>
         )}

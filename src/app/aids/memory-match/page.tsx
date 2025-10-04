@@ -199,12 +199,26 @@ export default function MemoryMatchPage() {
                 <h2 className="text-2xl font-bold text-gray-800">
                   記憶配對遊戲進行中
                 </h2>
-                <button
-                  onClick={resetGame}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  重新開始
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={resetGame}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    重新開始
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsGameStarted(false);
+                      setCards([]);
+                      setFlippedCards([]);
+                      setMoves(0);
+                      setVocabulary([]);
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    回到選擇
+                  </button>
+                </div>
               </div>
 
               {/* 遊戲統計 */}
@@ -248,17 +262,8 @@ export default function MemoryMatchPage() {
                       `}
                     >
                       {card.isFlipped || card.isMatched ? (
-                        <div>
-                          <div className="font-medium text-sm mb-1">
-                            {card.id.startsWith("en")
-                              ? card.word
-                              : card.chinese}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {card.id.startsWith("en")
-                              ? card.chinese
-                              : card.word}
-                          </div>
+                        <div className="font-medium text-lg">
+                          {card.id.startsWith("en") ? card.word : card.chinese}
                         </div>
                       ) : (
                         <div className="text-2xl">❓</div>

@@ -1,8 +1,8 @@
-# Z的國小英語支援 (ZPES) - Primary English Support
+# 白板英語遊戲室 - Primary English Support
 
 ## 🎯 專案概述
 
-Primary English Support 是一個專為國小英語學習設計的數位平台，提供豐富的互動遊戲和管理功能，幫助學生在輕鬆愉快的環境中學習英語。
+Primary English Support 是一個專為國小英語學習設計的數位平台，提供互動遊戲和電子教具，幫助學生在輕鬆愉快的環境中學習英語。
 
 ## ✨ 主要功能
 
@@ -20,12 +20,6 @@ Primary English Support 是一個專為國小英語學習設計的數位平台�
 - **操作說明**: 材料準備和使用方法
 - **分類管理**: 依科目和年級分類
 
-### 🌱 管理花園
-- **統一管理**: 所有管理功能的集中入口
-- **安全認證**: 企業級安全驗證系統
-- **權限管理**: 不同層級的存取權限
-- **即時更新**: 即時反映資料變更
-
 ### 📧 聯絡系統
 - **聯絡表單**: 用戶友善的聯絡介面
 - **郵件服務**: 使用 EmailJS 發送郵件
@@ -35,33 +29,26 @@ Primary English Support 是一個專為國小英語學習設計的數位平台�
 ## 🏗️ 技術架構
 
 ### 前端技術
-- **Next.js 14**: React 框架，使用 App Router
+- **Next.js 15**: React 框架，使用 App Router
 - **TypeScript**: 類型安全的 JavaScript
 - **Tailwind CSS**: 現代化 CSS 框架
 - **響應式設計**: 支援各種裝置尺寸
 
 ### 後端技術
 - **Vercel**: 前端部署平台
-- **Cloudflare Worker**: API 閘道
-- **Cloudflare D1**: SQLite 資料庫
-- **Cloudflare R2**: 物件存儲
+- **JSON 檔案存儲**: 靜態資料存儲
+- **API 路由**: Next.js API 路由
 
 ### 安全特性
-- **密碼雜湊**: 使用 bcrypt 進行安全雜湊
-- **會話管理**: 安全的 HTTP-only cookies
-- **速率限制**: 防止暴力破解攻擊
 - **XSS 防護**: 輸入清理和輸出編碼
-
-```
-Vercel (Next.js) → Cloudflare Worker API Gateway → Cloudflare D1/R2
-```
+- **安全標頭**: 設定適當的安全標頭
+- **輸入驗證**: 前端和後端輸入驗證
 
 ## 🚀 快速開始
 
 ### 1. 環境要求
 - Node.js 18+ 
 - npm 或 yarn
-- Cloudflare 帳戶
 - Vercel 帳戶
 
 ### 2. 安裝依賴
@@ -72,25 +59,17 @@ npm install
 ### 3. 環境變數設定
 創建 `.env.local` 文件：
 ```bash
-# Cloudflare 配置
-CLOUDFLARE_WORKER_URL=http://localhost:8787
-CLOUDFLARE_API_SECRET=local-dev-secret
-NODE_ENV=development
-
 # EmailJS 配置
 EMAILJS_SERVICE_ID=your_service_id
 EMAILJS_TEMPLATE_ID=your_template_id
 EMAILJS_PUBLIC_KEY=your_public_key
+NODE_ENV=development
 ```
 
 ### 4. 啟動開發環境
 ```bash
-# 啟動完整開發環境
-npm run dev:full
-
-# 或分別啟動
-npm run dev:worker  # Cloudflare Worker
-npm run dev         # Next.js 應用
+# 啟動 Next.js 應用
+npm run dev
 ```
 
 ## 🎮 遊戲頁面
@@ -110,33 +89,20 @@ npm run dev         # Next.js 應用
 
 ### 本地開發
 ```bash
-# 啟動完整開發環境
-npm run dev:full
-
-# 分別啟動服務
-npm run dev:worker  # Cloudflare Worker
-npm run dev         # Next.js 應用
+# 啟動 Next.js 應用
+npm run dev
 ```
 
 ### 測試工具
 ```bash
-# 測試 Cloudflare 客戶端
-npm run test:cloudflare
-
 # 測試 API 端點
 npm run test:api
 ```
 
 ### 部署工具
 ```bash
-# 部署 Cloudflare Worker
-npm run deploy:worker
-
 # 部署到 Vercel
 npm run deploy:vercel
-
-# 完整部署
-npm run deploy:full
 ```
 
 ## 📊 專案統計
@@ -165,19 +131,16 @@ src/
 
 ### 技術棧
 
-- **前端框架**: Next.js 14 (App Router)
+- **前端框架**: Next.js 15 (App Router)
 - **語言**: TypeScript
 - **樣式**: Tailwind CSS
-- **資料庫**: Cloudflare D1
-- **檔案存儲**: Cloudflare R2
-- **部署**: Vercel + Cloudflare Workers
+- **資料存儲**: JSON 檔案
+- **部署**: Vercel
 
 ### 開發腳本
 
 - `npm run dev`: 啟動 Next.js 開發伺服器
-- `npm run dev:worker`: 啟動 Cloudflare Worker 本地開發
 - `npm run build`: 建置專案
-- `npm run deploy:worker`: 部署 Cloudflare Worker
 - `npm run deploy:vercel`: 部署到 Vercel
 
 ## 📖 文檔
@@ -226,7 +189,7 @@ src/
 
 ## 📞 聯絡資訊
 
-- **專案維護者**: Z的國小英語支援團隊
+- **專案維護者**: 白板英語遊戲室團隊
 - **聯絡方式**: 透過網站聯絡表單
 - **問題回報**: 請使用 GitHub Issues
 

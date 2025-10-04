@@ -210,3 +210,23 @@
   - 使用 `{condition ? <ElementA /> : <span className="invisible">placeholder</span>}` 保持隱形佔位
 - **適用場景**：標籤、按鈕、圖標等可能影響佈局的 UI 元素
 - **目標**：確保用戶體驗一致，避免佈局因條件變化而跳動
+
+## 22. Quick Commands for File Access
+- **當用戶輸入「更新消息」時，直接打開 `src/app/page.tsx` 檔案**
+- **當用戶輸入「更新連結」時，直接打開 `src/app/public-games/page.tsx` 檔案**
+- 這些指令用於快速存取最常用的編輯檔案，提高工作效率
+- 指令對應的檔案位置：
+  - 「更新消息」→ `src/app/page.tsx` (第 8-33 行，最新消息陣列)
+  - 「更新連結」→ `src/app/public-games/page.tsx` (第 58-220 行，Kahoot/Wordwall 連結陣列)
+- 執行指令後，用戶可以直接進行編輯和修改
+
+
+
+## 23. 語言與框架偏好：讓 AI 懂你的專案
+- React 組件盡可能使用 Hooks。
+- 後端路由遵循 MVC 架構。
+
+## 24. 避免常見錯誤：防患未然
+- 不要使用 `console.log` 進行除錯，改用日誌模組（如 `winston`）。
+- 所有函數必須包含 JSDoc 註解進行文件化。
+- 避免使用全域變數，將狀態封裝在模組中。

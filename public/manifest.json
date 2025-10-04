@@ -1,7 +1,7 @@
 {
-  "name": "Z的國小英語支援(ZPES) - 英語數位化教具",
-  "short_name": "Z的國小英語支援(ZPES)",
-  "description": "支援沒有拿到紙本教具的國小老師，讓每個孩子都能享受優質的英語學習體驗。",
+  "name": "白板英語遊戲室 - 英語學習遊戲平台",
+  "short_name": "白板英語遊戲室",
+  "description": "豐富的英語學習遊戲，讓國小英語課堂更加生動有趣，提升教學效果。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

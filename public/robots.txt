@@ -4,7 +4,6 @@ Allow: /games/
 Allow: /contact/
 Allow: /privacy/
 Allow: /terms/
-Allow: /garden/
 
 Disallow: /api/
 Disallow: /api-test/

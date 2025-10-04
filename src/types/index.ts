@@ -38,7 +38,7 @@ export interface AdminMessage {
   id: string;
   title: string;
   content: string;
-  is_published: boolean; // 發布狀態
+  is_published?: boolean; // 發布狀態 (可選)
   is_pinned: boolean; // 釘選狀態
   published_at: Date; // 發布時間
 }

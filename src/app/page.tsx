@@ -2,39 +2,51 @@
 
 import Link from "next/link";
 import AdminMessageCard from "@/components/AdminMessageCard";
-import { useState, useEffect } from "react";
 import { AdminMessage } from "@/types";
 
+// 最新消息資料 - 直接在此新增消息
+const messages: AdminMessage[] = [
+  {
+    id: "1",
+    title: "歡迎使用白板英語遊戲室",
+    content:
+      "我們提供的英語學習遊戲方法以及數位遊戲教具，讓您的課堂更加生動有趣。所有遊戲都經過精心設計，適合國小英語教學使用。完全免費！不需要登入即可使用！2025年的下半年，將會運用 kahoot和 Wordwall 整理和提供更多不同的練習，並在網站裡更新。電子教具的下次大改版將會是2026年暑假，請大家敬請期待！",
+    is_pinned: true,
+    published_at: new Date("2025-07-10"),
+  },
+  {
+    id: "2",
+    title: "巨型拉霸機上線！",
+    content:
+      "選定主題之後，代名詞和主題用詞在部分句型中會更換，讓同學有更多練習的機會。",
+    is_pinned: false,
+    published_at: new Date("2025-07-31"),
+  },
+  {
+    id: "3",
+    title: "詞彙分類上線！有電子白版和平板模式！",
+    content:
+      "電子白版模式最多可以支援3位同學一起玩，每個單字都會出現藍色和綠色，只要點選即可完成分類。平板電腦模式則適用於同學個人使用，「拖曳」單字到顏色框框內即可分類成功！請注意，遊戲結束後，不會自動提醒同學是否分類正確，因為本遊戲是支援老師上課使用唷！",
+    is_pinned: true,
+    published_at: new Date("2025-08-05"),
+  },
+  {
+    id: "4",
+    title: "中英文記憶配對",
+    content: "國小常見單字都可以玩啦！如果老師覺得單字量不夠，歡迎來信建議。 ",
+    is_pinned: false,
+    published_at: new Date("2025-10-04"),
+  },
+];
+
 export default function Home() {
-  const [messages, setMessages] = useState<AdminMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // 從 JSON API 獲取已發布的消息
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch("/api/admin-messages?published=true");
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data.data || []);
-        }
-      } catch (error) {
-        console.error("載入消息失敗:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMessages();
-  }, []);
-
   // 結構化資料
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
-    name: "Z的國小英語支援(ZPES)",
+    name: "白板英語遊戲室",
     description:
-      "支援少紙化、有試教需求的老師，讓每個孩子都能享受優質的英語學習體驗。",
+      "豐富的英語學習遊戲，讓國小英語課堂更加生動有趣，提升教學效果。",
     url: "https://zsprimaryenglishsupport.com",
     logo: "https://zsprimaryenglishsupport.com/logo.png",
     sameAs: ["https://zsprimaryenglishsupport.com"],
@@ -49,7 +61,7 @@ export default function Home() {
     },
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "英語數位教具",
+      name: "英語學習遊戲",
       itemListElement: [
         {
           "@type": "Offer",
@@ -63,8 +75,8 @@ export default function Home() {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
-            name: "英語數位教具",
-            description: "多樣化的數位教具，配合課本內容",
+            name: "英語學習遊戲",
+            description: "多樣化的學習遊戲，配合課本內容",
           },
         },
       ],
@@ -82,9 +94,19 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-primary-blue text-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">英語數位教具</h1>
+          <div className="mb-8">
+            <img
+              src="/hero-english-digital-tools.gif"
+              alt="英語數位教具展示動畫"
+              className="mx-auto max-w-full h-auto rounded-lg shadow-lg"
+              style={{ maxHeight: "400px" }}
+            />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            白板英語遊戲室
+          </h1>
           <p className="text-xl md:text-2xl mb-8 text-primary-blue-dark">
-            支援少紙化、有試教需求的老師
+            豐富的英語學習遊戲，讓課堂更生動有趣
           </p>
         </div>
       </section>
@@ -108,7 +130,7 @@ export default function Home() {
               <span className="text-sm font-medium">
                 重要聲明：本網站僅供非營利、教育目的使用。
                 <br />
-                每個單元並非完全按照課本內編排的單字、句型。
+                遊戲內容設計靈活，可配合各版本課本使用。
               </span>
             </div>
           </div>
@@ -119,19 +141,23 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-black mb-4">站長消息</h2>
+            <h2 className="text-3xl font-bold text-black mb-4">最新消息</h2>
           </div>
 
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-pink mx-auto mb-4"></div>
-              <p className="text-black">載入消息中...</p>
-            </div>
-          ) : messages.length > 0 ? (
-            <div className="space-y-6">
-              {messages.slice(0, 6).map((message) => (
-                <AdminMessageCard key={message.id} message={message} />
-              ))}
+          {messages.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {messages
+                .sort((a, b) => {
+                  // 先按 is_pinned 排序，置頂消息優先
+                  if (a.is_pinned && !b.is_pinned) return -1;
+                  if (!a.is_pinned && b.is_pinned) return 1;
+                  // 如果置頂狀態相同，按發布日期排序（新的在前）
+                  return b.published_at.getTime() - a.published_at.getTime();
+                })
+                .slice(0, 6)
+                .map((message) => (
+                  <AdminMessageCard key={message.id} message={message} />
+                ))}
             </div>
           ) : (
             <div className="text-center text-black py-8">

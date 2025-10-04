@@ -16,11 +16,26 @@ import { useRouter } from "next/navigation";
 import { gameAPI, adminMessageAPI } from "@/lib/game-api";
 import AuthGuard from "@/components/AuthGuard";
 
+// 外部連結類型定義
+interface ExternalLink {
+  id: string;
+  title: string;
+  url: string;
+  platform: "wordwall" | "kahoot" | "other";
+  description?: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 function GardenPageContent() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"games" | "messages">("games");
+  const [activeTab, setActiveTab] = useState<"games" | "messages" | "links">(
+    "games"
+  );
   const [games, setGames] = useState<GameMethod[]>([]);
   const [messages, setMessages] = useState<AdminMessage[]>([]);
+  const [links, setLinks] = useState<ExternalLink[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 安全的日期格式化函數
@@ -98,6 +113,13 @@ function GardenPageContent() {
   const [messageForm, setMessageForm] = useState({
     title: "",
     content: "",
+  });
+
+  const [linkForm, setLinkForm] = useState({
+    title: "",
+    url: "",
+    platform: "wordwall" as "wordwall" | "kahoot" | "other",
+    description: "",
   });
 
   // 編輯狀態
@@ -207,11 +229,33 @@ function GardenPageContent() {
     }
   }, []);
 
+  // 載入外部連結數據
+  const loadLinks = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/public-games");
+      if (response.ok) {
+        const data = await response.json();
+        setLinks(data.data || []);
+      } else {
+        console.error("載入外部連結失敗:", response.status);
+        setLinks([]);
+      }
+    } catch (error) {
+      console.error("載入外部連結失敗:", error);
+      setLinks([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     // 載入數據
     loadGames();
     loadMessages();
-  }, [loadGames, loadMessages]);
+    loadLinks();
+  }, [loadGames, loadMessages, loadLinks]);
 
   // 遊戲方法相關函數 - 使用 Mock API
   const addGame = async () => {
@@ -477,6 +521,75 @@ function GardenPageContent() {
     }
   };
 
+  // 外部連結相關函數
+  const addLink = async () => {
+    if (!linkForm.title.trim() || !linkForm.url.trim()) {
+      alert("請填寫標題和連結");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/public-games", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: linkForm.title.trim(),
+          url: linkForm.url.trim(),
+          platform: linkForm.platform,
+          description: linkForm.description.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          await loadLinks();
+          alert("Wordwall/Kahoot 連結新增成功！");
+          setLinkForm({
+            title: "",
+            url: "",
+            platform: "wordwall",
+            description: "",
+          });
+        } else {
+          alert("新增失敗：" + result.error);
+        }
+      } else {
+        alert("新增失敗，請重試");
+      }
+    } catch (error) {
+      console.error("新增外部連結失敗:", error);
+      alert("新增失敗，請重試");
+    }
+  };
+
+  const deleteLink = async (id: string) => {
+    if (confirm("確定要刪除這個外部連結嗎？")) {
+      try {
+        const response = await fetch(`/api/public-games?id=${id}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            await loadLinks();
+            alert("刪除成功！");
+          } else {
+            alert("刪除失敗：" + result.error);
+          }
+        } else {
+          alert("刪除失敗，請重試");
+        }
+      } catch (error) {
+        console.error("刪除外部連結失敗:", error);
+        alert("刪除失敗，請重試");
+      }
+    }
+  };
+
   // 分類選項
   const categoryOptions = [
     "單字學習",
@@ -567,10 +680,13 @@ function GardenPageContent() {
             {[
               { id: "games", name: "遊戲方法", count: games.length },
               { id: "messages", name: "管理員消息", count: messages.length },
+              { id: "links", name: "Wordwall/Kahoot", count: links.length },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as "games" | "messages")}
+                onClick={() =>
+                  setActiveTab(tab.id as "games" | "messages" | "links")
+                }
                 className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 ${
                   activeTab === tab.id
                     ? "bg-secondary-pink text-black"
@@ -865,6 +981,99 @@ function GardenPageContent() {
                 </div>
               </div>
             )}
+
+            {activeTab === "links" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-black mb-4">
+                  新增 Wordwall/Kahoot 連結
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      標題 *
+                    </label>
+                    <input
+                      type="text"
+                      value={linkForm.title}
+                      onChange={(e) =>
+                        setLinkForm({
+                          ...linkForm,
+                          title: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:border-transparent"
+                      placeholder="連結標題"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      連結網址 *
+                    </label>
+                    <input
+                      type="url"
+                      value={linkForm.url}
+                      onChange={(e) =>
+                        setLinkForm({
+                          ...linkForm,
+                          url: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:border-transparent"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      平台 *
+                    </label>
+                    <select
+                      value={linkForm.platform}
+                      onChange={(e) =>
+                        setLinkForm({
+                          ...linkForm,
+                          platform: e.target.value as
+                            | "wordwall"
+                            | "kahoot"
+                            | "other",
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:border-transparent"
+                    >
+                      <option value="wordwall">Wordwall</option>
+                      <option value="kahoot">Kahoot</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                      描述
+                    </label>
+                    <textarea
+                      value={linkForm.description}
+                      onChange={(e) =>
+                        setLinkForm({
+                          ...linkForm,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:border-transparent resize-vertical"
+                      placeholder="連結描述（選填）"
+                    />
+                  </div>
+
+                  <button
+                    onClick={addLink}
+                    className="w-full bg-secondary-pink hover:bg-white hover:text-primary-blue-dark text-black font-medium py-3 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-pink focus:ring-offset-2 transition-colors duration-200 border-2 border-transparent hover:border-primary-blue-dark"
+                  >
+                    新增 Wordwall/Kahoot 連結
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 右側：管理員消息列表 */}
@@ -1013,6 +1222,108 @@ function GardenPageContent() {
                           <div className="text-sm text-gray-500">
                             發布時間:{" "}
                             {message.published_at.toLocaleDateString()}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "links" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold text-black mb-4">
+                  Wordwall/Kahoot 連結列表 ({links.length})
+                </h3>
+                <div className="space-y-4">
+                  {links.length === 0 ? (
+                    <p className="text-gray-500">暫無 Wordwall/Kahoot 連結</p>
+                  ) : (
+                    links.map((link) => {
+                      const getPlatformInfo = (platform: string) => {
+                        switch (platform) {
+                          case "wordwall":
+                            return {
+                              icon: "🧩",
+                              color: "bg-blue-100 text-blue-800",
+                              name: "Wordwall",
+                            };
+                          case "kahoot":
+                            return {
+                              icon: "🎯",
+                              color: "bg-purple-100 text-purple-800",
+                              name: "Kahoot",
+                            };
+                          default:
+                            return {
+                              icon: "🔗",
+                              color: "bg-gray-100 text-gray-800",
+                              name: "其他",
+                            };
+                        }
+                      };
+
+                      const platformInfo = getPlatformInfo(link.platform);
+
+                      return (
+                        <div
+                          key={link.id}
+                          className="border border-gray-200 rounded-lg p-4 space-y-3"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${platformInfo.color}`}
+                              >
+                                <span className="mr-1">
+                                  {platformInfo.icon}
+                                </span>
+                                {platformInfo.name}
+                              </span>
+                              <h4 className="text-lg font-medium text-black">
+                                {link.title}
+                              </h4>
+                            </div>
+                            <div className="flex gap-2">
+                              <a
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm"
+                              >
+                                預覽
+                              </a>
+                              <button
+                                onClick={() => deleteLink(link.id)}
+                                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                              >
+                                刪除
+                              </button>
+                            </div>
+                          </div>
+
+                          {link.description && (
+                            <p className="text-gray-600 text-sm">
+                              {link.description}
+                            </p>
+                          )}
+
+                          <div className="text-sm text-gray-500">
+                            <span className="font-medium">連結：</span>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 break-all"
+                            >
+                              {link.url}
+                            </a>
+                          </div>
+
+                          <div className="text-sm text-gray-500">
+                            建立時間:{" "}
+                            {new Date(link.created_at).toLocaleDateString()}
                           </div>
                         </div>
                       );

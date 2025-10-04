@@ -10,6 +10,7 @@ export default function VocabularySortPage() {
   const router = useRouter();
   const [vocabulary, setVocabulary] = useState<Vocabulary[]>([]);
   const [selectedThemes, setSelectedThemes] = useState<WordTheme[]>([]);
+  const [useWhiteboardMode, setUseWhiteboardMode] = useState(false);
 
   // 處理單字選擇
   const handleVocabularySelected = useCallback(
@@ -45,9 +46,10 @@ export default function VocabularySortPage() {
     // 將資料編碼為 URL 參數並導航到遊戲頁面
     const vocabularyParam = encodeURIComponent(JSON.stringify(vocabulary));
     const themesParam = encodeURIComponent(JSON.stringify(selectedThemes));
+    const whiteboardParam = useWhiteboardMode ? "true" : "false";
 
     router.push(
-      `/aids/vocabulary-sort/game?vocabulary=${vocabularyParam}&themes=${themesParam}`
+      `/aids/vocabulary-sort/game?vocabulary=${vocabularyParam}&themes=${themesParam}&whiteboard=${whiteboardParam}`
     );
   };
 
@@ -63,6 +65,33 @@ export default function VocabularySortPage() {
 
           {/* 句型與單字主題選擇 */}
           <TextbookSelector onVocabularySelected={handleVocabularySelected} />
+
+          {/* 電子白板模式選擇 */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 className="text-lg font-semibold text-black mb-4">
+              遊戲模式選擇
+            </h3>
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="whiteboard-mode"
+                checked={useWhiteboardMode}
+                onChange={(e) => setUseWhiteboardMode(e.target.checked)}
+                className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              />
+              <label
+                htmlFor="whiteboard-mode"
+                className="text-black font-medium"
+              >
+                使用電子白板模式
+              </label>
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              {useWhiteboardMode
+                ? "電子白板模式：點擊圓圈進行分類，適合觸控操作"
+                : "一般模式：拖拽單字進行分類，適合滑鼠操作"}
+            </p>
+          </div>
 
           {/* 開始遊戲按鈕 */}
           {vocabulary.length >= 2 && selectedThemes.length === 2 && (
